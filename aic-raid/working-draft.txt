@@ -1,0 +1,4 @@
+# Hi
+# This local file called working-draft.txt
+# Will be put to /magnung-opus.txt on the DropBox.
+# Now let's show how it works.

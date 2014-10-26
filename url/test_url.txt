@@ -1,0 +1,33 @@
+
+
+CLIENT_ID="hgb468c7b3flxmz6wt6diadn2nclocf9"
+
+CLIENT_SECRET="YDjmu4BEnGyHyGkWeYF56aOZ5hQSWwiz"
+
+DEVELOPER_TOKEN="tTqKTnvitxNmYdtJpyQ4Ld7SlL4llUUl"
+
+
+# REGISTER:
+
+# https://app.box.com/api/oauth2/authorize?response_type=code&client_id=hgb468c7b3flxmz6wt6diadn2nclocf9&state=security_token%3DtTqKTnvitxNmYdtJpyQ4Ld7SlL4llUUl
+# https://app.box.com/api/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&state=security_token%3D${DEVELOPER_TOKEN}
+
+
+# ... Authentifizierung ... 
+# 		e9027586@student.tuwien.ac.at
+# 	+ password
+
+
+# http://localhost/?state=security_token%3DtTqKTnvitxNmYdtJpyQ4Ld7SlL4llUUl&code=HVNTrCJWtgIJsGnMXajcOQjkecCFJ4kb
+SECURITY_TOKEN=YDjmu4BEnGyHyGkWeYF56aOZ5hQSWwiz
+# &code=HVNTrCJWtgIJsGnMXajcOQjkecCFJ4kb
+CODE=Kxn7aSjIGWr5adjzRaLWsMlkCr0A6GSd
+
+
+# curl https://api.box.com/2.0/folders/ -H "Authorization: Bearer HVNTrCJWtgIJsGnMXajcOQjkecCFJ4kb"
+
+curl https://app.box.com/api/oauth2/token \
+-d 'grant_type=authorization_code&code={CODE}&client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}' \
+-X POST
+
+
