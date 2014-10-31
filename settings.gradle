@@ -1,1 +1,1 @@
-include 'web','middleware'
+include 'ear:web','middleware','ear','ear:sessionBean','ear:sessionBeanInterface'

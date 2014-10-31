@@ -1,34 +1,115 @@
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.11'
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.0.1'
+    }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
+//repositories
 allprojects {
  repositories {
     mavenCentral()
    	maven {
         url "http://repo1.maven.org/maven2/"
     }
+    maven { url 'https://repository.jboss.org/nexus/content/groups/public-jboss' }  
+    maven { url 'https://repository.jboss.org/nexus/content/repositories' }  
+    maven { url 'https://repository.jboss.org/nexus/content/repositories/thirdparty-releases' }  
 }
 }
 
-
-project(':web'){
-apply plugin: 'war'
-
-dependencies {
-	compile project(':middleware')
-        testCompile 'junit:junit:4.11'
-
-}
-
-}
 project(':middleware'){
-apply plugin: 'java'
+	apply plugin: 'java'
+	
+	dependencies {
+	 compile 'com.dropbox.core:dropbox-core-sdk:1.6'
+	 compile 'net.box:boxjavalibv2:3.0.9'
+	 testCompile 'junit:junit:4.11'
+	}
 
-dependencies {
- compile 'com.dropbox.core:dropbox-core-sdk:1.6'
- compile 'net.box:boxjavalibv2:3.0.9'
- testCompile 'junit:junit:4.11'
+}
+//ear content
+
+project(':ear:web'){
+	apply plugin: 'war'
+	
+
+	dependencies {
+	    testCompile 'junit:junit:4.11'
+	 	providedCompile project(':ear:sessionBeanInterface')
+	 	
+	}
+	
+	
+}
+project(':ear:sessionBean'){
+	apply plugin: 'java'
+	
+
+	dependencies {
+	    testCompile 'junit:junit:4.11'
+	 	compile project(':middleware')
+	    testCompile 'junit:junit:4.11'
+	    compile project(':ear:sessionBeanInterface')
+	    compile 'org.jboss.spec:jboss-javaee-6.0:3.0.2.Final'   
+	}
+	
+	
+}
+project(':ear:sessionBeanInterface'){
+	apply plugin: 'java'
+	
+
+	dependencies {
+	    testCompile 'junit:junit:4.11'
+	 	compile project(':middleware')
+	    testCompile 'junit:junit:4.11'
+	      compile 'org.jboss.spec:jboss-javaee-6.0:3.0.2.Final'  
+	}
+	
+	
 }
 
+
+//EAR Assembly
+project(':ear'){
+	apply plugin: 'ear'
+	apply plugin: 'com.bmuschko.cargo'
+	dependencies {
+		 deploy project(':ear:sessionBean')
+		 earlib project(':ear:sessionBeanInterface')
+	     deploy project(path:':ear:web', configuration:'archives')
+	}
+
+	cargo{
+		containerId="jboss71x"
+		File jb= file("${rootDir}/jboss7");//jboss home
+		local{
+		   
+ 			logLevel="medium"
+			jb.mkdirs();
+			homeDir =jb
+			installer {
+	            installUrl = 'http://download.jboss.org/jbossas/7.1/jboss-as-7.1.1.Final/jboss-as-7.1.1.Final.zip'
+	            downloadDir = file("$jb/")
+	            extractDir = file("$jb/")
+        	}
+		}
+		deployable {
+        	file = file('build/libs/ear.ear')
+        
+        }
+		
+	}
+	cargoRunLocal{
+		dependsOn ear
+	
+	}
 }
+
