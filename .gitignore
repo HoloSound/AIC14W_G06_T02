@@ -41,12 +41,13 @@ hs_err_pid*
 #gradle
 .gradle/
 */.gradle/*
-gradle/
+
 **/build/
 ear/build/
 #eclipse
 *.project
 *.classpath
+.settings
 
 #jboss
 jboss7/*
