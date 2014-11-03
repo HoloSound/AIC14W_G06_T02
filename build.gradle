@@ -77,16 +77,27 @@ project(':ear:sessionBeanInterface'){
 	
 }
 
-
 //EAR Assembly
 project(':ear'){
+
+
+
+task debug << {
+
+  configurations.earlib.each { println it }
+}
+
+
+	
 	apply plugin: 'ear'
 	apply plugin: 'com.bmuschko.cargo'
 	dependencies {
 		 deploy project(':ear:sessionBean')
 		 earlib project(':ear:sessionBeanInterface')
-	     deploy project(path:':ear:web', configuration:'archives')
+	         deploy project(path:':ear:web', configuration:'archives')
+	
 	}
+	configurations.earlib.exclude module: "guava"
 
 	cargo{
 		containerId="jboss71x"
