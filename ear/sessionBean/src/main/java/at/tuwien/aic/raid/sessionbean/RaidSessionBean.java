@@ -1,6 +1,5 @@
 package at.tuwien.aic.raid.sessionbean;
 
-import javax.ejb.Init;
 import javax.ejb.Stateless;
 
 import at.tuwien.aic.raid.Raid1;
