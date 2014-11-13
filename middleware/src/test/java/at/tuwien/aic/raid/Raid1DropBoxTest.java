@@ -25,9 +25,8 @@ import at.tuwien.aic.raid.data.FileObject;
  */
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class Raid1Test
+public class Raid1DropBoxTest
 {
-	private FileImpl fileIF = null;
 	private DropBoxImpl dropBoxIF = null;
 
 	private byte[] toPrimitives( Byte[] oBytes )
@@ -60,7 +59,6 @@ public class Raid1Test
 	@Before
 	public void init()
 	{
-		fileIF = new FileImpl();
 		dropBoxIF = new DropBoxImpl();
 	}
 
@@ -117,7 +115,6 @@ public class Raid1Test
 	{
 		FileObject fo = createFileObject( "hex.bin" );
 		
-		fileIF.create( fo );
 		dropBoxIF.create( fo );
 	}
 	
@@ -127,7 +124,6 @@ public class Raid1Test
 		FileObject fo = new FileObject();
 		fo.setName(  "hex.bin" );
 		
-		fileIF.delete( fo );
 		dropBoxIF.delete( fo );
 	}	
 	
@@ -136,18 +132,14 @@ public class Raid1Test
 	{
 		FileObject fo = createFileObject( "hex.bin" );
 		
-		fileIF.create( fo );
 		dropBoxIF.create( fo );
 		
 		FileObject readFo = new FileObject();
 		readFo.setName( fo.getName() );
 		
-		fileIF.read( readFo );
 		
 		// compare
-		boolean ret = fo.compare( readFo );
-		assertEquals( "creation and read = document with same content and name", true, ret );
-		ret = fo.compare( readFo );
+		boolean ret = false;
 		
 		dropBoxIF.read( readFo );		
 		
@@ -162,11 +154,9 @@ public class Raid1Test
 	{
 		FileObject fo = createFileObject( "hex.bin" );
 		
-		fileIF.create( fo );
 		dropBoxIF.create( fo );
 		
 		// and now a second time
-		fileIF.create( fo );
 		dropBoxIF.create( fo );
 	}	
 	
@@ -177,7 +167,6 @@ public class Raid1Test
 		
 		fo.setName( "hex.bin" );
 		
-		fileIF.create( fo );
 		dropBoxIF.create( fo );
 		
 		// create palindrom
@@ -194,7 +183,6 @@ public class Raid1Test
 		fo.setData( data );
 		
 		// and now a second time
-		fileIF.update( fo );
 		dropBoxIF.update( fo );
 	}
 	
@@ -204,7 +192,6 @@ public class Raid1Test
 	{
 		FileObject fo = createFileObject( "hex.bin" );
 		
-		fileIF.create( fo );
 		dropBoxIF.create( fo );
 		
 		// create diagonal swap
@@ -224,7 +211,6 @@ public class Raid1Test
 		fo.setData( data );
 		
 		// and now a second time
-		fileIF.update( fo );
 		dropBoxIF.update( fo );
 	}
 	

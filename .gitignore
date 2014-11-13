@@ -48,5 +48,9 @@ ear/build/
 *.project
 *.classpath
 
+# private configuration files
+*.properties
+
 #jboss
 jboss7/*
+/build/

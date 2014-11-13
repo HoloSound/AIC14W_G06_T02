@@ -25,10 +25,9 @@ import at.tuwien.aic.raid.data.FileObject;
  */
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class Raid1Test
+public class Raid1FileTest
 {
 	private FileImpl fileIF = null;
-	private DropBoxImpl dropBoxIF = null;
 
 	private byte[] toPrimitives( Byte[] oBytes )
 	{
@@ -61,7 +60,6 @@ public class Raid1Test
 	public void init()
 	{
 		fileIF = new FileImpl();
-		dropBoxIF = new DropBoxImpl();
 	}
 
 	private FileObject createFileObject( String filename )
@@ -118,7 +116,6 @@ public class Raid1Test
 		FileObject fo = createFileObject( "hex.bin" );
 		
 		fileIF.create( fo );
-		dropBoxIF.create( fo );
 	}
 	
 	@Test
@@ -128,7 +125,6 @@ public class Raid1Test
 		fo.setName(  "hex.bin" );
 		
 		fileIF.delete( fo );
-		dropBoxIF.delete( fo );
 	}	
 	
 	@Test
@@ -137,7 +133,6 @@ public class Raid1Test
 		FileObject fo = createFileObject( "hex.bin" );
 		
 		fileIF.create( fo );
-		dropBoxIF.create( fo );
 		
 		FileObject readFo = new FileObject();
 		readFo.setName( fo.getName() );
@@ -149,12 +144,6 @@ public class Raid1Test
 		assertEquals( "creation and read = document with same content and name", true, ret );
 		ret = fo.compare( readFo );
 		
-		dropBoxIF.read( readFo );		
-		
-		// compare
-		ret = fo.compare( readFo );
-		assertEquals( "creation and read = document with same content and name", true, ret );
-		ret = fo.compare( readFo );
 	}		
 	
 	@Test
@@ -163,11 +152,9 @@ public class Raid1Test
 		FileObject fo = createFileObject( "hex.bin" );
 		
 		fileIF.create( fo );
-		dropBoxIF.create( fo );
 		
 		// and now a second time
 		fileIF.create( fo );
-		dropBoxIF.create( fo );
 	}	
 	
 	@Test
@@ -176,9 +163,6 @@ public class Raid1Test
 		FileObject fo = createFileObject( "hex_mirror.bin" );
 		
 		fo.setName( "hex.bin" );
-		
-		fileIF.create( fo );
-		dropBoxIF.create( fo );
 		
 		// create palindrom
 		Byte[] data = fo.getData();
@@ -195,7 +179,6 @@ public class Raid1Test
 		
 		// and now a second time
 		fileIF.update( fo );
-		dropBoxIF.update( fo );
 	}
 	
 	
@@ -205,8 +188,7 @@ public class Raid1Test
 		FileObject fo = createFileObject( "hex.bin" );
 		
 		fileIF.create( fo );
-		dropBoxIF.create( fo );
-		
+
 		// create diagonal swap
 		Byte[] data = fo.getData();
 		Byte tmp;
@@ -225,7 +207,6 @@ public class Raid1Test
 		
 		// and now a second time
 		fileIF.update( fo );
-		dropBoxIF.update( fo );
 	}
 	
 }
