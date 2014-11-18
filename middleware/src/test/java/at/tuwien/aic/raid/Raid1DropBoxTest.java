@@ -20,7 +20,7 @@ import at.tuwien.aic.raid.data.FileObject;
  * TODO: in every Impl and here there are to methods: toPrimitives, toObjects
  * HERE we should not copy these methods!
  * 
- * @author Holosound
+ * @author Schwarzinger Rainer aka Holosound
  *
  */
 
@@ -29,33 +29,7 @@ public class Raid1DropBoxTest
 {
 	private DropBoxImpl dropBoxIF = null;
 
-	private byte[] toPrimitives( Byte[] oBytes )
-	{
 
-		byte[] bytes = new byte[oBytes.length];
-
-		for( int i = 0 ; i < oBytes.length ; i++ )
-		{
-			bytes[i] = oBytes[i];
-		}
-		
-		return bytes;
-	}
-
-	private Byte[] toObjects( byte[] bytesPrim )
-	{
-
-		Byte[] bytes = new Byte[bytesPrim.length];
-		int i = 0;
-
-		for( byte b : bytesPrim )
-		{
-			bytes[i++] = b; // Autoboxing
-		}
-
-		return bytes;
-	}
-	
 	@Before
 	public void init()
 	{
@@ -69,7 +43,7 @@ public class Raid1DropBoxTest
 		fo.setName( filename );
 		
 		// TODO ... same in each *Impl object? --> REDESIGN
-		File baseDirectory = new File( "c:/tmp/" );
+		File baseDirectory = new File( "src/test/data" );
 		File absPath = new File( baseDirectory, filename );
 
 		if( absPath.isFile() )
@@ -83,7 +57,7 @@ public class Raid1DropBoxTest
 				
 				buffer = IOUtils.toByteArray( is );
 
-				fo.setData( toObjects( buffer ) );
+				fo.setData( buffer );
 			}
 			catch( IOException e )
 			{
@@ -170,8 +144,8 @@ public class Raid1DropBoxTest
 		dropBoxIF.create( fo );
 		
 		// create palindrom
-		Byte[] data = fo.getData();
-		Byte tmp;
+		byte[] data = fo.getData();
+		byte tmp;
 		
 		for( int ii = 0 ; ii < (data.length / 2) ; ii++ )
 		{
@@ -195,8 +169,8 @@ public class Raid1DropBoxTest
 		dropBoxIF.create( fo );
 		
 		// create diagonal swap
-		Byte[] data = fo.getData();
-		Byte tmp;
+		byte[] data = fo.getData();
+		byte tmp;
 		
 		for( int ii = 0 ; ii < 16 ; ii++ )
 		{

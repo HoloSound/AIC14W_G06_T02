@@ -15,14 +15,16 @@ import at.tuwien.aic.raid.data.FileObject;
 /**
  * The FileImpl is a connector which works with files in a local diectory.
  * 
- * @author Holosound
+ * @author Schwarzinger Rainer aka Holosound
  *
  */
 
-public class FileImpl implements ConnectorInterface
+public class FileImpl 
+		implements ConnectorInterface
 {
 	// directory is RAID level specific
 	private File baseDirectory = new File( "c:/tmp/FILE/RAID1/" );
+
 	
 	public FileImpl( File baseDirectory )
 	{
@@ -35,30 +37,6 @@ public class FileImpl implements ConnectorInterface
 		// TODO Auto-generated constructor stub
 	}
 
-	private byte[] toPrimitives( Byte[] oBytes )
-	{
-		byte[] bytes = new byte[oBytes.length];
-
-		for( int i = 0 ; i < oBytes.length ; i++ )
-		{
-			bytes[i] = oBytes[i];
-		}
-		
-		return bytes;
-	}
-
-	private Byte[] toObjects( byte[] bytesPrim )
-	{
-		Byte[] bytes = new Byte[bytesPrim.length];
-		int i = 0;
-
-		for( byte b : bytesPrim )
-		{
-			bytes[i++] = b; // Autoboxing
-		}
-
-		return bytes;
-	}
 
 	/**
 	 * creates a FileObject
@@ -66,7 +44,6 @@ public class FileImpl implements ConnectorInterface
 	@Override
 	public void create( FileObject file )
 	{
-		// TODO Auto-generated method stub
 		/**
 		 * check if baseDirecory exists
 		 */
@@ -97,8 +74,8 @@ public class FileImpl implements ConnectorInterface
 		{
 			os = new FileOutputStream( absPath );
 
-			Byte[] buffer = file.getData();
-			os.write( toPrimitives( buffer ), 0, buffer.length );
+			byte[] data = file.getData();
+			os.write( data, 0, data.length );
 		}
 		catch( FileNotFoundException fnfe )
 		{
@@ -144,7 +121,7 @@ public class FileImpl implements ConnectorInterface
 				is = new FileInputStream( absPath );
 				buffer = IOUtils.toByteArray( is );
 
-				name.setData( toObjects( buffer ) );
+				name.setData( buffer );
 			}
 			catch( IOException e )
 			{

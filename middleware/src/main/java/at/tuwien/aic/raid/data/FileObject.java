@@ -19,7 +19,10 @@ package at.tuwien.aic.raid.data;
 public class FileObject
 {
 	private String name;
-	private Byte[] data;
+	private byte[] data;
+	private boolean isFile = false;
+	private boolean isDirectory = false;
+	
 
 	public FileObject( String name )
 	{
@@ -42,17 +45,17 @@ public class FileObject
 		this.name = name;
 	}
 
-	public Byte[] getData()
+	public byte[] getData()
 	{
 		return data;
 	}
 
-	public void setData( Byte[] data )
+	public void setData( byte[] data )
 	{
 		this.data = data;
 	}
 	
-	private boolean compare( Byte[] byteArray )
+	private boolean compare( byte[] byteArray )
 	{
 		boolean ret = true;
 		
@@ -79,5 +82,61 @@ public class FileObject
 		}
 		
 		return ret;
+	}
+	
+	/*
+	 * 
+	 * 	
+	private byte[] toPrimitives( Byte[] oBytes )
+	{
+
+		byte[] bytes = new byte[oBytes.length];
+
+		for( int i = 0 ; i < oBytes.length ; i++ )
+		{
+			bytes[i] = oBytes[i];
+		}
+		
+		return bytes;
+
+	}
+
+	private Byte[] toObjects( byte[] bytesPrim )
+	{
+
+		Byte[] bytes = new Byte[bytesPrim.length];
+		int i = 0;
+
+		for( byte b : bytesPrim )
+		{
+			bytes[i++] = b; // Autoboxing
+		}
+
+		return bytes;
+
+	}
+	 * 
+	 */
+	
+	public boolean isFile()
+	{
+		return this.isFile;
+	}
+
+	public boolean isDirectory()
+	{
+		return this.isDirectory;
+	}
+
+	public void setIsFile()
+	{
+		this.isFile = true;
+		this.isDirectory = false;
+	}
+
+	public void setIsDirectory()
+	{
+		this.isDirectory = true;
+		this.isFile = false;
 	}
 }

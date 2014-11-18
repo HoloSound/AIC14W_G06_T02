@@ -28,7 +28,7 @@ project(':middleware'){
 	apply plugin: 'java'
 	
 	dependencies {
-	 compile 'com.dropbox.core:dropbox-core-sdk:1.6'
+	 compile 'com.dropbox.core:dropbox-core-sdk:1.7.7'
 	 compile 'net.box:boxjavalibv2:3.0.9'
 	 compile 'org.apache.jclouds.provider:aws-s3:1.7.0'
 	 testCompile 'junit:junit:4.11'

@@ -9,7 +9,7 @@ import at.tuwien.aic.raid.data.FileObject;
  * rmDir( FileObject )
  * lsContent( FileObject )
  *  
- * @author Holosound
+ * @author Schwarzinger Rainer aka Holosound
  *
  */
 public interface ConnectorInterface
@@ -18,5 +18,6 @@ public interface ConnectorInterface
 	public FileObject read( FileObject name );  // prototype pattern
 	public void update( FileObject file );
 	public void delete( FileObject file );
+
 
 }
