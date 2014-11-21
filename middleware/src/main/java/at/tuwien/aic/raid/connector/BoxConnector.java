@@ -1,5 +1,7 @@
 package at.tuwien.aic.raid.connector;
 
+import java.util.ArrayList;
+
 import at.tuwien.aic.raid.ConnectorInterface;
 import at.tuwien.aic.raid.data.FileObject;
 
@@ -28,6 +30,11 @@ public class BoxConnector
 	public void delete(FileObject file) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public ArrayList<FileObject> listFiles() {
+		return null;
 	}
 
 }
