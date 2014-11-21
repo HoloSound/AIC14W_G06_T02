@@ -180,7 +180,7 @@ public class BoxImpl implements ConnectorInterface
 		is = new ByteArrayInputStream( bytes );
 		
 		try {
-			client.getFilesManager().uploadFile(BoxFileUploadRequestObject.uploadFileRequestObject(bFolder, file.getName(), is));
+			fileIDs.put(file.getName(), client.getFilesManager().uploadFile(BoxFileUploadRequestObject.uploadFileRequestObject(bFolder, file.getName(), is)).getId());
 		} catch (BoxRestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
