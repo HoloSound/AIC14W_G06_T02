@@ -44,7 +44,7 @@ project(':ear:web'){
 	dependencies {
 	    testCompile 'junit:junit:4.11'
 	 	providedCompile project(':ear:sessionBeanInterface')
-	 	
+	 	compile 'commons-fileupload:commons-fileupload:1.2'
 	}
 	
 	

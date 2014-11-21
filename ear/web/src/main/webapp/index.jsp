@@ -63,12 +63,21 @@ $( document ).ready(function() {
 
 <DIV id="content">
 
-
 <ul><li id='raid1li'><a href='javascript:void(0)' onclick="showRaid1()">RAID1</a></li> <li id='raid5li'> <a href='javascript:void(0)' onclick="showRaid5()" >RAID5</a></li> </ul>
 
 <DIV>
 <div id='raid1Div'>
-	<%=c.sayHello()%>
+<div class="uploadDiv">
+
+<form action="raid1?task=upload" method="post"
+                        enctype="multipart/form-data">
+		<input type="file" name="file" size="50" />
+		<br />
+		<input type="submit" value="Upload File" />
+		</form>
+ </div>
+
+	<%=c.listFiles()%>
 </div>
 
 <div id='raid5Div'>

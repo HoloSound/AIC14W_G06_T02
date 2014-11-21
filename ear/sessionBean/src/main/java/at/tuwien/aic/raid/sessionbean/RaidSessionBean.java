@@ -1,8 +1,12 @@
 package at.tuwien.aic.raid.sessionbean;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import javax.ejb.Stateless;
 
 import at.tuwien.aic.raid.Raid1;
+import at.tuwien.aic.raid.data.FileObject;
 
 @Stateless()
 public class RaidSessionBean implements RaidSessionBeanInterface {
@@ -14,10 +18,29 @@ public class RaidSessionBean implements RaidSessionBeanInterface {
 	}
 
 	@Override
-	public String sayHello() {
-		//TODO REMOVE  EXAMPLE CODE
-		return raid1.sayHello();
+	public ArrayList<FileObject> listFiles() {
+		
+		return raid1.listFiles();
 	}
+
+	@Override
+	public void delete(String fn) throws IOException {
+		raid1.delete(fn);
+		
+	}
+
+	@Override
+	public FileObject getFile(String fn) throws IOException {
+		
+		return raid1.getFile(fn);
+	}
+
+	@Override
+	public void write(FileObject f) throws IOException {
+		raid1.write(f);
+		
+	}
+
 	
 	
 }
