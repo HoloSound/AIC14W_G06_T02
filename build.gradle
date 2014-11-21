@@ -32,6 +32,8 @@ project(':middleware'){
 	 compile 'net.box:boxjavalibv2:3.0.9'
 	 compile 'com.amazonaws:aws-java-sdk:1.9.6'
 	 testCompile 'junit:junit:4.11'
+	compile 'com.google.guava:guava:15.0'
+
 	}
 
 }
