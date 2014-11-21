@@ -13,6 +13,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.BoxConfigBuilder;
@@ -48,7 +49,7 @@ public class BoxImpl implements ConnectorInterface
 	public static final String bFolder = "0";
 	
 	private BoxClient client;
-	private HashMap<String, String> fileIDs = new HashMap<String, String>();
+	private HashMap<String, String> fileIDs = null;
 	
 	
 
@@ -99,7 +100,8 @@ public class BoxImpl implements ConnectorInterface
 	 * @throws BoxRestException 
 	 */
 	private void getFileIDs() throws BoxRestException, BoxServerException, AuthFatalFailureException {
-		BoxFolder boxFolder= client.getFoldersManager().getFolder(bFolder,null);
+		fileIDs = new HashMap<String, String>();
+		BoxFolder boxFolder = client.getFoldersManager().getFolder(bFolder,null);
         ArrayList<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
         int folderSize = folderEntries.size();
         for (int i = 0; i <= folderSize-1; i++){
@@ -281,6 +283,28 @@ public class BoxImpl implements ConnectorInterface
 	
 	@Override
 	public ArrayList<FileObject> listFiles() {
+		//refresh the fileIDs HashMap with all Files (and IDs) from BOX
+		try {
+			this.getFileIDs();
+			
+			ArrayList<FileObject> listedFiles = new ArrayList<FileObject>();
+			for(Map.Entry<String, String> entry : fileIDs.entrySet()) {
+	        	listedFiles.add(new FileObject(entry.getKey()));
+	        }
+			
+			return listedFiles;
+			
+		} catch (BoxRestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BoxServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AuthFatalFailureException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 	
