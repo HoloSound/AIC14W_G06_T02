@@ -18,7 +18,7 @@ public class RaidSessionBean implements RaidSessionBeanInterface {
 	}
 
 	@Override
-	public ArrayList<FileObject> listFiles() {
+	public ArrayList<FileObject> listFiles() throws IOException {
 		
 		return raid1.listFiles();
 	}

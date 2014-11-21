@@ -1,5 +1,8 @@
 package at.tuwien.aic.raid;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import at.tuwien.aic.raid.data.FileObject;
 
 /**
@@ -14,10 +17,10 @@ import at.tuwien.aic.raid.data.FileObject;
  */
 public interface ConnectorInterface
 {
-	public void create( FileObject file );
-	public FileObject read( FileObject name );  // prototype pattern
-	public void update( FileObject file );
-	public void delete( FileObject file );
-
+	public void create( FileObject file )throws Exception;
+	public FileObject read( FileObject name ) throws Exception;  // prototype pattern
+	public void update( FileObject file )throws Exception;
+	public void delete( FileObject file )throws Exception;
+	public ArrayList<FileObject> listFiles()throws Exception;
 
 }
