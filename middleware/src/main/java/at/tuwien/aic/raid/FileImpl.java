@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 
@@ -169,6 +170,11 @@ public class FileImpl
 			 */
 			absPath.delete();
 		}
+	}
+	
+	@Override
+	public ArrayList<FileObject> listFiles() {
+		return null;
 	}
 
 }
