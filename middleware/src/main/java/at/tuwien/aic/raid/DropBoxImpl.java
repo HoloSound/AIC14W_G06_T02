@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 import com.dropbox.core.DbxAppInfo;
@@ -292,7 +293,10 @@ public class DropBoxImpl
 		}
 	}
 
-	
+	@Override
+	public ArrayList<FileObject> listFiles() {
+		return null;
+	}
 
 
 }

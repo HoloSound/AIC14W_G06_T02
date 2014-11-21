@@ -279,4 +279,9 @@ public class BoxImpl implements ConnectorInterface
 		
 	}
 	
+	@Override
+	public ArrayList<FileObject> listFiles() {
+		return null;
+	}
+	
 }
