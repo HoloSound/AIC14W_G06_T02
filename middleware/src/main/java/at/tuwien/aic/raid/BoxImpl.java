@@ -40,8 +40,8 @@ import at.tuwien.aic.raid.data.FileObject;
  */
 public class BoxImpl implements ConnectorInterface
 {
-	
-	private static final String propertyFileLocation = "src/main/resources/box.properties";
+	private static File boxProps = new File( "src/main/resources/box.properties" ); 
+	private static final String propertyFileLocation = boxProps.toString();
 	private static final int PORT = 4000;
 	private static String key;
 	private static String secret;
@@ -80,7 +80,8 @@ public class BoxImpl implements ConnectorInterface
 	
 	private void createConnection() throws AuthFatalFailureException, BoxServerException, BoxRestException {
 		String code = "";
-        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + key + "&redirect_uri=http%3A//localhost%3A" + PORT;
+        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + key;
+        // + "&redirect_uri=http%3A//localhost%3A" + PORT;
         try {
             Desktop.getDesktop().browse(java.net.URI.create(url));
             code = getCode();

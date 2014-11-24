@@ -155,7 +155,7 @@ public class DropBoxImpl
 		 */
 		File dirName = absPath.getParentFile();
 		
-		while( ! dirName.toString().equals( "\\" ) )
+		while( dirName!= null && ! dirName.toString().equals( File.pathSeparator ) )
 		{
 			System.out.println( "create: check existance of dir " + dirName.toString() );
 			
