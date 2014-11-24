@@ -13,7 +13,7 @@ public class RaidSessionBean implements RaidSessionBeanInterface {
 	
 	private Raid1 raid1;
 
-	public RaidSessionBean() {
+	public RaidSessionBean() throws IOException {
 		raid1=new Raid1();
 	}
 

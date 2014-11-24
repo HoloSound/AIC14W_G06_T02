@@ -73,13 +73,13 @@ public class Controller {
 
 		return "<a target='_blank' href=\"raid1?task="
 				+ Raid1Servlet.DOWNLOAD_OPERATION + "&"
-				+ Raid1Servlet.FILE_NAME + "\"> download</a>";
+				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> download</a>";
 	}
 
 	private String getDeleteLink(FileObject f) {
 
 		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid1?task="
-				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME
+				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME+"="+f.getName()
 				+ "', '', callback, 'text' )\" > delete</a>";
 	}
 

@@ -7,49 +7,62 @@ import at.tuwien.aic.raid.connector.BoxConnector;
 import at.tuwien.aic.raid.data.FileObject;
 
 public class Raid1 {
-	ConnectorInterface box = new BoxConnector();
+	ConnectorInterface box = new DropBoxImpl();
 
+	public Raid1() {
+		System.out.println("NEW Raid1");
+	}
+	
 	public ArrayList<FileObject> listFiles()  throws IOException{ //TODO IMPLEMENT  RAID1 LOGIK
 		
-		ArrayList<FileObject> ret = new ArrayList<FileObject>();
-		ret.add(new FileObject("simpleFile1"));
-		ret.add(new FileObject("simpleFile2"));
-		FileObject d = new FileObject("IMPLEMENT DIRS ?.TXT");
-		d.setIsDirectory();
-		
-		ret.add(d);
-		return ret;
 
+		try {
+			
+			return  box.listFiles();
+		
+		} catch (Exception e) {
+		
+			
+			throw new IOException(e);
+		}
+		
 	}
 
 	public void delete(String fn) throws IOException{//TODO IMPLEMENT  RAID1 LOGIK
 		
+		try {
+			System.out.println("getFile"+fn);
+			box.delete(new FileObject(fn));
+		
+		} catch (Exception e) {
+		
+			
+			throw new IOException(e);
+		}
 		
 	}
 
 	public FileObject getFile(String fn)  throws IOException {//TODO IMPLEMENT  RAID1 LOGIK
+		try {
+			System.out.println("getFile"+fn);
+			return box.read(new FileObject(fn));
 		
-		FileObject f=new FileObject(fn);
-		f.setData((fn+"SOME DATA CONTENT").getBytes());
-		return f;
+		} catch (Exception e) {
+		
+			
+			throw new IOException(e);
+		}
+		
 	}
 
 	public void write(FileObject f) throws IOException {//TODO IMPLEMENT  RAID1 LOGIK
-			System.out.println(f.getName());
-			System.out.println("len:"+f.getData().length);
-			int i=0;
-			for (byte b : f.getData()) {
-				try {
-					System.out.print(Character.toChars(b));
-				} catch (IllegalArgumentException e) {
-					System.out.print("?");
-				}
-				i++;
-				if(i>600){
-					return;
-				}
-			}
+		try {
+			System.out.println("getFile"+f.getName());
+			box.create(f);
+		} catch (Exception e) {
 		
+			throw new IOException(e);
+		}
 	}
 
 }
