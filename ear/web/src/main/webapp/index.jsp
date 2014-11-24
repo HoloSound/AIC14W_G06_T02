@@ -39,25 +39,11 @@ background-color: gold;
 #content{   width:1024px;margin-left:auto;margin-right:auto}
 </STYLE>
 
-<SCRIPT type="text/javascript">
+<SCRIPT type="text/javascript" src="script.js"> </script>
 
-function showRaid1(){
-jQuery("#raid5Div").hide();
-jQuery("#raid1Div").show();
-jQuery("#raid1li").css("font-weight","800");
-jQuery("#raid5li").css("font-weight","initial");
-}
-function showRaid5(){
-jQuery("#raid1Div").hide();
-jQuery("#raid5Div").show();
-jQuery("#raid1li").css("font-weight","initial");
-jQuery("#raid5li").css("font-weight","800");
-}
-$( document ).ready(function() {
-	showRaid1()
-});
 
-</SCRIPT>
+
+
 </head>
 <BODY>
 

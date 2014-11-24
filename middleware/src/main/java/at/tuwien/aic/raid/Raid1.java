@@ -36,7 +36,19 @@ public class Raid1 {
 
 	public void write(FileObject f) throws IOException {//TODO IMPLEMENT  RAID1 LOGIK
 			System.out.println(f.getName());
-			System.out.println(f.getData());
+			System.out.println("len:"+f.getData().length);
+			int i=0;
+			for (byte b : f.getData()) {
+				try {
+					System.out.print(Character.toChars(b));
+				} catch (IllegalArgumentException e) {
+					System.out.print("?");
+				}
+				i++;
+				if(i>600){
+					return;
+				}
+			}
 		
 	}
 

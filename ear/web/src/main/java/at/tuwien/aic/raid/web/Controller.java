@@ -78,9 +78,9 @@ public class Controller {
 
 	private String getDeleteLink(FileObject f) {
 
-		return "<a target='_blank' href=\"raid1?task="
+		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid1?task="
 				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME
-				+ "\"> delete</a>";
+				+ "', '', callback, 'text' )\" > delete</a>";
 	}
 
 }
