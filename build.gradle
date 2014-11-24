@@ -96,10 +96,13 @@ task debug << {
 	dependencies {
 		 deploy project(':ear:sessionBean')
 		 earlib project(':ear:sessionBeanInterface')
+		 earlib 'com.google.guava:guava-io:r03'
+
 	         deploy project(path:':ear:web', configuration:'archives')
 	
 	}
 	configurations.earlib.exclude module: "guava"
+
 
 	cargo{
 		containerId="jboss71x"

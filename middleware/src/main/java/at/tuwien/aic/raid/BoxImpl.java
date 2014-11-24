@@ -40,12 +40,12 @@ import at.tuwien.aic.raid.data.FileObject;
  */
 public class BoxImpl implements ConnectorInterface
 {
-	private static File boxProps = new File( "src/main/resources/box.properties" ); 
+	private static final File boxProps = new File( "/home/tomas/Documents/skola/advanced internet computing/AIC14W_G06_T02/middleware/src/main/resources/box.properties" ); 
 	private static final String propertyFileLocation = boxProps.toString();
-	private static String PORT;
-	private static String key;
-	private static String secret;
-	private static String redirectUrl;
+	private  final String PORT;
+	private  final String key;
+	private  final String secret;
+	private  final  String redirectUrl;
 	
 	public static final String bFolder = "0";
 	
@@ -81,7 +81,7 @@ public class BoxImpl implements ConnectorInterface
 		
 	}
 	
-	private void createConnection() throws AuthFatalFailureException, BoxServerException, BoxRestException {
+	private  synchronized void createConnection() throws AuthFatalFailureException, BoxServerException, BoxRestException {
 		String code = "";
         String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + key;
         if(redirectUrl != null) {
@@ -105,7 +105,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @throws BoxServerException 
 	 * @throws BoxRestException 
 	 */
-	private void getFileIDs() throws BoxRestException, BoxServerException, AuthFatalFailureException {
+	private  synchronized  void getFileIDs() throws BoxRestException, BoxServerException, AuthFatalFailureException {
 		fileIDs = new HashMap<String, String>();
 		BoxFolder boxFolder = client.getFoldersManager().getFolder(bFolder,null);
         ArrayList<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
@@ -117,7 +117,7 @@ public class BoxImpl implements ConnectorInterface
         }
 	}
 	
-    private static BoxClient getAuthenticatedClient(String code) throws BoxRestException,     BoxServerException, AuthFatalFailureException {
+    private   synchronized  BoxClient getAuthenticatedClient(String code) throws BoxRestException,     BoxServerException, AuthFatalFailureException {
         BoxResourceHub hub = new BoxResourceHub();
         BoxJSONParser parser = new BoxJSONParser(hub);
         IBoxConfig config = (new BoxConfigBuilder()).build();
@@ -128,7 +128,7 @@ public class BoxImpl implements ConnectorInterface
     }
 
 
-    private static String getCode() throws IOException {
+    private  synchronized  String getCode() throws IOException {
 
         @SuppressWarnings("resource")
 		ServerSocket serverSocket = new ServerSocket(Integer.parseInt(PORT));
@@ -180,7 +180,7 @@ public class BoxImpl implements ConnectorInterface
 	 * Does not proof if the file already exists!
 	 */
 	@Override
-	public void create(FileObject file) throws IOException {
+	public synchronized   void create(FileObject file) throws IOException {
 		InputStream is = null;
 		
 		byte[] bytes = file.getData();
@@ -214,7 +214,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @return FileObject
 	 */
 	@Override
-	public FileObject read(FileObject name) throws IOException {
+	public  synchronized  FileObject read(FileObject name) throws IOException {
 		File f = null;
 		try {
 			f = File.createTempFile("temp", "deleteme");
@@ -261,7 +261,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @param file
 	 */
 	@Override
-	public void update(FileObject file) throws IOException {
+	public  synchronized  void update(FileObject file) throws IOException {
 			this.delete(file);
 			this.create(file);
 	}
@@ -271,7 +271,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @param file
 	 */
 	@Override
-	public void delete(FileObject file) throws IOException {
+	public   synchronized  void delete(FileObject file) throws IOException {
 		try {
 			client.getFilesManager().deleteFile(fileIDs.get(file.getName()), null);
 		} catch (BoxRestException e) {
@@ -288,7 +288,7 @@ public class BoxImpl implements ConnectorInterface
 	}
 	
 	@Override
-	public ArrayList<FileObject> listFiles() {
+	public  synchronized  ArrayList<FileObject> listFiles() {
 		//refresh the fileIDs HashMap with all Files (and IDs) from BOX
 		try {
 			this.getFileIDs();

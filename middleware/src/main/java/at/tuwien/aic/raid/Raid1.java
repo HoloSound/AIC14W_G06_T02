@@ -7,7 +7,7 @@ import at.tuwien.aic.raid.connector.BoxConnector;
 import at.tuwien.aic.raid.data.FileObject;
 
 public class Raid1 {
-	ConnectorInterface box = new DropBoxImpl();
+	 ConnectorInterface box = new DropBoxImpl();
 
 	public Raid1() {
 		System.out.println("NEW Raid1");
@@ -31,7 +31,7 @@ public class Raid1 {
 	public void delete(String fn) throws IOException{//TODO IMPLEMENT  RAID1 LOGIK
 		
 		try {
-			System.out.println("getFile"+fn);
+			System.out.println("delete"+fn);
 			box.delete(new FileObject(fn));
 		
 		} catch (Exception e) {
@@ -57,7 +57,7 @@ public class Raid1 {
 
 	public void write(FileObject f) throws IOException {//TODO IMPLEMENT  RAID1 LOGIK
 		try {
-			System.out.println("getFile"+f.getName());
+			System.out.println("write"+f.getName());
 			box.create(f);
 		} catch (Exception e) {
 		
