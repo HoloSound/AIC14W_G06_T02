@@ -46,7 +46,7 @@ public class DropBoxImpl
 		// pf.setPropertyFileName( "dropBox.properties" );
 		try
 		{
-			pf.load( DropBoxImpl.class.getResourceAsStream( "/dropBox.properties" ) );
+			pf.load( DropBoxImpl.class.getResourceAsStream( "dropBox.properties" ) );
 		}
 		catch( IOException e1 )
 		{
