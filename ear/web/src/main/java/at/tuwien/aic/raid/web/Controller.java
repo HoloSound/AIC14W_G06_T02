@@ -73,7 +73,7 @@ public class Controller {
 
 		return "<a target='_blank' href=\"raid1?task="
 				+ Raid1Servlet.DOWNLOAD_OPERATION + "&"
-				+ Raid1Servlet.FILE_NAME + "\"> donwload</a>";
+				+ Raid1Servlet.FILE_NAME + "\"> download</a>";
 	}
 
 	private String getDeleteLink(FileObject f) {

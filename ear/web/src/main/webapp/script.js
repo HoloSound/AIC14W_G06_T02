@@ -13,6 +13,27 @@ jQuery("#raid5li").css("font-weight","800");
 }
 $( document ).ready(function() {
 	showRaid1()
+	
+	$( 'form' )
+	  .submit( function( e ) {
+
+	    var url =$(this).attr("action");
+
+	    $.ajax( {
+	      url: 'raid1?task=upload',
+	      type: 'POST',
+	      data: new FormData( this ),
+	      processData: false,
+	      contentType: false,
+	      success: function(data)
+	           {
+	               alert(data); // show response from the php script.
+	           }
+
+
+	    } );
+	    e.preventDefault();
+	  } );
 });
 
 
