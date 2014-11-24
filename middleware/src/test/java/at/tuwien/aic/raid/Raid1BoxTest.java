@@ -85,7 +85,7 @@ public class Raid1BoxTest
 	/**
 	 * Delete test
 	 */
-	@Test
+	/*	@Test
 	public void t02_test()
 	{
 		FileObject tmp = new FileObject();
@@ -97,7 +97,7 @@ public class Raid1BoxTest
 			e.printStackTrace();
 		}
 	}
-	
+	*/
 	/**
 	 * Exception when reading a not existing file
 	 */
@@ -115,6 +115,6 @@ public class Raid1BoxTest
 	public void t04_test() throws IOException {
 		FileObject tmp = new FileObject();
 		tmp.setName(tmpfilename); 
-		boxClient.delete(tmp);
+//		boxClient.delete(tmp);
 	}
 }

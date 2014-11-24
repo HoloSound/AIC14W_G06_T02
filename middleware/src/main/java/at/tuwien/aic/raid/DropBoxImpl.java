@@ -139,7 +139,7 @@ public class DropBoxImpl
 		
 //		System.out.println( "Name: " + ret );	
 		
-		return "/";
+		return ret;
 	}
 	
 	/**
@@ -168,7 +168,7 @@ public class DropBoxImpl
 		dirName = absPath.getParentFile();
 		
 		String unixDir = getUnixPath( dirName );
-		ArrayList<FileObject> list = this.lsContent( "/" );
+		ArrayList<FileObject> list = this.lsContent( unixDir );
 		
 		for( FileObject aFO : list )
 		{
@@ -184,7 +184,8 @@ public class DropBoxImpl
 			}	
 		}
 
-
+		unixDir = getUnixPath( absPath );
+		
 		/**
 		 * write data to file
 		 */
