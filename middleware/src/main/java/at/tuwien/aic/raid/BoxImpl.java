@@ -42,9 +42,10 @@ public class BoxImpl implements ConnectorInterface
 {
 	private static File boxProps = new File( "src/main/resources/box.properties" ); 
 	private static final String propertyFileLocation = boxProps.toString();
-	private static final int PORT = 4000;
+	private static String PORT;
 	private static String key;
 	private static String secret;
+	private static String redirectUrl;
 	
 	public static final String bFolder = "0";
 	
@@ -61,6 +62,8 @@ public class BoxImpl implements ConnectorInterface
 		
 		key = pf.getProperty( "key" );
 		secret = pf.getProperty( "secret" );
+		redirectUrl = pf.getProperty("redirect");
+		PORT = pf.getProperty("port");
 		
 		try {
 			this.createConnection();
@@ -81,7 +84,9 @@ public class BoxImpl implements ConnectorInterface
 	private void createConnection() throws AuthFatalFailureException, BoxServerException, BoxRestException {
 		String code = "";
         String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + key;
-        // + "&redirect_uri=http%3A//localhost%3A" + PORT;
+        if(redirectUrl != null) {
+        	url += redirectUrl + PORT;
+        }
         try {
             Desktop.getDesktop().browse(java.net.URI.create(url));
             code = getCode();
@@ -126,7 +131,7 @@ public class BoxImpl implements ConnectorInterface
     private static String getCode() throws IOException {
 
         @SuppressWarnings("resource")
-		ServerSocket serverSocket = new ServerSocket(PORT);
+		ServerSocket serverSocket = new ServerSocket(Integer.parseInt(PORT));
         Socket socket = serverSocket.accept();
         BufferedReader in = new BufferedReader (new InputStreamReader (socket.getInputStream ()));
         while (true)
@@ -175,7 +180,7 @@ public class BoxImpl implements ConnectorInterface
 	 * Does not proof if the file already exists!
 	 */
 	@Override
-	public void create(FileObject file) {
+	public void create(FileObject file) throws IOException {
 		InputStream is = null;
 		
 		byte[] bytes = file.getData();
@@ -185,20 +190,20 @@ public class BoxImpl implements ConnectorInterface
 		try {
 			fileIDs.put(file.getName(), client.getFilesManager().uploadFile(BoxFileUploadRequestObject.uploadFileRequestObject(bFolder, file.getName(), is)).getId());
 		} catch (BoxRestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (BoxServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (AuthFatalFailureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (BoxJSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		}
 		
 	}
@@ -209,7 +214,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @return FileObject
 	 */
 	@Override
-	public FileObject read(FileObject name) {
+	public FileObject read(FileObject name) throws IOException {
 		File f = null;
 		try {
 			f = File.createTempFile("temp", "deleteme");
@@ -220,23 +225,23 @@ public class BoxImpl implements ConnectorInterface
 		try {
 			client.getFilesManager().downloadFile(fileIDs.get(name.getName()), f, null, null);
 		} catch (BoxRestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (BoxServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (AuthFatalFailureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		}
 		
 		try {
@@ -256,9 +261,9 @@ public class BoxImpl implements ConnectorInterface
 	 * @param file
 	 */
 	@Override
-	public void update(FileObject file) {
-		this.delete(file);
-		this.create(file);	
+	public void update(FileObject file) throws IOException {
+			this.delete(file);
+			this.create(file);
 	}
 
 	/**
@@ -266,18 +271,18 @@ public class BoxImpl implements ConnectorInterface
 	 * @param file
 	 */
 	@Override
-	public void delete(FileObject file) {
+	public void delete(FileObject file) throws IOException {
 		try {
 			client.getFilesManager().deleteFile(fileIDs.get(file.getName()), null);
 		} catch (BoxRestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (BoxServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		} catch (AuthFatalFailureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw new IOException(e);
 		}
 		
 	}
