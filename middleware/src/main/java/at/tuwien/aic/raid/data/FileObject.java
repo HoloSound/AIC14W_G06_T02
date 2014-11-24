@@ -1,5 +1,7 @@
 package at.tuwien.aic.raid.data;
 
+import java.util.Arrays;
+
 /**
  * In the future there we will need additional parameter
  * 
@@ -55,7 +57,7 @@ public class FileObject
 		this.data = data;
 	}
 	
-	private boolean compare( byte[] byteArray )
+	private boolean compareData( byte[] byteArray )
 	{
 		boolean ret = true;
 		
@@ -71,12 +73,40 @@ public class FileObject
 		return ret;
 	}
 	
+	public void showHexData()
+	{
+		int ii = 0;
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append( String.format( "%08X: ", ii ) );
+		
+		for( byte b : data )
+		{		
+			if( ii != 0 && ii % 16 == 0 )
+			{
+				System.out.println( sb.toString() );
+				
+				sb = new StringBuilder();
+				sb.append( String.format( "%08X: ", ii ) );
+			}
+
+			sb.append( String.format( "%02X ", b ) );
+			
+			ii++;
+		}
+		
+		if( ! sb.toString().isEmpty() )
+		{
+			System.out.println( sb.toString() );
+		}			
+	}
+	
 	public boolean compare( FileObject secondFo )
 	{
 		boolean ret = false;
 		
 		if( this.name.compareTo( secondFo.getName() ) == 0 
-				&& compare( secondFo.getData() ) == true )
+				&& compareData( secondFo.getData() ) )
 		{
 			ret = true;
 		}

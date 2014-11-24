@@ -6,12 +6,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters; //Running test cases in order of method names in ascending order.
+
 import at.tuwien.aic.raid.data.FileObject;
 
 /**
@@ -83,6 +85,20 @@ public class Raid1DropBoxTest
 		
 		return fo;
 	}
+
+	@Test
+	public void t00_listTest()
+	{
+		ArrayList<FileObject> list = dropBoxIF.listFiles();
+		
+		for( FileObject aFO : list )
+		{
+			System.out.println( " " + aFO.getName() );
+		}
+
+		System.out.println( "============================" );
+	}
+	
 	
 	@Test
 	public void t00_createTest()
@@ -91,6 +107,24 @@ public class Raid1DropBoxTest
 		
 		dropBoxIF.create( fo );
 	}
+
+	
+	// @Test
+	public void t01_deleteAllFiles()
+	{
+		FileObject fo = new FileObject();
+		
+		ArrayList<FileObject> list = dropBoxIF.listFiles();
+		
+		for( FileObject aFO : list )
+		{
+			System.out.println( " " + aFO.getName() );
+			fo.setName(  aFO.getName() );
+				
+			dropBoxIF.delete( fo );			
+		}
+	}	
+	
 	
 	@Test
 	public void t01_deleteTest()
@@ -118,9 +152,15 @@ public class Raid1DropBoxTest
 		dropBoxIF.read( readFo );		
 		
 		// compare
+		
+		System.out.println( "Original file: " + fo.getName() );
+		fo.showHexData();
+
+		System.out.println( "Re-read file: " + readFo.getName() );
+		readFo.showHexData();
+		
 		ret = fo.compare( readFo );
 		assertEquals( "creation and read = document with same content and name", true, ret );
-		ret = fo.compare( readFo );
 	}		
 	
 	@Test

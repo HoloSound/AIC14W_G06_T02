@@ -4,13 +4,12 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Properties;
 
 import com.dropbox.core.DbxAppInfo;
 import com.dropbox.core.DbxAuthFinish;
@@ -41,9 +40,19 @@ public class DropBoxImpl
 	{
 		// TODO Auto-generated constructor stub
 		
-		PropertyFile pf = new PropertyFile();
+		// PropertyFile pf = new PropertyFile();
+		Properties pf = new Properties();
 		
-		pf.setPropertyFileName( "dropBox.properties" );
+		// pf.setPropertyFileName( "dropBox.properties" );
+		try
+		{
+			pf.load( DropBoxImpl.class.getResourceAsStream( "/dropBox.properties" ) );
+		}
+		catch( IOException e1 )
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		// Get your app key and secret from the Dropbox developers website.
 		// 	... and add it into private dropBox.properties file.
@@ -66,6 +75,10 @@ public class DropBoxImpl
 		if( accessToken ==  null )
 		{		
 			// TODO - this won't work with J2EE
+			// extension: In this registered dorpBox application it is
+			// possible to register a recall URL.
+			// This URL would get a &code= parameter which has to be inserted
+			// into to properties file.
 			System.out.println( "1. Go to: " + authorizeUrl );
 			System.out.println( "2. Click \"Allow\" (you might have to log in first)" );
 			System.out.println( "3. Copy the authorization code." );
@@ -94,7 +107,8 @@ public class DropBoxImpl
 				e.printStackTrace();
 			}
 
-			pf.addProperty( "accessToken", accessToken );
+			// pf.addProperty( "accessToken", accessToken );
+			pf.setProperty( "accessToken", accessToken );
 		}
 		
 		client = new DbxClient( config, accessToken );
@@ -134,32 +148,43 @@ public class DropBoxImpl
 	@Override
 	public void create( FileObject file )
 	{
-		// TODO Auto-generated method stub
+		File absPath = new File( baseDirectory, file.getName() );
+		
+		/** 
+		 * split path into basedir and file
+		 */
+		File dirName = absPath.getParentFile();
+		
+		while( ! dirName.toString().equals( "\\" ) )
+		{
+			System.out.println( "create: check existance of dir " + dirName.toString() );
+			
+			dirName = dirName.getParentFile();
+		}
+		
 		/**
 		 * check if baseDirecory exists
 		 */
-/*		
-		if( !baseDirectory.isDirectory() )
+		dirName = absPath.getParentFile();
+		
+		String unixDir = getUnixPath( dirName );
+		ArrayList<FileObject> list = this.lsContent( unixDir );
+		
+		for( FileObject aFO : list )
 		{
-			baseDirectory.mkdirs();
+			System.out.println( " List objects: " + aFO.getName() + " compare with: " +  absPath.getName() );
+			
+			if( aFO.getName().equals( absPath.getName() ) )
+			{
+				System.out.println( "DELETE: " + aFO.getName() );
+		
+				this.delete( file );
+				// there can only be ONE file with the same name!
+				break;
+			}	
 		}
- */
-		/**
-		 * check file existence
-		 */
-		File absPath = new File( baseDirectory, file.getName() );
-/*
- * 		Check if file exists on dropbox
- */
-//		if( absPath.isFile() )
-//		{
-			/**
-			 * we delete it to be idempotent
-			 */
-/*		
-			absPath.delete();
-		}
- */
+
+
 		/**
 		 * write data to file
 		 */
@@ -168,10 +193,10 @@ public class DropBoxImpl
 		try 
 		{
 			/*
-			System.out.println( "client.getAccountInfo()" + client.getAccountInfo() ); 
-			System.out.println( "Linked account: " + client.getAccountInfo().displayName );
-			System.out.flush();
-		*/
+				System.out.println( "client.getAccountInfo()" + client.getAccountInfo() ); 
+				System.out.println( "Linked account: " + client.getAccountInfo().displayName );
+				System.out.flush();
+			 */
 
 			byte[] bytes = file.getData();
 			is = new ByteArrayInputStream( bytes );
@@ -218,9 +243,10 @@ public class DropBoxImpl
 		/**
 		 * check file existence ?
 		 */
-		File aFile = new File( name.getName() );
+		// File aFile = new File( name.getName() );
+		File absPath = new File( baseDirectory, name.getName() );
 
-		String unixFn = getUnixPath( aFile );
+		String unixFn = getUnixPath( absPath );
 		
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		
@@ -231,7 +257,12 @@ public class DropBoxImpl
 			byte[] bytes = os.toByteArray();
 			
 			name.setData( bytes );
-			name.setName( downloadedFile.toString() );
+			name.setName( downloadedFile.path );
+			
+			if( downloadedFile.isFile() )
+			{
+				name.setIsFile();
+			}
      	}
 		catch( DbxException e )
 		{
@@ -278,9 +309,9 @@ public class DropBoxImpl
 		// System.out.println( "Function delete - at the moment not implemented!" );
 		// See: http://stackoverflow.com/questions/17703250/how-can-i-delete-a-file-folder-from-dropbox-using-the-java-api
 		// a rest implementation!? - Not beautiful!
-		
-		File aFile = new File( file.getName() );
-		String unixFn = getUnixPath( aFile );
+		File absPath = new File( baseDirectory, file.getName() );
+		// File aFile = new File( file.getName() );
+		String unixFn = getUnixPath( absPath );
 		
 		try 
 		{	
@@ -294,9 +325,79 @@ public class DropBoxImpl
 	}
 
 	@Override
-	public ArrayList<FileObject> listFiles() {
-		return null;
+	public ArrayList<FileObject> listFiles()
+	{
+		return lsContent( "/" );
 	}
 
+	 public void mkDir( FileObject aFileObject )
+	 {
+			File absPath = new File( baseDirectory, aFileObject.getName() );
+			// File aFile = new File( file.getName() );
+			String unixFn = getUnixPath( absPath );		 
+		 
+			try 
+			{	
+				client.createFolder( unixFn );
+			}
+			catch( DbxException e )
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	 
+	 
+	 }
 
+	public void rmDir( FileObject aFileObject )
+	{
+		File absPath = new File( baseDirectory, aFileObject.getName() );
+		// File aFile = new File( file.getName() );
+		String unixFn = getUnixPath( absPath );		 
+	 
+		try 
+		{	
+			// There is no difference between file and directory!
+			client.delete( unixFn );
+		}
+		catch( DbxException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+	}
+	
+	private ArrayList<FileObject> lsContent( String unixFn )
+	{
+		ArrayList<FileObject> ret = new ArrayList<FileObject>();
+		DbxEntry.WithChildren listing;
+		
+		try
+		{
+			listing = client.getMetadataWithChildren( unixFn );
+
+			for( DbxEntry child : listing.children )
+			{
+				FileObject aFileObject = new FileObject();
+				aFileObject.setName(  child.name );
+				ret.add( aFileObject );
+				
+				System.out.println( "    " + child.name + ": " + child.toString() );
+			}
+		}
+		catch( DbxException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+		
+		return ret;
+	}
+	
+	public ArrayList<FileObject> lsContent( FileObject file )
+	{
+		File aFile = new File( file.getName() );
+		String unixFn = getUnixPath( aFile );
+		
+		return lsContent( unixFn );
+	}
 }
