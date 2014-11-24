@@ -139,7 +139,7 @@ public class DropBoxImpl
 		
 //		System.out.println( "Name: " + ret );	
 		
-		return ret;
+		return "/";
 	}
 	
 	/**
@@ -168,7 +168,7 @@ public class DropBoxImpl
 		dirName = absPath.getParentFile();
 		
 		String unixDir = getUnixPath( dirName );
-		ArrayList<FileObject> list = this.lsContent( unixDir );
+		ArrayList<FileObject> list = this.lsContent( "/" );
 		
 		for( FileObject aFO : list )
 		{
@@ -315,7 +315,7 @@ public class DropBoxImpl
 		
 		try 
 		{	
-			client.delete( unixFn );
+			client.delete( "/"+file.getName() );
 		}
 		catch( DbxException e )
 		{
