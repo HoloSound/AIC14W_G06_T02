@@ -1,4 +1,4 @@
-package at.tuwien.aic.raid;
+package at.tuwien.aic.raid.connector;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;
@@ -14,6 +14,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+
+import org.apache.commons.codec.language.bm.Rule.RPattern;
 
 import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.BoxConfigBuilder;
@@ -31,6 +34,8 @@ import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
 import com.google.common.io.Files;
 
+import at.tuwien.aic.raid.ConnectorInterface;
+import at.tuwien.aic.raid.PropertyFile;
 import at.tuwien.aic.raid.data.FileObject;
 
 /**
@@ -40,8 +45,8 @@ import at.tuwien.aic.raid.data.FileObject;
  */
 public class BoxImpl implements ConnectorInterface
 {
-	private static final File boxProps = new File( "/home/tomas/Documents/skola/advanced internet computing/AIC14W_G06_T02/middleware/src/main/resources/box.properties" ); 
-	private static final String propertyFileLocation = boxProps.toString();
+	 
+	private static final String propertyFileLocation ="box.properties";
 	private  final String PORT;
 	private  final String key;
 	private  final String secret;
@@ -57,8 +62,14 @@ public class BoxImpl implements ConnectorInterface
 	public BoxImpl()
 	{
 		
-		PropertyFile pf = new PropertyFile();
-		pf.setPropertyFileName(propertyFileLocation);
+		Properties pf = new Properties();
+		try {
+			pf.load( BoxImpl.class.getResourceAsStream( "box.properties" ) );
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException();
+			
+		}
 		
 		key = pf.getProperty( "key" );
 		secret = pf.getProperty( "secret" );

@@ -1,4 +1,4 @@
-package at.tuwien.aic.raid;
+package at.tuwien.aic.raid.connector;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 
+import at.tuwien.aic.raid.ConnectorInterface;
 import at.tuwien.aic.raid.data.FileObject;
 
 /**

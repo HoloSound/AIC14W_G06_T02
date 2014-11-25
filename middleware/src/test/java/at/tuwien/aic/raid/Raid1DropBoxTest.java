@@ -14,6 +14,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters; //Running test cases in order of method names in ascending order.
 
+import at.tuwien.aic.raid.connector.DropBoxImpl;
 import at.tuwien.aic.raid.data.FileObject;
 
 /**

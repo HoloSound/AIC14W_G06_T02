@@ -8,6 +8,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import at.tuwien.aic.raid.connector.BoxImpl;
 import at.tuwien.aic.raid.data.FileObject;
 
 /**
@@ -18,9 +19,11 @@ import at.tuwien.aic.raid.data.FileObject;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Raid1BoxTest
 {
-	private static BoxImpl boxClient = new BoxImpl();
+	private static BoxImpl boxClient =new BoxImpl();
 	private static String tmpfilename = "datei.txt";
 	private static String tmpdata = "Testing data :)";
+	
+	
 	
 	/**
 	 * Create Test

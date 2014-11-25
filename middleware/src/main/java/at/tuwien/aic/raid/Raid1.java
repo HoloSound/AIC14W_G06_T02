@@ -3,12 +3,13 @@ package at.tuwien.aic.raid;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import at.tuwien.aic.raid.connector.BoxConnector;
+import at.tuwien.aic.raid.connector.BoxImpl;
+import at.tuwien.aic.raid.connector.DropBoxImpl;
 import at.tuwien.aic.raid.data.FileObject;
 
 public class Raid1 {
-	 ConnectorInterface box = new DropBoxImpl();
-
+	 ConnectorInterface dbox = new DropBoxImpl();
+	 static ConnectorInterface box = new BoxImpl();
 	public Raid1() {
 		System.out.println("NEW Raid1");
 	}
