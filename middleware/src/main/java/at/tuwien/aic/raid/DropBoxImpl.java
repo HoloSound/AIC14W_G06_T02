@@ -126,8 +126,8 @@ public class DropBoxImpl
 	// Is it possible to so File Object to use now the UNIX formating?
 	private String getUnixPath( File absPath )
 	{
-		String ret = null;
 		String fn = absPath.getPath();
+		String ret = fn;
 		
 //		System.out.println(  "PATH-Seperator: " +  absPath.separator + " WINDOWs like?" );
 		
