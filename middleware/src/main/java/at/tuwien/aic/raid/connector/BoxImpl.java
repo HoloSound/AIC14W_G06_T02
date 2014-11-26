@@ -1,4 +1,4 @@
-package at.tuwien.aic.raid;
+package at.tuwien.aic.raid.connector;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;
@@ -14,6 +14,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+
+import org.apache.commons.codec.language.bm.Rule.RPattern;
 
 import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.BoxConfigBuilder;
@@ -31,6 +34,8 @@ import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
 import com.google.common.io.Files;
 
+import at.tuwien.aic.raid.ConnectorInterface;
+import at.tuwien.aic.raid.PropertyFile;
 import at.tuwien.aic.raid.data.FileObject;
 
 /**
@@ -40,12 +45,12 @@ import at.tuwien.aic.raid.data.FileObject;
  */
 public class BoxImpl implements ConnectorInterface
 {
-	private static File boxProps = new File( "src/main/resources/box.properties" ); 
-	private static final String propertyFileLocation = boxProps.toString();
-	private static String PORT;
-	private static String key;
-	private static String secret;
-	private static String redirectUrl;
+	 
+	private static final String propertyFileLocation ="box.properties";
+	private  final String PORT;
+	private  final String key;
+	private  final String secret;
+	private  final  String redirectUrl;
 	
 	public static final String bFolder = "0";
 	
@@ -57,8 +62,14 @@ public class BoxImpl implements ConnectorInterface
 	public BoxImpl()
 	{
 		
-		PropertyFile pf = new PropertyFile();
-		pf.setPropertyFileName(propertyFileLocation);
+		Properties pf = new Properties();
+		try {
+			pf.load( BoxImpl.class.getResourceAsStream( "box.properties" ) );
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException();
+			
+		}
 		
 		key = pf.getProperty( "key" );
 		secret = pf.getProperty( "secret" );
@@ -81,7 +92,7 @@ public class BoxImpl implements ConnectorInterface
 		
 	}
 	
-	private void createConnection() throws AuthFatalFailureException, BoxServerException, BoxRestException {
+	private  synchronized void createConnection() throws AuthFatalFailureException, BoxServerException, BoxRestException {
 		String code = "";
         String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + key;
         if(redirectUrl != null) {
@@ -105,7 +116,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @throws BoxServerException 
 	 * @throws BoxRestException 
 	 */
-	private void getFileIDs() throws BoxRestException, BoxServerException, AuthFatalFailureException {
+	private  synchronized  void getFileIDs() throws BoxRestException, BoxServerException, AuthFatalFailureException {
 		fileIDs = new HashMap<String, String>();
 		BoxFolder boxFolder = client.getFoldersManager().getFolder(bFolder,null);
         ArrayList<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
@@ -117,7 +128,7 @@ public class BoxImpl implements ConnectorInterface
         }
 	}
 	
-    private static BoxClient getAuthenticatedClient(String code) throws BoxRestException,     BoxServerException, AuthFatalFailureException {
+    private   synchronized  BoxClient getAuthenticatedClient(String code) throws BoxRestException,     BoxServerException, AuthFatalFailureException {
         BoxResourceHub hub = new BoxResourceHub();
         BoxJSONParser parser = new BoxJSONParser(hub);
         IBoxConfig config = (new BoxConfigBuilder()).build();
@@ -128,7 +139,7 @@ public class BoxImpl implements ConnectorInterface
     }
 
 
-    private static String getCode() throws IOException {
+    private  synchronized  String getCode() throws IOException {
 
         @SuppressWarnings("resource")
 		ServerSocket serverSocket = new ServerSocket(Integer.parseInt(PORT));
@@ -180,7 +191,7 @@ public class BoxImpl implements ConnectorInterface
 	 * Does not proof if the file already exists!
 	 */
 	@Override
-	public void create(FileObject file) throws IOException {
+	public synchronized   void create(FileObject file) throws IOException {
 		InputStream is = null;
 		
 		byte[] bytes = file.getData();
@@ -214,7 +225,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @return FileObject
 	 */
 	@Override
-	public FileObject read(FileObject name) throws IOException {
+	public  synchronized  FileObject read(FileObject name) throws IOException {
 		File f = null;
 		try {
 			f = File.createTempFile("temp", "deleteme");
@@ -261,7 +272,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @param file
 	 */
 	@Override
-	public void update(FileObject file) throws IOException {
+	public  synchronized  void update(FileObject file) throws IOException {
 			this.delete(file);
 			this.create(file);
 	}
@@ -271,7 +282,7 @@ public class BoxImpl implements ConnectorInterface
 	 * @param file
 	 */
 	@Override
-	public void delete(FileObject file) throws IOException {
+	public   synchronized  void delete(FileObject file) throws IOException {
 		try {
 			client.getFilesManager().deleteFile(fileIDs.get(file.getName()), null);
 		} catch (BoxRestException e) {
@@ -288,7 +299,7 @@ public class BoxImpl implements ConnectorInterface
 	}
 	
 	@Override
-	public ArrayList<FileObject> listFiles() {
+	public  synchronized  ArrayList<FileObject> listFiles() {
 		//refresh the fileIDs HashMap with all Files (and IDs) from BOX
 		try {
 			this.getFileIDs();
