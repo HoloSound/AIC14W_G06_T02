@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.amazonaws.AmazonClientException;
@@ -27,6 +29,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.dropbox.core.DbxEntry;
 import com.sun.xml.internal.ws.util.ByteArrayBuffer;
 
 import at.tuwien.aic.raid.ConnectorInterface;
@@ -120,23 +123,29 @@ public class S3Connector implements ConnectorInterface {
 	}
 
 	@Override
-	public ArrayList<FileObject> listFiles() throws Exception {
+	public ArrayList<FileObject> listFiles() throws Exception
+	{
+		ArrayList<FileObject> ret = new ArrayList<FileObject>();
 		
+		ObjectListing listing = s3.listObjects(new ListObjectsRequest().withBucketName(bucketName));
 		
-		ObjectListing listing = s3.listObjects(new ListObjectsRequest()
-        .withPrefix("My"));
-		
+
 		List<S3ObjectSummary> summaries = listing.getObjectSummaries();
 
-		while (listing.isTruncated()) {
-		   listing = s3.listNextBatchOfObjects (listing);
-		   summaries.addAll (listing.getObjectSummaries());
-		}
+		Iterator<S3ObjectSummary>  iterator = summaries.iterator();
+		
+		while( iterator.hasNext() )
+		{
+			S3ObjectSummary aSummary = iterator.next();
 			
+			FileObject aFileObject = new FileObject();
+			aFileObject.setName(  aSummary.getKey() );
+			ret.add( aFileObject );
+			
+			System.out.println( "    " + aSummary.getKey() + ": " + aSummary.toString() );
+		}
 		
-		
-		return summaries;
+		return ret;
 	}
 
 }
-
