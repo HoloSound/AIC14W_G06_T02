@@ -25,15 +25,7 @@ public class S3SampleTest {
 		f.setName("Name7");
 		
 		s.create(f);
-		//try {
-			// This is a test both for create and read, to check if the returned file is the same as uploaded
-			//FileObject fr = s.read(f);			
-			//assertArrayEquals(b, fr.getData());
-			
-		//} catch (IOException e) {
-		//	fail(e.getMessage());
-		//	e.printStackTrace();
-		//}		
+		
 
     }
     
