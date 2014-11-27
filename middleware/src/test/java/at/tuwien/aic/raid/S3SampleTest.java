@@ -22,17 +22,10 @@ public class S3SampleTest {
 
         S3Connector s = new S3Connector();
 		f.setData(b);
-		f.setName("Name6");
+		f.setName("Name7");
 		
 		s.create(f);
-		try {
-			FileObject fr = s.read(f);			
-			assertArrayEquals(b, fr.getData());
-			
-		} catch (IOException e) {
-			fail(e.getMessage());
-			e.printStackTrace();
-		}		
+		
 
     }
     
@@ -41,34 +34,17 @@ public class S3SampleTest {
     	
     	FileObject f;
     	f = new FileObject() ;
-    	byte[] b = "Any String you want7".getBytes();
+    			f.setName("Name7");    	
 
-
+    	
         S3Connector s = new S3Connector();
-		f.setData(b);
-		f.setName("Name6");
+
+        
 		
 		s.read(f);
 
     }
-    @Test
-    public void deleteFileTest() throws IOException {
-    	
-    	FileObject f;
-    	f = new FileObject() ;
-		f.setName("Name6");
-		
-		S3Connector s = new S3Connector();
-		s.delete(f);
-		try {
-			s.delete(f);
-			
-		} catch (IOException e) {
-			fail(e.getMessage());
-			e.printStackTrace();
-		}		
 
-    }
     
     @Test
     public void updateFileTest() {
@@ -80,12 +56,49 @@ public class S3SampleTest {
 
         S3Connector s = new S3Connector();
 		f.setData(b);
-		f.setName("Name6");
+		f.setName("Name7");
 		
 		s.create(f);
 		try {
 			s.update(f);
 
+			
+		} catch (IOException e) {
+			fail(e.getMessage());
+			e.printStackTrace();
+		}		
+
+    }
+    
+    @Test
+    public void listFilesTest() throws Exception {
+    	
+        S3Connector s = new S3Connector();
+		
+		
+	
+		try {
+			s.listFiles();
+
+			
+		} catch (IOException e) {
+			fail(e.getMessage());
+			e.printStackTrace();
+		}		
+
+    }
+    
+    @Test
+    public void deleteFileTest() throws IOException {
+    	
+    	FileObject f;
+    	f = new FileObject() ;
+		f.setName("Name7");
+		
+		S3Connector s = new S3Connector();
+		s.delete(f);
+		try {
+			s.delete(f);
 			
 		} catch (IOException e) {
 			fail(e.getMessage());

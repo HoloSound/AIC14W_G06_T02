@@ -28,6 +28,7 @@ $( document ).ready(function() {
 	      success: function(data)
 	           {
 	               alert(data); // show response from the php script.
+	               $('#raid1Div table' ).load("raid1?task=list" );//RELOAD LIST
 	           }
 
 
@@ -40,4 +41,5 @@ $( document ).ready(function() {
 var callback = function(dataReceived){
 
 	alert(dataReceived);
+	 $('#raid1Div table' ).load("raid1?task=list" );//RELOAD LIST
 };

@@ -5,11 +5,12 @@ import java.util.ArrayList;
 
 import at.tuwien.aic.raid.connector.BoxImpl;
 import at.tuwien.aic.raid.connector.DropBoxImpl;
+import at.tuwien.aic.raid.connector.S3Connector;
 import at.tuwien.aic.raid.data.FileObject;
 
 public class Raid1 {
 	 ConnectorInterface dbox = new DropBoxImpl();
-	 static ConnectorInterface box = new BoxImpl();
+	 static ConnectorInterface box = new S3Connector();
 	public Raid1() {
 		System.out.println("NEW Raid1");
 	}
