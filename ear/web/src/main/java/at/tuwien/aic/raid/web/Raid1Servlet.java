@@ -3,6 +3,7 @@ package at.tuwien.aic.raid.web;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -28,6 +29,7 @@ public class Raid1Servlet extends HttpServlet {
 	public static final String UPLOAD_OPERATION = "upload";
 	@EJB
 	private RaidSessionBeanInterface raid;
+	public static String GET_FILE_LIST = "list";
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -46,7 +48,10 @@ public class Raid1Servlet extends HttpServlet {
 		if (ServletFileUpload.isMultipartContent(req)) {
 			try {
 				DiskFileItemFactory fac = new DiskFileItemFactory();
-				fac.setSizeThreshold(Integer.MAX_VALUE);//set maximum possible  if we cant hold it in memory than we cant have it as a byte[]
+				fac.setSizeThreshold(Integer.MAX_VALUE);// set maximum possible
+														// if we cant hold it in
+														// memory than we cant
+														// have it as a byte[]
 				List<FileItem> multiparts = new ServletFileUpload(fac)
 						.parseRequest(req);
 
@@ -55,7 +60,7 @@ public class Raid1Servlet extends HttpServlet {
 						FileObject f = new FileObject(item.getName());
 
 						f.setData(item.get());
-						
+
 						raid.write(f);
 
 					}
@@ -77,6 +82,9 @@ public class Raid1Servlet extends HttpServlet {
 			throws ServletException, IOException {
 		try {
 
+			if (GET_FILE_LIST.equals(req.getParameter("task"))) {// lets
+				listFiles(req, resp);
+			}
 			if (DELETE_OPERATION.equals(req.getParameter("task"))) {// lets
 																	// delete a
 																	// file
@@ -107,6 +115,39 @@ public class Raid1Servlet extends HttpServlet {
 
 	}
 
+	private void listFiles(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("<table>");
+		sb.append("<thead>");
+		sb.append("<tr>");
+		sb.append("<td>FileName</td>");
+		sb.append("</tr>");
+		sb.append("</thead>");
+
+		ArrayList<FileObject> fl = raid.listFiles();
+		for (FileObject f : fl) {
+			sb.append("<tr>");
+
+			sb.append("<td>");
+			sb.append(f.getName());
+			sb.append("<td>");
+
+			sb.append("<td>");
+			sb.append(getDownloadLink(f));
+			sb.append("<td>");
+
+			sb.append("<td>");
+			sb.append(getDeleteLink(f));
+			sb.append("<td>");
+
+			sb.append("</tr>");
+		}
+
+		sb.append("</table>");
+		resp.getWriter().write(sb.toString());
+	}
+
 	private void downloadFile(String fn, HttpServletResponse resp)
 			throws IOException {
 		FileObject f = raid.getFile(fn);
@@ -127,6 +168,21 @@ public class Raid1Servlet extends HttpServlet {
 	private void error(String string, HttpServletResponse resp)
 			throws IOException {
 		resp.getOutputStream().write(string.getBytes());
+	}
+
+	
+	private String getDownloadLink(FileObject f) {
+
+		return "<a target='_blank' href=\"raid1?task="
+				+ Raid1Servlet.DOWNLOAD_OPERATION + "&"
+				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> download</a>";
+	}
+
+	private String getDeleteLink(FileObject f) {
+
+		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid1?task="
+				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME+"="+f.getName()
+				+ "', '', callback, 'text' )\" > delete</a>";
 	}
 
 }
