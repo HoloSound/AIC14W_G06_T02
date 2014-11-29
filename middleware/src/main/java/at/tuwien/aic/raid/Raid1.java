@@ -61,26 +61,31 @@ public class Raid1 {
 														// LOGIK
 
 		try { 
-			System.out.println("delete" + fn + "from box");
+			System.out.println("Deleting" + fn + "from Box");
 			box.delete(new FileObject(fn));
 			
 		} catch (Exception e) {
+			log.fine("Deleting drom Box failed" + e.getMessage()); 
 			throw new IOException(e);
+			
+		
 		}
 		
 		try {
-			System.out.println("delete" + fn + "from s3");
+			System.out.println("Seleting" + fn + "from S3");
 			s3.delete(new FileObject(fn));
 			
 		} catch (Exception e) {
+			log.fine("Deleting drom S3 failed" + e.getMessage()); 
 			throw new IOException(e);
 		}
 		
 		try {
-			System.out.println("delete" + fn + "from dropbox");
+			System.out.println("Deleting" + fn + "from DB");
 			dbox.delete(new FileObject(fn));
 			
 		} catch (Exception e) {
+			log.fine("Deleting drom DB failed" + e.getMessage()); 
 			throw new IOException(e);
 		}
 
