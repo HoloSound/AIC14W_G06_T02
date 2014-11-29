@@ -101,14 +101,84 @@ public class Raid1 {
  */
 	public FileObject getFile(String fn) throws IOException {// TODO IMPLEMENT
 																// RAID1 LOGIK
+		FileObject readFile = new FileObject(fn);
+		
+		FileObject boxFile = null;
+		FileObject dboxFile = null;
+		FileObject s3File = null;
+		
+		FileObject returnFile = null;
+		
 		try {
-			System.out.println("getFile" + fn);
-			return box.read(new FileObject(fn));
+			//System.out.println("getFile" + fn);
+			boxFile = box.read(readFile);
 
 		} catch (Exception e) {
-
-			throw new IOException(e);
+			log.fine("An error occured while reading file "+fn+" from Box: "+e.toString());
 		}
+		
+		try {
+			dboxFile = dbox.read(readFile);
+
+		} catch (Exception e) {
+			log.fine("An error occured while reading file \""+fn+"\" from DropBox: "+e.toString());
+		}
+		
+		try {
+			s3File = s3.read(readFile);
+
+		} catch (Exception e) {
+			log.fine("An error occured while reading file "+fn+" from S3: "+e.toString());
+		}
+		
+		if(boxFile == null && dboxFile == null && s3File == null) {
+			log.fine("Couldn't read the file \""+fn+"\" from all connectors.");
+			throw new IOException("I/O Error");
+		}
+		
+		String boxFileMd5 = null;
+		String dboxFileMd5 = null;
+		String s3FileMd5 = null;
+		
+		if(boxFile != null) {
+			boxFileMd5 = boxFile.getMd5();
+			returnFile = boxFile;
+		}
+		
+		if(dboxFile != null) {
+			dboxFileMd5 = dboxFile.getMd5();
+			returnFile = dboxFile;
+		}
+		
+		if(s3File != null) {
+			s3FileMd5 = s3File.getMd5();
+			returnFile = s3File;
+		}
+		
+		if(boxFileMd5 != null && dboxFileMd5 != null) {
+			if(!boxFileMd5.equals(dboxFileMd5)) {
+				log.fine("File \""+fn+"\" has inconsistency! Box MD5: "+boxFileMd5+" DropBox MD5: "+dboxFileMd5);
+				throw new IOException("Inconsistency! Box MD5: "+boxFileMd5+" DropBox MD5: "+dboxFileMd5);
+			}
+		}
+		
+		if(boxFileMd5 != null && s3FileMd5 != null) {
+			if(!boxFileMd5.equals(s3FileMd5)) {
+				log.fine("File \""+fn+"\" has inconsistency! Box MD5: "+boxFileMd5+" S3 MD5: "+dboxFileMd5);
+				throw new IOException("Inconsistency! Box MD5: "+boxFileMd5+" S3 MD5: "+s3FileMd5);
+			}
+		}
+		
+		if(dboxFileMd5 != null && s3FileMd5 != null) {
+			if(!dboxFileMd5.equals(s3FileMd5)) {
+				log.fine("File \""+fn+"\" has inconsistency! DropBox MD5: "+boxFileMd5+" S3 MD5: "+dboxFileMd5);
+				throw new IOException("Inconsistency! DropBox MD5: "+dboxFileMd5+" S3 MD5: "+s3FileMd5);
+			}
+		}
+		
+		log.fine("Successfully read file \""+fn+"\"");
+		
+		return returnFile;
 
 	}
 /**
