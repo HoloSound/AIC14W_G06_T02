@@ -9,10 +9,14 @@ import at.tuwien.aic.raid.connector.S3Connector;
 import at.tuwien.aic.raid.data.FileObject;
 
 public class Raid1 {
-	java.util.logging.Logger log = java.util.logging.Logger.getLogger("Raid1");
-	ConnectorInterface dbox = new DropBoxImpl();
-	static ConnectorInterface box = new S3Connector();
-
+	
+	 java.util.logging.Logger log = java.util.logging.Logger.getLogger("Raid1");
+	    ConnectorInterface dbox = new DropBoxImpl();
+	    static ConnectorInterface box = new BoxImpl();
+	    ConnectorInterface s3 = new S3Connector();
+	
+	
+	
 	public Raid1() {
 		System.out.println("NEW Raid1");
 	}
@@ -56,12 +60,27 @@ public class Raid1 {
 	public void delete(String fn) throws IOException {// TODO IMPLEMENT RAID1
 														// LOGIK
 
-		try {
-			System.out.println("delete" + fn);
+		try { 
+			System.out.println("delete" + fn + "from box");
 			box.delete(new FileObject(fn));
-
+			
 		} catch (Exception e) {
-
+			throw new IOException(e);
+		}
+		
+		try {
+			System.out.println("delete" + fn + "from s3");
+			s3.delete(new FileObject(fn));
+			
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+		
+		try {
+			System.out.println("delete" + fn + "from dropbox");
+			dbox.delete(new FileObject(fn));
+			
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 
