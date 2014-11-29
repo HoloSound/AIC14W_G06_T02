@@ -1,6 +1,8 @@
 package at.tuwien.aic.raid.data;
 
-import java.util.Arrays;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * In the future there we will need additional parameter
@@ -168,5 +170,28 @@ public class FileObject
 	{
 		this.isDirectory = true;
 		this.isFile = false;
+	}
+	
+	public String getMd5() {
+		if(data == null) {
+			return null;
+		}
+		
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			return null;
+		}
+		
+		byte[] digest = md.digest(data);
+		
+		BigInteger bigInt = new BigInteger(1,digest);
+		String md5hash = bigInt.toString(16);
+		while(md5hash.length() < 32 ){
+		  md5hash = "0"+md5hash;
+		}
+		
+		return md5hash;
 	}
 }

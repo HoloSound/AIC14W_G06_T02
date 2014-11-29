@@ -9,10 +9,14 @@ import at.tuwien.aic.raid.connector.S3Connector;
 import at.tuwien.aic.raid.data.FileObject;
 
 public class Raid1 {
-	java.util.logging.Logger log = java.util.logging.Logger.getLogger("Raid1");
-	ConnectorInterface dbox = new DropBoxImpl();
-	static ConnectorInterface box = new S3Connector();
-
+	
+	 java.util.logging.Logger log = java.util.logging.Logger.getLogger("Raid1");
+	    ConnectorInterface dbox = new DropBoxImpl();
+	    static ConnectorInterface box = new BoxImpl();
+	    ConnectorInterface s3 = new S3Connector();
+	
+	
+	
 	public Raid1() {
 		System.out.println("NEW Raid1");
 	}
@@ -56,12 +60,32 @@ public class Raid1 {
 	public void delete(String fn) throws IOException {// TODO IMPLEMENT RAID1
 														// LOGIK
 
-		try {
-			System.out.println("delete" + fn);
+		try { 
+			System.out.println("Deleting" + fn + "from Box");
 			box.delete(new FileObject(fn));
-
+			
 		} catch (Exception e) {
-
+			log.fine("Deleting drom Box failed" + e.getMessage()); 
+			throw new IOException(e);
+			
+		
+		}
+		
+		try {
+			System.out.println("Seleting" + fn + "from S3");
+			s3.delete(new FileObject(fn));
+			
+		} catch (Exception e) {
+			log.fine("Deleting drom S3 failed" + e.getMessage()); 
+			throw new IOException(e);
+		}
+		
+		try {
+			System.out.println("Deleting" + fn + "from DB");
+			dbox.delete(new FileObject(fn));
+			
+		} catch (Exception e) {
+			log.fine("Deleting drom DB failed" + e.getMessage()); 
 			throw new IOException(e);
 		}
 
@@ -77,14 +101,84 @@ public class Raid1 {
  */
 	public FileObject getFile(String fn) throws IOException {// TODO IMPLEMENT
 																// RAID1 LOGIK
+		FileObject readFile = new FileObject(fn);
+		
+		FileObject boxFile = null;
+		FileObject dboxFile = null;
+		FileObject s3File = null;
+		
+		FileObject returnFile = null;
+		
 		try {
-			System.out.println("getFile" + fn);
-			return box.read(new FileObject(fn));
+			//System.out.println("getFile" + fn);
+			boxFile = box.read(readFile);
 
 		} catch (Exception e) {
-
-			throw new IOException(e);
+			log.fine("An error occured while reading file "+fn+" from Box: "+e.toString());
 		}
+		
+		try {
+			dboxFile = dbox.read(readFile);
+
+		} catch (Exception e) {
+			log.fine("An error occured while reading file \""+fn+"\" from DropBox: "+e.toString());
+		}
+		
+		try {
+			s3File = s3.read(readFile);
+
+		} catch (Exception e) {
+			log.fine("An error occured while reading file "+fn+" from S3: "+e.toString());
+		}
+		
+		if(boxFile == null && dboxFile == null && s3File == null) {
+			log.fine("Couldn't read the file \""+fn+"\" from all connectors.");
+			throw new IOException("I/O Error");
+		}
+		
+		String boxFileMd5 = null;
+		String dboxFileMd5 = null;
+		String s3FileMd5 = null;
+		
+		if(boxFile != null) {
+			boxFileMd5 = boxFile.getMd5();
+			returnFile = boxFile;
+		}
+		
+		if(dboxFile != null) {
+			dboxFileMd5 = dboxFile.getMd5();
+			returnFile = dboxFile;
+		}
+		
+		if(s3File != null) {
+			s3FileMd5 = s3File.getMd5();
+			returnFile = s3File;
+		}
+		
+		if(boxFileMd5 != null && dboxFileMd5 != null) {
+			if(!boxFileMd5.equals(dboxFileMd5)) {
+				log.fine("File \""+fn+"\" has inconsistency! Box MD5: "+boxFileMd5+" DropBox MD5: "+dboxFileMd5);
+				throw new IOException("Inconsistency! Box MD5: "+boxFileMd5+" DropBox MD5: "+dboxFileMd5);
+			}
+		}
+		
+		if(boxFileMd5 != null && s3FileMd5 != null) {
+			if(!boxFileMd5.equals(s3FileMd5)) {
+				log.fine("File \""+fn+"\" has inconsistency! Box MD5: "+boxFileMd5+" S3 MD5: "+dboxFileMd5);
+				throw new IOException("Inconsistency! Box MD5: "+boxFileMd5+" S3 MD5: "+s3FileMd5);
+			}
+		}
+		
+		if(dboxFileMd5 != null && s3FileMd5 != null) {
+			if(!dboxFileMd5.equals(s3FileMd5)) {
+				log.fine("File \""+fn+"\" has inconsistency! DropBox MD5: "+boxFileMd5+" S3 MD5: "+dboxFileMd5);
+				throw new IOException("Inconsistency! DropBox MD5: "+dboxFileMd5+" S3 MD5: "+s3FileMd5);
+			}
+		}
+		
+		log.fine("Successfully read file \""+fn+"\"");
+		
+		return returnFile;
 
 	}
 /**
