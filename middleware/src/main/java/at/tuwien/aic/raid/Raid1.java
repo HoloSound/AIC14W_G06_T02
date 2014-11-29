@@ -2,6 +2,7 @@ package at.tuwien.aic.raid;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import at.tuwien.aic.raid.connector.BoxImpl;
 import at.tuwien.aic.raid.connector.DropBoxImpl;
@@ -31,20 +32,153 @@ public class Raid1 {
 	 * 
 	 */
 
-	public ArrayList<FileObject> listFiles() throws IOException { // TODO
-																	// IMPLEMENT
-																	// RAID1
-
-
-		try {
-
-			return box.listFiles();
-
-		} catch (Exception e) {
-
-			throw new IOException(e);
+	public ArrayList<FileObject> listFiles() throws IOException 
+	{ 
+		ArrayList<FileObject> ret = new ArrayList<FileObject>();
+		
+		HashMap<String,FileObject> compare = new HashMap<String,FileObject>();
+		
+		ArrayList<FileObject> boxFiles = null;
+		HashMap<String,FileObject> boxHash = new HashMap<String,FileObject>();
+		ArrayList<FileObject> dBoxFiles = null;
+		HashMap<String,FileObject> dBoxHash = new HashMap<String,FileObject>();
+		ArrayList<FileObject> s3Files = null;
+		HashMap<String,FileObject> s3Hash = new HashMap<String,FileObject>();
+		
+		// IMPLEMENT
+		// RAID1
+		try
+		{
+			boxFiles = box.listFiles();
+		}
+		catch( Exception e1 )
+		{
+			log.fine( "BOX Connector failed ro retrieve files." );
+			e1.printStackTrace();
+		}
+		
+		try
+		{
+			dBoxFiles = dbox.listFiles();
+		}
+		catch( Exception e1 )
+		{			
+			log.fine( "DROP_BOX Connector failed ro retrieve files." );
+			e1.printStackTrace();
+		}
+		
+		try
+		{
+			s3Files = as3.listFiles();
+		}
+		catch( Exception e1 )
+		{
+			log.fine( "AMAZON_S3 Connector failed ro retrieve files." );
+			e1.printStackTrace();
+		}
+		
+		if( boxFiles == null && dBoxFiles == null && s3Files == null )
+		{
+			throw( new IOException( "No connection available." ) );
 		}
 
+		// 1 st initialize the first ret - via box
+		for( FileObject aFO : boxFiles )
+		{
+			compare.put( aFO.getName(), aFO );
+			boxHash.put( aFO.getName(), aFO );
+		}
+
+		// 2 st initialize the ret 
+		for( FileObject aFO : dBoxFiles )
+		{
+			// search in ret the aFO.getName();
+			String aFileName = aFO.getName();
+			
+			FileObject foundObject = compare.get( aFileName );
+			
+			if( foundObject == null )
+			{
+				// we have a new file there!
+				compare.put( aFileName, aFO );
+			}
+			
+			dBoxHash.put( aFileName, aFO );
+		}
+			
+		// 3nd initialize the ret 
+		for( FileObject aFO : s3Files )
+		{
+			// search in ret the aFO.getName();
+			String aFileName = aFO.getName();
+			
+			FileObject foundObject = compare.get( aFileName );
+			
+			if( foundObject == null )
+			{
+				// we have a new file there!
+				compare.put( aFileName, aFO );
+			}
+			
+			s3Hash.put( aFileName, aFO );
+		}	
+		
+		// Now we have the other way round
+		for( String key : compare.keySet() )
+		{
+			FileObject toCreate = compare.get( key );
+			// search for each connector:
+			FileObject foundObject = boxHash.get( key );
+			
+			if( foundObject == null )
+			{	
+				try
+				{
+					box.create( toCreate );
+				}
+				catch( Exception e )
+				{
+					log.fine( "Creation of " + toCreate + " failed at BOX Connection." );
+					e.printStackTrace();
+				}
+			}
+			
+			// search for each connector:
+			foundObject = dBoxHash.get( key );
+			
+			if( foundObject == null )
+			{	
+				try
+				{
+					dbox.create( toCreate );
+				}
+				catch( Exception e )
+				{
+					log.fine( "Creation of " + toCreate + " failed at DROP_BOX Connection." );
+					e.printStackTrace();
+				}
+			}
+			
+			// search for each connector:
+			foundObject = s3Hash.get( key );
+			
+			if( foundObject == null )
+			{	
+				try
+				{
+					as3.create( toCreate );
+				}
+				catch( Exception e )
+				{
+					log.fine( "Creation of " + toCreate + " failed at AMAZON_S3 Connection." );
+					e.printStackTrace();
+				}
+			}
+			
+			ret.add( toCreate );
+		}
+				
+		return ret;
 	}
 
 
