@@ -69,7 +69,7 @@ public class Raid1 {
 		
 		try
 		{
-			s3Files = as3.listFiles();
+			s3Files = s3.listFiles();
 		}
 		catch( Exception e1 )
 		{
@@ -166,7 +166,7 @@ public class Raid1 {
 			{	
 				try
 				{
-					as3.create( toCreate );
+					s3.create( toCreate );
 				}
 				catch( Exception e )
 				{
