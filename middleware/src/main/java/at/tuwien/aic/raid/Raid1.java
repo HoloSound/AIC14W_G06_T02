@@ -134,11 +134,12 @@ public class Raid1 {
 			{	
 				try
 				{
+					log.fine( "Creation of file " + toCreate + " (because missing) on BOX connection." );
 					box.create( toCreate );
 				}
 				catch( Exception e )
 				{
-					log.fine( "Creation of " + toCreate + " failed at BOX Connection." );
+					log.fine( "Creation of " + toCreate + " failed at BOX connection." );
 					e.printStackTrace();
 				}
 			}
@@ -150,6 +151,7 @@ public class Raid1 {
 			{	
 				try
 				{
+					log.fine( "Creation of file " + toCreate + " (because missing) on DROPBOX connection." );
 					dbox.create( toCreate );
 				}
 				catch( Exception e )
@@ -166,6 +168,7 @@ public class Raid1 {
 			{	
 				try
 				{
+					log.fine( "Creation of file " + toCreate + " (because missing) on AMAZON_S3 connection." );
 					s3.create( toCreate );
 				}
 				catch( Exception e )
