@@ -139,7 +139,7 @@ public class Raid1DropBoxTest
 	@Test
 	public void t02_readTest()
 	{
-		FileObject fo = createFileObject( "hex.bin" );
+		FileObject fo = createFileObject( "/hex.bin" );
 		
 		dropBoxIF.create( fo );
 		
