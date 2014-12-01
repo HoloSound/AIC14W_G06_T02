@@ -259,7 +259,7 @@ public class DropBoxImpl
 			byte[] bytes = os.toByteArray();
 			
 			name.setData( bytes );
-			name.setName( downloadedFile.path );
+			name.setName( downloadedFile.path.replace( "/", "" ) );
 			
 			if( downloadedFile.isFile() )
 			{
