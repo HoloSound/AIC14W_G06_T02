@@ -320,26 +320,79 @@ public class Raid1 {
 			returnFile = s3File;
 		}
 		
-		if(boxFileMd5 != null && dboxFileMd5 != null) {
-			if(!boxFileMd5.equals(dboxFileMd5)) {
-				log.fine("File \""+fn+"\" has inconsistency! Box MD5: "+boxFileMd5+" DropBox MD5: "+dboxFileMd5);
-				throw new IOException("Inconsistency! Box MD5: "+boxFileMd5+" DropBox MD5: "+dboxFileMd5);
+		//if all hashvalues are available
+		if(boxFileMd5 != null && dboxFileMd5 != null && s3FileMd5 != null) {
+			//proof if all hashvalues are the same if not proof if two are the same and restore and if all three are different raise exception
+			if(boxFileMd5.equals(dboxFileMd5) && boxFileMd5.equals(s3FileMd5)) {
+				log.fine("File: "+fn+": All three hashvalues are the same: "+boxFileMd5);
+			} else if(boxFileMd5.equals(dboxFileMd5)) {
+				returnFile = boxFile;
+				
+				log.fine("Inconsistency! S3 diffs to the other two hashes: S3: "+s3FileMd5+" Others: "+boxFileMd5+" trying to restore...");
+				//restore s3
+				try { 
+					s3.delete(new FileObject(fn));
+					s3.create(boxFile);
+					
+				} catch (Exception e) {
+					log.fine("Restoring of File \""+fn+"\" on S3 failed" + e.getMessage()); 
+				}
+				
+			} else if(boxFileMd5.equals(s3FileMd5)) {
+				returnFile = boxFile;
+				
+				log.fine("Inconsistency! DropBox diffs to the other two hashes: DropBox: "+dboxFileMd5+" Others: "+boxFileMd5+" trying to restore...");
+				//restore dbox
+				try { 
+					dbox.delete(new FileObject(fn));
+					dbox.create(boxFile);
+					
+				} catch (Exception e) {
+					log.fine("Restoring of File \""+fn+"\" on DropBox failed" + e.getMessage()); 
+				}
+				
+			} else if(dboxFileMd5.equals(s3FileMd5)) {
+				returnFile = dboxFile;
+				
+				log.fine("Inconsistency! Box diffs to the other two hashes: Box: "+s3FileMd5+" Others: "+dboxFileMd5+" trying to restore...");
+				//restore box
+				try { 
+					box.delete(new FileObject(fn));
+					box.create(dboxFile);
+					
+				} catch (Exception e) {
+					log.fine("Restoring of File \""+fn+"\" on Box failed" + e.getMessage()); 
+				}
+				
+			} else {
+				log.fine("Inconsistency! All three hashvalues are different! Box: "+boxFileMd5+" DropBox: "+dboxFileMd5+" S3: "+s3FileMd5);
+				throw new IOException("Inconsistency! All three hashvalues are different! Box: "+boxFileMd5+" DropBox: "+dboxFileMd5+" S3: "+s3FileMd5);
 			}
+			
+		} else {
+			if(boxFileMd5 != null && dboxFileMd5 != null) {
+				if(!boxFileMd5.equals(dboxFileMd5)) {
+					log.fine("File \""+fn+"\" has inconsistency! Box MD5: "+boxFileMd5+" DropBox MD5: "+dboxFileMd5);
+					throw new IOException("Inconsistency! Box MD5: "+boxFileMd5+" DropBox MD5: "+dboxFileMd5);
+				}
+			}
+			
+			if(boxFileMd5 != null && s3FileMd5 != null) {
+				if(!boxFileMd5.equals(s3FileMd5)) {
+					log.fine("File \""+fn+"\" has inconsistency! Box MD5: "+boxFileMd5+" S3 MD5: "+dboxFileMd5);
+					throw new IOException("Inconsistency! Box MD5: "+boxFileMd5+" S3 MD5: "+s3FileMd5);
+				}
+			}
+			
+			if(dboxFileMd5 != null && s3FileMd5 != null) {
+				if(!dboxFileMd5.equals(s3FileMd5)) {
+					log.fine("File \""+fn+"\" has inconsistency! DropBox MD5: "+boxFileMd5+" S3 MD5: "+dboxFileMd5);
+					throw new IOException("Inconsistency! DropBox MD5: "+dboxFileMd5+" S3 MD5: "+s3FileMd5);
+				}
+			}
+			
 		}
 		
-		if(boxFileMd5 != null && s3FileMd5 != null) {
-			if(!boxFileMd5.equals(s3FileMd5)) {
-				log.fine("File \""+fn+"\" has inconsistency! Box MD5: "+boxFileMd5+" S3 MD5: "+dboxFileMd5);
-				throw new IOException("Inconsistency! Box MD5: "+boxFileMd5+" S3 MD5: "+s3FileMd5);
-			}
-		}
-		
-		if(dboxFileMd5 != null && s3FileMd5 != null) {
-			if(!dboxFileMd5.equals(s3FileMd5)) {
-				log.fine("File \""+fn+"\" has inconsistency! DropBox MD5: "+boxFileMd5+" S3 MD5: "+dboxFileMd5);
-				throw new IOException("Inconsistency! DropBox MD5: "+dboxFileMd5+" S3 MD5: "+s3FileMd5);
-			}
-		}
 		
 		log.fine("Successfully read file \""+fn+"\"");
 		
