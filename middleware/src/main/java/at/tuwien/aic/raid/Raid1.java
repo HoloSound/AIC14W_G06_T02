@@ -399,22 +399,48 @@ public class Raid1 {
 		return returnFile;
 
 	}
-/**
- * Stores  the  file in atleast one connector
- * 
- * @param f
- * @throws IOException if no write operation success 
- *
- */
+	/**
+	 * Stores  the  file in atleast one connector
+	 * 
+	 * @param f
+	 * @throws IOException if no write operation success 
+	 *
+	 */
+
 	public void write(FileObject f) throws IOException {// TODO IMPLEMENT RAID1
 														// LOGIK
+		int b = 0;	
+		
 		try {
+			log.fine("write" + f.getName());
+			dbox.create(f);
+		} catch (Exception e) {
+			b = b+1;
+			log.fine("Error" + e.getMessage());
+			e.printStackTrace();
+		}
+
+		try {
+			log.fine("write" + f.getName());
+			s3.create(f);
+		} catch (Exception e) {
+			b = b+1;
+			log.fine("Error" + e.getMessage());
+			e.printStackTrace();
+		}
+
+		try {
+			log.fine("write" + f.getName());
 			System.out.println("write" + f.getName());
 			box.create(f);
 		} catch (Exception e) {
+			b = b+1;
+			log.fine("Error" + e.getMessage());
+			e.printStackTrace();
+		}
 
-			throw new IOException(e);
+		if (b == 3){
+		throw new IOException("Faild: The file is not stored in any of the connector!");
 		}
 	}
-
 }
