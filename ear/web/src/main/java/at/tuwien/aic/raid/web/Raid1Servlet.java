@@ -56,8 +56,11 @@ public class Raid1Servlet extends HttpServlet {
 						.parseRequest(req);
 
 				for (FileItem item : multiparts) {
-					if (!item.isFormField()) {
-						FileObject f = new FileObject(item.getName());
+					if (!item.isFormField()) 
+					{
+						File aFile = new File( item.getName() );
+
+						FileObject f = new FileObject( aFile.getName() );
 
 						f.setData(item.get());
 
