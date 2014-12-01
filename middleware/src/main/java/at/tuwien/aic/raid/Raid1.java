@@ -304,16 +304,19 @@ public class Raid1 {
 		
 		if(boxFile != null) {
 			boxFileMd5 = boxFile.getMd5();
+			log.fine("File \""+fn+"\": BoxMD5: "+boxFileMd5);
 			returnFile = boxFile;
 		}
 		
 		if(dboxFile != null) {
 			dboxFileMd5 = dboxFile.getMd5();
+			log.fine("File \""+fn+"\": DropBoxMD5: "+dboxFileMd5);
 			returnFile = dboxFile;
 		}
 		
 		if(s3File != null) {
 			s3FileMd5 = s3File.getMd5();
+			log.fine("File \""+fn+"\": S3MD5: "+s3FileMd5);
 			returnFile = s3File;
 		}
 		
