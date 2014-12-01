@@ -37,6 +37,7 @@ public class Raid1 {
 		ArrayList<FileObject> ret = new ArrayList<FileObject>();
 		
 		HashMap<String,FileObject> compare = new HashMap<String,FileObject>();
+		HashMap<String,ConnectorInterface> sourceIF = new HashMap<String,ConnectorInterface>();
 		
 		ArrayList<FileObject> boxFiles = null;
 		HashMap<String,FileObject> boxHash = new HashMap<String,FileObject>();
@@ -86,6 +87,7 @@ public class Raid1 {
 		for( FileObject aFO : boxFiles )
 		{
 			compare.put( aFO.getName(), aFO );
+			sourceIF.put( aFO.getName(), box );
 			boxHash.put( aFO.getName(), aFO );
 		}
 
@@ -101,6 +103,7 @@ public class Raid1 {
 			{
 				// we have a new file there!
 				compare.put( aFileName, aFO );
+				sourceIF.put( aFileName, dbox );
 			}
 			
 			dBoxHash.put( aFileName, aFO );
@@ -118,12 +121,13 @@ public class Raid1 {
 			{
 				// we have a new file there!
 				compare.put( aFileName, aFO );
+				sourceIF.put( aFileName, s3 );
 			}
 			
 			s3Hash.put( aFileName, aFO );
 		}	
 		
-		// Now we have the other way round
+		// Now we have the other way round to create the files
 		for( String key : compare.keySet() )
 		{
 			FileObject toCreate = compare.get( key );
@@ -134,8 +138,15 @@ public class Raid1 {
 			{	
 				try
 				{
-					log.fine( "Creation of file " + toCreate + " (because missing) on BOX connection." );
-					box.create( toCreate );
+					String fileName = toCreate.getName();
+					
+					log.fine( "Creation of file " + fileName + " (because missing) on BOX connection." );
+					
+					// We have to read this file first - from where?
+					ConnectorInterface readIF = sourceIF.get( fileName );
+					FileObject searchFileObject = new FileObject( fileName );
+					FileObject newFileObject = readIF.read( searchFileObject );
+					box.create( newFileObject );
 				}
 				catch( Exception e )
 				{
@@ -151,8 +162,15 @@ public class Raid1 {
 			{	
 				try
 				{
-					log.fine( "Creation of file " + toCreate + " (because missing) on DROPBOX connection." );
-					dbox.create( toCreate );
+					String fileName = toCreate.getName();
+					
+					log.fine( "Creation of file " + fileName + " (because missing) on DROPBOX connection." );
+					
+					// We have to read this file first - from where?
+					ConnectorInterface readIF = sourceIF.get( fileName );
+					FileObject searchFileObject = new FileObject( fileName );
+					FileObject newFileObject = readIF.read( searchFileObject );
+					dbox.create( newFileObject );
 				}
 				catch( Exception e )
 				{
@@ -168,8 +186,15 @@ public class Raid1 {
 			{	
 				try
 				{
-					log.fine( "Creation of file " + toCreate + " (because missing) on AMAZON_S3 connection." );
-					s3.create( toCreate );
+					String fileName = toCreate.getName();
+					
+					log.fine( "Creation of file " + fileName + " (because missing) on AMAZON_S3 connection." );
+					
+					// We have to read this file first - from where?
+					ConnectorInterface readIF = sourceIF.get( fileName );
+					FileObject searchFileObject = new FileObject( fileName );
+					FileObject newFileObject = readIF.read( searchFileObject );
+					s3.create( newFileObject );
 				}
 				catch( Exception e )
 				{
