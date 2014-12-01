@@ -380,7 +380,7 @@ public class DropBoxImpl
 			for( DbxEntry child : listing.children )
 			{
 				FileObject aFileObject = new FileObject();
-				aFileObject.setName(  child.name );
+				aFileObject.setName(  child.name.replace( "/", "" ) );
 				ret.add( aFileObject );
 				
 				System.out.println( "    " + child.name + ": " + child.toString() );
