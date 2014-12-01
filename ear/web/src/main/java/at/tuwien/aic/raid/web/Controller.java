@@ -33,30 +33,59 @@ public class Controller {
 		try {
 			StringBuilder sb = new StringBuilder();
 
-			sb.append("<table>");
+			sb.append("<table border=\"1\">");
+			sb.append("<colgroup>");
+			sb.append("<col width=\"200\" />");
+			sb.append("<col width=\"100\" />");
+			sb.append("<col width=\"100\" />");
+			sb.append("</colgroup>");
 			sb.append("<thead>");
 			sb.append("<tr>");
-			sb.append("<td>FileName</td>");
+			sb.append("<td><strong>FileName</strong></td>");
 			sb.append("</tr>");
 			sb.append("</thead>");
 
+			int ii=0;
 			ArrayList<FileObject> fl = raid.listFiles();
 			for (FileObject f : fl) {
 				sb.append("<tr>");
 
-				sb.append("<td>");
+				// may be done via class - and css definition
+				sb.append("<td");
+				if( ii % 2 == 0 )
+				{
+					sb.append( " bgcolor=\"#eeeeff\"" );
+				}
+				sb.append( ">" );
+				
+				// in principle the name itself may be the downloadlink
+				sb.append( "<tt>" );
 				sb.append(f.getName());
-				sb.append("<td>");
+				sb.append("</tt></td>");
 
-				sb.append("<td>");
+				sb.append("<td");
+				if( ii % 2 == 0 )
+				{
+					sb.append( " bgcolor=\"#eeeeff\"" );
+				}
+				sb.append( ">" );
+				
 				sb.append(getDownloadLink(f));
-				sb.append("<td>");
+				sb.append("</td>");
 
-				sb.append("<td>");
+				sb.append("<td");
+				if( ii % 2 == 0 )
+				{
+					sb.append( " bgcolor=\"#eeeeff\"" );
+				}
+				sb.append( ">" );
+				
 				sb.append(getDeleteLink(f));
-				sb.append("<td>");
+				sb.append("</td>");
 
 				sb.append("</tr>");
+				
+				ii++;
 			}
 
 			sb.append("</table>");
