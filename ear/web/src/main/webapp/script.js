@@ -18,7 +18,7 @@ $( document ).ready(function() {
 	  .submit( function( e ) {
 
 	    var url =$(this).attr("action");
-
+	  
 	    $.ajax( {
 	      url: 'raid1?task=upload',
 	      type: 'POST',
@@ -28,6 +28,8 @@ $( document ).ready(function() {
 	      success: function(data)
 	           {
 	               alert(data); // show response from the php script.
+	               $('#raid1Div table' ).empty();
+	               $('#raid1Div table' ).append("<strong>LOADING</strong>")
 	               $('#raid1Div table' ).load("raid1?task=list" );//RELOAD LIST
 	           }
 
