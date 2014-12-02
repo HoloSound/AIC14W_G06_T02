@@ -57,7 +57,7 @@ background-color: gold;
 
 <form action="raid1?task=upload" method="post"
                         enctype="multipart/form-data">
-		<input type="file" name="file" size="50" />
+		<input id="raid1FileInput" type="file" name="file" size="50" />
 		<br />
 		<input type="submit" value="Upload File" />
 		</form>

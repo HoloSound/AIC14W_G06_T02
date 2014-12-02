@@ -11,12 +11,21 @@ jQuery("#raid1Div").fadeOut('fast',function(){jQuery("#raid5Div").fadeIn();});
 jQuery("#raid1li").css("font-weight","initial");
 jQuery("#raid5li").css("font-weight","800");
 }
+
+function showLoadingInFileList(){
+	$('#raid1Div table' ).empty();
+	$('#raid1Div table' ).append("<strong>LOADING</strong>")
+}
 $( document ).ready(function() {
 	showRaid1()
 	
 	$( 'form' )
 	  .submit( function( e ) {
-
+        if($("#raid1FileInput").val()==''){
+        	alert("Please select a file");
+    	    e.preventDefault();
+        	return;
+        }
 	    var url =$(this).attr("action");
 	  
 	    $.ajax( {
@@ -28,8 +37,7 @@ $( document ).ready(function() {
 	      success: function(data)
 	           {
 	               alert(data); // show response from the php script.
-	               $('#raid1Div table' ).empty();
-	               $('#raid1Div table' ).append("<strong>LOADING</strong>")
+	               showLoadingInFileList();
 	               $('#raid1Div table' ).load("raid1?task=list" );//RELOAD LIST
 	           }
 
@@ -43,5 +51,6 @@ $( document ).ready(function() {
 var callback = function(dataReceived){
 
 	alert(dataReceived);
+	showLoadingInFileList();
 	 $('#raid1Div table' ).load("raid1?task=list" );//RELOAD LIST
 };
