@@ -22,12 +22,13 @@ $( document ).ready(function() {
 	
 	$( 'form' )
 	  .submit( function( e ) {
-		$("#raid1Div :submit").prop("disabled",true);
+	
         if($("#raid1FileInput").val()==''){
         	alert("Please select a file");
     	    e.preventDefault();
         	return;
         }
+    	$("#raid1Div :submit").prop("disabled",true);
 	    var url =$(this).attr("action");
 	  
 	    $.ajax( {
