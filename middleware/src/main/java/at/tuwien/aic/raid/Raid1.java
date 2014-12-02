@@ -32,7 +32,7 @@ public class Raid1 {
 	 * 
 	 */
 
-	public ArrayList<FileObject> listFiles() throws IOException 
+	public synchronized ArrayList<FileObject> listFiles() throws IOException 
 	{ 
 		ArrayList<FileObject> ret = new ArrayList<FileObject>();
 		
@@ -219,7 +219,7 @@ public class Raid1 {
 	 *             restored lazily
 	 * 
 	 */
-	public void delete(String fn) throws IOException {// TODO IMPLEMENT RAID1
+	public  synchronized  void delete(String fn) throws IOException {// TODO IMPLEMENT RAID1
 														// LOGIK
 
 		try { 
@@ -261,7 +261,7 @@ public class Raid1 {
  * @throws IOException If no connector is reachable, the file does not exist in any connector,  the calculated hashfiles are  inconsistent 
  *
  */
-	public FileObject getFile(String fn) throws IOException {// TODO IMPLEMENT
+	public  synchronized  FileObject getFile(String fn) throws IOException {// TODO IMPLEMENT
 																// RAID1 LOGIK
 		FileObject readFile = new FileObject(fn);
 		
@@ -407,7 +407,7 @@ public class Raid1 {
 	 *
 	 */
 
-	public void write(FileObject f) throws IOException {// TODO IMPLEMENT RAID1
+	public  synchronized  void write(FileObject f) throws IOException {// TODO IMPLEMENT RAID1
 														// LOGIK
 		int b = 0;	
 		

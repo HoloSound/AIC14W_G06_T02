@@ -12,6 +12,7 @@ jQuery("#raid1li").css("font-weight","initial");
 jQuery("#raid5li").css("font-weight","800");
 }
 
+
 function showLoadingInFileList(){
 	$('#raid1Div table' ).empty();
 	$('#raid1Div table' ).append("<strong>LOADING</strong>")
@@ -21,6 +22,7 @@ $( document ).ready(function() {
 	
 	$( 'form' )
 	  .submit( function( e ) {
+		$("#raid1Div :submit").prop("disabled",true);
         if($("#raid1FileInput").val()==''){
         	alert("Please select a file");
     	    e.preventDefault();
@@ -36,11 +38,17 @@ $( document ).ready(function() {
 	      contentType: false,
 	      success: function(data)
 	           {
+	    	       $("#raid1Div :submit").prop("disabled",false);
 	               alert(data); // show response from the php script.
 	               showLoadingInFileList();
 	               $('#raid1Div table' ).load("raid1?task=list" );//RELOAD LIST
-	           }
-
+	           },
+		    error: function(data)
+	        {
+	 	       $("#raid1Div :submit").prop("disabled",false);
+	 	      alert("error "+data);
+	        }
+  
 
 	    } );
 	    e.preventDefault();
