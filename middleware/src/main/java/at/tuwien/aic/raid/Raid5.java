@@ -28,9 +28,9 @@ public class Raid5
 	 * This file will be split up into 3 different files
 	 * named:
 	 * 
-	 * L_<SIZE_HEX>_<FILE>.<EXT>
-	 * H_<SIZE_HEX>_<FILE>.<EXT>
-	 * P_<SIZE_HEX>_<FILE>.<EXT>
+	 * L<ZERO_PADDING>_<FILE>.<EXT>
+	 * H<ZERO_PADDING>_<FILE>.<EXT>
+	 * P<ZERO_PADDING>_<FILE>.<EXT>
 	 * 
 	 * Why do we have to do this?
 	 * 
@@ -39,14 +39,15 @@ public class Raid5
 	 * H ... High order nibble of data
 	 * P ... XOR (Parity) of data
 	 * 
-	 * SIZE_HEX - original file size in HEX to get the original file size!
+	 * ZERO_PADDING - in case of odd file size - the last byte has to be removed
+	 * by reconstructing the file.
 	 * 
 	 * TWO nibbles are stored into ONE Byte --> 2 File sizes will result in ONE 
 	 * target filesize - because 1 Byte will be extended with padding to get 1 Byte
 	 * and also 2 Bytes will be combined to a file with 1 Byte!
 	 * 
-	 * To reconstruct the file size the information of padding has to be stored.
-	 * (Because from the given data it is not possible to reconstruct it!
+	 * To reconstruct the file size the information of padding we use from filename.
+	 * (Because from the given data it is not possible to reconstruct it!)
 	 */
 
 	java.util.logging.Logger log = java.util.logging.Logger.getLogger( "Raid5" );
@@ -72,6 +73,22 @@ public class Raid5
 		return ret;
 	}
 	
+	/**
+	 *  for RAID5 we generate 3 files.
+	 *  
+	 * The L, H, P describes the contents of the file.
+	 * L ... Low order nibble of data
+	 * H ... High order nibble of data
+	 * P ... XOR (Parity) of data	 
+	 * 
+	 *  ZERO_PADDING - in case of odd file size - the last byte has to be removed
+	 * by reconstructing the file.  
+	 * 
+	 * + "_" prefix!
+	 *  
+	 * @param ONE FileObject
+	 * @return THREE FileObjects splitted into necessary parts
+	 */
 	public FileObject[] generateFiles( FileObject in )
 	{
 		FileObject[] ret = new FileObject[3];
@@ -204,7 +221,7 @@ public class Raid5
 			String typeStr = fn.substring( 0, 1 );
 			String evenStr = fn.substring( 1, 2 );
 			String padStr = fn.substring( 2, 3 );
-			String sourceFn = fn.substring( 4 );
+			String sourceFn = fn.substring( 3 );
 			
 			if( padStr.equalsIgnoreCase( "_" ) == false )
 			{
@@ -353,34 +370,72 @@ public class Raid5
 		byte[] resultData = new byte[dataSize*2];
 		int writeIndex = 0;
 		
-		for( ii = 0 ; ii < dataSize ; ii++ )
+		// first implementation ( two further must follow! )
+		if( lonData != null && hinData != null )
 		{
-			// first implementation ( two further must follow! )
-			if( lonData != null && hinData != null )
+			for( ii = 0 ; ii < dataSize ; ii++ )
 			{
 				// we simply unfold the data
 				byte lon = lonData[ii];
 				byte hin = hinData[ii];
-				
-				int byte1 = (hin & 0xf0) | (lon & 0xf0 ) >> 4;
-				int byte2 = ((hin & 0x0f) << 4 ) | (lon & 0x0f);
-				
+
+				int byte1 = (hin & 0xf0) | (lon & 0xf0) >> 4;
+				int byte2 = ((hin & 0x0f) << 4) | (lon & 0x0f);
+
 				if( parData != null )
 				{
 					// check parity byte
-					if( (byte) ( (lon ^ hin) & 0xff) != parData[ii] )
+					if( (byte) ((lon ^ hin) & 0xff) != parData[ii] )
 					{
-						throw( new IOException( "File inconsistency of " + ret.getName() 
-								+ " parity error at position " + ii + "." ) );
+						throw(new IOException( "File inconsistency of "
+								+ ret.getName() + " parity error at position "
+								+ ii + "." ));
 					}
 				}
-				
-				resultData[writeIndex] = (byte) ( byte1 & 0xff );
+
+				resultData[writeIndex] = (byte) (byte1 & 0xff);
 				writeIndex++;
-				resultData[writeIndex] = (byte) ( byte2 & 0xff );
+				resultData[writeIndex] = (byte) (byte2 & 0xff);
 				writeIndex++;
 			}
 		}
+		else if( lonData != null && parData != null )
+		{
+			for( ii = 0 ; ii < dataSize ; ii++ )
+			{
+				// we simply unfold the data
+				byte lon = lonData[ii];
+				byte par = parData[ii];
+				byte hin = (byte) ((lon ^ par) & 0xff);
+
+				int byte1 = (hin & 0xf0) | (lon & 0xf0) >> 4;
+				int byte2 = ((hin & 0x0f) << 4) | (lon & 0x0f);
+
+				resultData[writeIndex] = (byte) (byte1 & 0xff);
+				writeIndex++;
+				resultData[writeIndex] = (byte) (byte2 & 0xff);
+				writeIndex++;
+			}
+		}
+		else if( hinData != null && parData != null )
+		{
+			for( ii = 0 ; ii < dataSize ; ii++ )
+			{
+				// we simply unfold the data
+				byte par = parData[ii];
+				byte hin = hinData[ii];
+				byte lon = (byte) ((hin ^ par) & 0xff);
+
+				int byte1 = (hin & 0xf0) | (lon & 0xf0) >> 4;
+				int byte2 = ((hin & 0x0f) << 4) | (lon & 0x0f);
+
+				resultData[writeIndex] = (byte) (byte1 & 0xff);
+				writeIndex++;
+				resultData[writeIndex] = (byte) (byte2 & 0xff);
+				writeIndex++;
+			}
+		}
+
 		
 		// we have to shorten the file if odd byte size!
 		if( targetEven.compareTo( "0" ) == 0 )
@@ -391,6 +446,7 @@ public class Raid5
 		{
 			// we have to shorten the data
 			resultData = Arrays.copyOf( resultData, resultData.length -1 );
+			ret.setData( resultData );
 		}
 		
 		return ret;
@@ -612,7 +668,6 @@ public class Raid5
 		{
 			log.fine( "Deleting drom Box failed" + e.getMessage() );
 			throw new IOException( e );
-
 		}
 
 		try
