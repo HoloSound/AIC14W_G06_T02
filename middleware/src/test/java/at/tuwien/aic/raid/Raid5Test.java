@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -39,27 +40,6 @@ public class Raid5Test
 	{
 		raid5 = new Raid5();
 		fileIF = new FileImpl();
-	}
-	
-	@Test
-	public void t00_createTest()
-	{
-		FileObject fo = createFileObject( "hex.bin" );
-		// we read local from Directory: ...
-		
-		// and write local to directory: ...
-		fileIF.create( fo );
-		
-		FileObject[] raid5File = raid5.generateFiles( fo );
-		
-		// this fileObject - we split into 3 files
-		for( int ii = 0 ; ii < raid5File.length ; ii++ )
-		{
-			// and store each alone
-			FileObject actFo = raid5File[ii];
-			
-			fileIF.create(  actFo );
-		}
 	}
 
 
@@ -111,122 +91,228 @@ public class Raid5Test
 		return fo;
 	}
 	
-/*	
+	
 	@Test
 	public void t00_createTest()
 	{
 		FileObject fo = createFileObject( "hex.bin" );
+		// we read local from Directory: ...
 		
+		// and write local to directory: ...
 		fileIF.create( fo );
-		dropBoxIF.create( fo );
-	}
-	
-	@Test
-	public void t01_deleteTest()
-	{
-		FileObject fo = new FileObject();
-		fo.setName(  "hex.bin" );
 		
-		fileIF.delete( fo );
-		dropBoxIF.delete( fo );
-	}	
-	
-	@Test
-	public void t02_readTest()
-	{
-		FileObject fo = createFileObject( "hex.bin" );
+		FileObject[] raid5Files = raid5.generateFiles( fo );
 		
-		fileIF.create( fo );
-		dropBoxIF.create( fo );
-		
-		FileObject readFo = new FileObject();
-		readFo.setName( fo.getName() );
-		
-		fileIF.read( readFo );
-		
-		// compare
-		boolean ret = fo.compare( readFo );
-		assertEquals( "creation and read = document with same content and name", true, ret );
-		ret = fo.compare( readFo );
-		
-		dropBoxIF.read( readFo );		
-		
-		// compare
-		ret = fo.compare( readFo );
-		assertEquals( "creation and read = document with same content and name", true, ret );
-		ret = fo.compare( readFo );
-	}		
-	
-	@Test
-	public void t03_idempotentCreateTest()
-	{
-		FileObject fo = createFileObject( "hex.bin" );
-		
-		fileIF.create( fo );
-		dropBoxIF.create( fo );
-		
-		// and now a second time
-		fileIF.create( fo );
-		dropBoxIF.create( fo );
-	}	
-	
-	@Test
-	public void t04_updateTest()
-	{
-		FileObject fo = createFileObject( "hex_mirror.bin" );
-		
-		fo.setName( "hex.bin" );
-		
-		fileIF.create( fo );
-		dropBoxIF.create( fo );
-		
-		// create palindrom
-		byte[] data = fo.getData();
-		byte tmp;
-		
-		for( int ii = 0 ; ii < (data.length / 2) ; ii++ )
+		// this fileObject - we split into 3 files
+		for( int ii = 0 ; ii < raid5Files.length ; ii++ )
 		{
-			tmp = data[ii];
-			data[ii] = data[data.length-1-ii];
-			data[data.length-1-ii] = tmp;
+			// and store each alone
+			FileObject actFo = raid5Files[ii];
+			
+			fileIF.create( actFo );
 		}
 		
-		fo.setData( data );
+		// now try to analyse the files in different configurations
+		// all files given:
+		try
+		{
+			FileObject newTarget = raid5.reconstructFile( raid5Files );
+			
+			boolean ret = fo.compare( newTarget );
+			assertEquals( "creation and read = document with same content and name", true, ret );
+			
+			newTarget.setName(  "recover_" + newTarget.getName() );
+			
+			fileIF.create( newTarget );
+		}
+		catch( IOException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
+	@Test
+	public void t01_createTest()
+	{
+		FileObject fo = createFileObject( "hex_odd.bin" );
+		// we read local from Directory: ...
 		
-		// and now a second time
-		fileIF.update( fo );
-		dropBoxIF.update( fo );
+		// and write local to directory: ...
+		fileIF.create( fo );
+		
+		FileObject[] raid5Files = raid5.generateFiles( fo );
+		
+		// this fileObject - we split into 3 files
+		for( int ii = 0 ; ii < raid5Files.length ; ii++ )
+		{
+			// and store each alone
+			FileObject actFo = raid5Files[ii];
+			
+			fileIF.create( actFo );
+		}
+		
+		// now try to analyse the files in different configurations
+		// all files given:
+		try
+		{
+			FileObject newTarget = raid5.reconstructFile( raid5Files );
+			
+			boolean ret = fo.compare( newTarget );
+			assertEquals( "creation and read = document with same content and name", true, ret );
+			
+			newTarget.setName(  "recover_" + newTarget.getName() );
+			
+			fileIF.create( newTarget );
+		}
+		catch( IOException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	
 	@Test
-	public void t05_update2Test()
+	public void t02_part1Test()
 	{
 		FileObject fo = createFileObject( "hex.bin" );
+		// we read local from Directory: ...
 		
+		// and write local to directory: ...
 		fileIF.create( fo );
-		dropBoxIF.create( fo );
 		
-		// create diagonal swap
-		byte[] data = fo.getData();
-		byte tmp;
+		FileObject[] raid5Files = raid5.generateFiles( fo );
 		
-		for( int ii = 0 ; ii < 16 ; ii++ )
+		// this fileObject - we split into 3 files
+		for( int ii = 0 ; ii < raid5Files.length ; ii++ )
 		{
-			for( int jj = 0 ; jj < ii ; jj ++ )
-			{
-					tmp = data[ii*16+jj];
-					data[ii*16+jj] = data[jj*16+ii];
-					data[jj*16+ii] = tmp;
-			}
+			// and store each alone
+			FileObject actFo = raid5Files[ii];
+			
+			fileIF.create( actFo );
 		}
 		
-		fo.setData( data );
+		// we delete one generated file 
+		raid5Files = Arrays.copyOf( raid5Files, raid5Files.length -1 );
+		// last one should now only have LON and HIN! (Parity deleted)
 		
-		// and now a second time
-		fileIF.update( fo );
-		dropBoxIF.update( fo );
+		// now try to analyse the files in different configurations
+		// all files given:
+		try
+		{
+			FileObject newTarget = raid5.reconstructFile( raid5Files );
+			
+			boolean ret = fo.compare( newTarget );
+			assertEquals( "creation and read = document with same content and name", true, ret );
+			
+			newTarget.setName(  "recover_" + newTarget.getName() );
+			
+			fileIF.create( newTarget );
+		}
+		catch( IOException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-	*/
+	
+	@Test
+	public void t02_part2Test()
+	{
+		FileObject fo = createFileObject( "hex.bin" );
+		// we read local from Directory: ...
+		
+		// and write local to directory: ...
+		fileIF.create( fo );
+		
+		FileObject[] raid5Files = raid5.generateFiles( fo );
+		
+		// this fileObject - we split into 3 files
+		for( int ii = 0 ; ii < raid5Files.length ; ii++ )
+		{
+			// and store each alone
+			FileObject actFo = raid5Files[ii];
+			
+			fileIF.create( actFo );
+		}
+		
+		// we delete one generated file 
+		FileObject[] raid5FilesTmp = Arrays.copyOf( raid5Files, raid5Files.length -1 );
+		// last one should now only have LON and HIN! (Parity deleted)
+		raid5FilesTmp[0] = raid5Files[0];
+		raid5FilesTmp[1] = raid5Files[2];
+		
+		raid5Files = raid5FilesTmp;
+		
+		// now try to analyse the files in different configurations
+		// all files given:
+		try
+		{
+			FileObject newTarget = raid5.reconstructFile( raid5Files );
+			
+			boolean ret = fo.compare( newTarget );
+			assertEquals( "creation and read = document with same content and name", true, ret );
+			
+			newTarget.setName(  "recover_" + newTarget.getName() );
+			
+			fileIF.create( newTarget );
+		}
+		catch( IOException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	@Test
+	public void t02_part3Test()
+	{
+		FileObject fo = createFileObject( "hex.bin" );
+		// we read local from Directory: ...
+		
+		// and write local to directory: ...
+		fileIF.create( fo );
+		
+		FileObject[] raid5Files = raid5.generateFiles( fo );
+		
+		// this fileObject - we split into 3 files
+		for( int ii = 0 ; ii < raid5Files.length ; ii++ )
+		{
+			// and store each alone
+			FileObject actFo = raid5Files[ii];
+			
+			fileIF.create( actFo );
+		}
+		
+		// we delete one generated file 
+		FileObject[] raid5FilesTmp = Arrays.copyOf( raid5Files, raid5Files.length -1 );
+		// last one should now only have LON and HIN! (Parity deleted)
+		raid5FilesTmp[0] = raid5Files[1];
+		raid5FilesTmp[1] = raid5Files[2];
+		
+		raid5Files = raid5FilesTmp;
+		
+		// now try to analyse the files in different configurations
+		// all files given:
+		try
+		{
+			FileObject newTarget = raid5.reconstructFile( raid5Files );
+			
+			boolean ret = fo.compare( newTarget );
+			assertEquals( "creation and read = document with same content and name", true, ret );
+			
+			newTarget.setName(  "recover_" + newTarget.getName() );
+			
+			fileIF.create( newTarget );
+		}
+		catch( IOException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
 
