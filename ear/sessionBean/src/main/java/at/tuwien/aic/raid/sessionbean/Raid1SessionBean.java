@@ -9,11 +9,11 @@ import at.tuwien.aic.raid.Raid1;
 import at.tuwien.aic.raid.data.FileObject;
 
 @Stateless()
-public class RaidSessionBean implements RaidSessionBeanInterface {
+public class Raid1SessionBean implements RaidSessionBeanInterface {
 	
 	private Raid1 raid1;
 
-	public RaidSessionBean() throws IOException {
+	public Raid1SessionBean() throws IOException {
 		raid1=new Raid1();
 	}
 

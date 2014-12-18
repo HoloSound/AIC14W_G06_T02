@@ -1,6 +1,5 @@
 package at.tuwien.aic.raid.web;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,17 +17,17 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import at.tuwien.aic.raid.data.FileObject;
-import at.tuwien.aic.raid.sessionbean.RaidSessionBeanInterface;
+import at.tuwien.aic.raid.sessionbean.Raid5sessionBeanInterface;
 
-@WebServlet("/raid1")
-public class Raid1Servlet extends HttpServlet {
+@WebServlet("/raid5")
+public class Raid5Servlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	public static final String DELETE_OPERATION = "delete";
 	public static final String FILE_NAME = "fileName";
 	public static final String DOWNLOAD_OPERATION = "download";
 	public static final String UPLOAD_OPERATION = "upload";
 	@EJB
-	private RaidSessionBeanInterface raid;
+	private Raid5sessionBeanInterface raid;
 	public static String GET_FILE_LIST = "list";
 
 	@Override
@@ -205,16 +204,16 @@ public class Raid1Servlet extends HttpServlet {
 	
 	private String getDownloadLink(FileObject f) {
 
-		return "<a target='_blank' href=\"raid1?task="
-				+ Raid1Servlet.DOWNLOAD_OPERATION + "&"
-				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> download</a>";
+		return "<a target='_blank' href=\"raid5?task="
+				+ Raid5Servlet.DOWNLOAD_OPERATION + "&"
+				+ Raid5Servlet.FILE_NAME + "="+f.getName()+"\"> download</a>";
 	}
 
 	private String getDeleteLink(FileObject f) {
 
-		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid1?task="
-				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME+"="+f.getName()
-				+ "', '', callback1, 'text' )\" > delete</a>";
+		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid5?task="
+				+ Raid5Servlet.DELETE_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
+				+ "', '', callback5, 'text' )\" > delete</a>";
 	}
 
 }

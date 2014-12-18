@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import at.tuwien.aic.raid.connector.BoxImpl;
+import at.tuwien.aic.raid.connector.ConnectorConstructor;
 import at.tuwien.aic.raid.connector.DropBoxImpl;
 import at.tuwien.aic.raid.connector.S3Connector;
 import at.tuwien.aic.raid.data.FileObject;
@@ -12,9 +13,9 @@ import at.tuwien.aic.raid.data.FileObject;
 public class Raid1 {
 	
 	 java.util.logging.Logger log = java.util.logging.Logger.getLogger("Raid1");
-	    ConnectorInterface dbox = new DropBoxImpl();
-	    static ConnectorInterface box = new BoxImpl();
-	    ConnectorInterface s3 = new S3Connector();
+	    ConnectorInterface dbox =  ConnectorConstructor.dropBoxInstance();
+	    static ConnectorInterface box =  ConnectorConstructor.boxInstance();
+	    ConnectorInterface s3 =  ConnectorConstructor.s3Instance();
 	
 	
 	

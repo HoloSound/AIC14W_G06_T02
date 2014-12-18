@@ -19,7 +19,7 @@ public class Controller {
 			// all beans have to be "injected" here the JNDI bindings name is
 			// displayed on deployment
 			this.raid = (RaidSessionBeanInterface) ctx
-					.lookup("java:global/ear/sessionBean/RaidSessionBean");
+					.lookup("java:global/ear/sessionBean/Raid1SessionBean");
 
 		} catch (NamingException e) {
 
@@ -109,7 +109,7 @@ public class Controller {
 
 		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid1?task="
 				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME+"="+f.getName()
-				+ "', '', callback, 'text' )\" > delete</a>";
+				+ "', '', callback1, 'text' )\" > delete</a>";
 	}
 
 }
