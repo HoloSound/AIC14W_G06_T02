@@ -6,6 +6,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import at.tuwien.aic.raid.data.FileObject;
+import at.tuwien.aic.raid.data.FileViewObject;
 import at.tuwien.aic.raid.sessionbean.RaidSessionBeanInterface;
 
 public class Controller {
@@ -55,7 +56,7 @@ public class Controller {
 			// this listFiles is method which compromizes the fileinformation --> global info
 			// We should here show a 
 			// ArrayList<FileObjectView> ... that means global info and information per interface!
-			ArrayList<FileObject> fl = raid.listFiles();
+			// ArrayList<FileObject> fl = raid.listFiles();
 			
 			// here we should to more things.
 			// we generate a column for each interface
@@ -66,7 +67,13 @@ public class Controller {
 // The creation of viewing would be the wrong place - we should here only output it!
 			
 			// building up a table row
-			for (FileObject f : fl) {
+
+			ArrayList<FileViewObject> fvol = raid.listFiles();
+			
+			for( FileViewObject fvo : fvol ) 
+			{
+				FileObject f = fvo.getGlobalFo();
+			
 				sb.append("<tr>");
 
 				// may be done via class - and css definition

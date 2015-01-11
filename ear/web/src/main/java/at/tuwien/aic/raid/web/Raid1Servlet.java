@@ -18,6 +18,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import at.tuwien.aic.raid.data.FileObject;
+import at.tuwien.aic.raid.data.FileViewObject;
 import at.tuwien.aic.raid.sessionbean.RaidSessionBeanInterface;
 
 @WebServlet("/raid1")
@@ -134,8 +135,11 @@ public class Raid1Servlet extends HttpServlet {
 		sb.append("</thead>");
 
 		int ii=0;
-		ArrayList<FileObject> fl = raid.listFiles();
-		for (FileObject f : fl) {
+		ArrayList<FileViewObject> fvol = raid.listFiles();
+		
+		for( FileViewObject fvo : fvol ) 
+		{
+			FileObject f = fvo.getGlobalFo();
 			sb.append("<tr>");
 
 			// may be done via class - and css definition

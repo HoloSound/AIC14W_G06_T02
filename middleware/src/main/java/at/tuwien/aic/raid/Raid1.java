@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import at.tuwien.aic.raid.connector.ConnectorConstructor;
 import at.tuwien.aic.raid.data.FileObject;
+import at.tuwien.aic.raid.data.FileViewObject;
 
 public class Raid1 {
 	
@@ -55,12 +56,45 @@ public class Raid1 {
 	 * 
 	 */
 
-	public synchronized ArrayList<FileObject> listFiles() throws IOException 
+	public synchronized ArrayList<FileViewObject> listFiles() throws IOException 
 	{ 
-		ArrayList<FileObject> ret = new ArrayList<FileObject>();
+		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
 		
 		HashMap<String,FileObject> compare = new HashMap<String,FileObject>();
 		HashMap<String,ConnectorInterface> sourceIF = new HashMap<String,ConnectorInterface>();
+		
+/*    // FUTURE CODING STYLE
+	
+		// definition of connector interfaces
+		ConnectorInterface[] cis = new ConnectorInterface[3];
+
+		for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
+		{
+			cis[ii] = this.getInterface( ii );
+		}
+
+		ArrayList<FileObject> fileObjectList;
+		
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		for( ConnectorInterface ci : cis )
+		{
+			try
+			{
+				log.fine( "Querying files from " + ci.getName() + "." );
+				fileObjectList = ci.listFiles();
+			}
+			catch( Exception e )
+			{
+				log.fine( "Querying files from " + ci.getName() + " failed: " + e.getMessage() );
+				throw new IOException( e );
+			}
+			
+			log.fine( "Got " + fileObjectList.size() + " files from " + ci.getName() + "." );
+		}
+	
+ */
 		
 		ArrayList<FileObject> boxFiles = null;
 		HashMap<String,FileObject> boxHash = new HashMap<String,FileObject>();
@@ -69,6 +103,8 @@ public class Raid1 {
 		ArrayList<FileObject> s3Files = null;
 		HashMap<String,FileObject> s3Hash = new HashMap<String,FileObject>();
 		
+	
+		// UNROLLED LOOP
 		// IMPLEMENT
 		// RAID1
 		try
@@ -77,7 +113,7 @@ public class Raid1 {
 		}
 		catch( Exception e1 )
 		{
-			log.fine( "BOX Connector failed ro retrieve files." );
+			log.fine( "BOX Connector failed to retrieve files." );
 			e1.printStackTrace();
 		}
 		
@@ -87,7 +123,7 @@ public class Raid1 {
 		}
 		catch( Exception e1 )
 		{			
-			log.fine( "DROP_BOX Connector failed ro retrieve files." );
+			log.fine( "DROP_BOX Connector failed to retrieve files." );
 			e1.printStackTrace();
 		}
 		
@@ -97,7 +133,7 @@ public class Raid1 {
 		}
 		catch( Exception e1 )
 		{
-			log.fine( "AMAZON_S3 Connector failed ro retrieve files." );
+			log.fine( "AMAZON_S3 Connector failed to retrieve files." );
 			e1.printStackTrace();
 		}
 		
@@ -226,7 +262,11 @@ public class Raid1 {
 				}
 			}
 			
-			ret.add( toCreate );
+			// here we have to add an additional layer
+			FileViewObject actfvo = new FileViewObject();
+			actfvo.setGlobalFo( toCreate );
+			
+			ret.add( actfvo );
 		}
 				
 		return ret;

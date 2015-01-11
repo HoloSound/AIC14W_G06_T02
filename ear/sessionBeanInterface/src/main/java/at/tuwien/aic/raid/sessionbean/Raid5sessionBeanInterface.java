@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.ejb.Local;
 
 import at.tuwien.aic.raid.data.FileObject;
+import at.tuwien.aic.raid.data.FileViewObject;
 
 @Local
 public interface Raid5sessionBeanInterface {
@@ -15,7 +16,7 @@ public interface Raid5sessionBeanInterface {
 	 *         file content eg data is set to null
 	 * 
 	 */
-	ArrayList<FileObject> listFiles() throws IOException;
+	ArrayList<FileViewObject> listFiles() throws IOException;
 
 	void delete(String fn) throws IOException;
 

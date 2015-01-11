@@ -17,6 +17,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import at.tuwien.aic.raid.data.FileObject;
+import at.tuwien.aic.raid.data.FileViewObject;
 import at.tuwien.aic.raid.sessionbean.Raid5sessionBeanInterface;
 
 @WebServlet("/raid5")
@@ -128,13 +129,17 @@ public class Raid5Servlet extends HttpServlet {
 		sb.append("</colgroup>");
 		sb.append("<thead>");
 		sb.append("<tr>");
-		sb.append("<td><strong>FileName</strong></td>");
+		sb.append("<td colspan=\"3\"><strong>FileName</strong></td>");
 		sb.append("</tr>");
 		sb.append("</thead>");
 
 		int ii=0;
-		ArrayList<FileObject> fl = raid.listFiles();
-		for (FileObject f : fl) {
+		
+		ArrayList<FileViewObject> fvol = raid.listFiles();
+		
+		for( FileViewObject fvo : fvol ) 
+		{
+			FileObject f = fvo.getGlobalFo();
 			sb.append("<tr>");
 
 			// may be done via class - and css definition

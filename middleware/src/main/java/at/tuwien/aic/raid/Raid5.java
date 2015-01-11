@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import at.tuwien.aic.raid.connector.ConnectorConstructor;
 import at.tuwien.aic.raid.data.FileObject;
+import at.tuwien.aic.raid.data.FileViewObject;
 
 
 /**
@@ -460,9 +461,9 @@ public class Raid5
 	 * 
 	 */
 
-	public synchronized ArrayList<FileObject> listFiles() throws IOException
+	public synchronized ArrayList<FileViewObject> listFiles() throws IOException
 	{
-		ArrayList<FileObject> ret = new ArrayList<FileObject>();
+		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
 
 		HashMap<String, FileObject> compare = new HashMap<String, FileObject>();
 		HashMap<String, ConnectorInterface> sourceIF = new HashMap<String, ConnectorInterface>();
@@ -482,7 +483,7 @@ public class Raid5
 		}
 		catch( Exception e1 )
 		{
-			log.fine( "BOX Connector failed ro retrieve files." );
+			log.fine( "BOX Connector failed to retrieve files." );
 			e1.printStackTrace();
 		}
 
@@ -492,7 +493,7 @@ public class Raid5
 		}
 		catch( Exception e1 )
 		{
-			log.fine( "DROP_BOX Connector failed ro retrieve files." );
+			log.fine( "DROP_BOX Connector failed to retrieve files." );
 			e1.printStackTrace();
 		}
 
@@ -502,7 +503,7 @@ public class Raid5
 		}
 		catch( Exception e1 )
 		{
-			log.fine( "AMAZON_S3 Connector failed ro retrieve files." );
+			log.fine( "AMAZON_S3 Connector failed to retrieve files." );
 			e1.printStackTrace();
 		}
 
@@ -637,7 +638,11 @@ public class Raid5
 				}
 			}
 
-			ret.add( toCreate );
+			// here we have to add an additional layer
+			FileViewObject actfvo = new FileViewObject();
+			actfvo.setGlobalFo( toCreate );
+			
+			ret.add( actfvo );
 		}
 
 		return ret;

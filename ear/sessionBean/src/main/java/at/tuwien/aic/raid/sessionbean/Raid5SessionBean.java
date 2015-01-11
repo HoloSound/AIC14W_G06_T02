@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 
 import at.tuwien.aic.raid.Raid5;
 import at.tuwien.aic.raid.data.FileObject;
+import at.tuwien.aic.raid.data.FileViewObject;
 
 @Stateless()
 public class Raid5SessionBean implements Raid5sessionBeanInterface {
@@ -18,7 +19,7 @@ public class Raid5SessionBean implements Raid5sessionBeanInterface {
 	}
 
 	@Override
-	public ArrayList<FileObject> listFiles() throws IOException {
+	public ArrayList<FileViewObject> listFiles() throws IOException {
 		
 		return raid.listFiles();
 	}
