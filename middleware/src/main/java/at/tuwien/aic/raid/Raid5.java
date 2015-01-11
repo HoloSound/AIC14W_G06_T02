@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import at.tuwien.aic.raid.connector.BoxImpl;
 import at.tuwien.aic.raid.connector.ConnectorConstructor;
-import at.tuwien.aic.raid.connector.DropBoxImpl;
-import at.tuwien.aic.raid.connector.S3Connector;
 import at.tuwien.aic.raid.data.FileObject;
 
 
@@ -51,6 +48,7 @@ public class Raid5
 	 */
 
 	java.util.logging.Logger log = java.util.logging.Logger.getLogger( "Raid5" );
+	
 	ConnectorInterface dbox = ConnectorConstructor.dropBoxInstance();
 	static ConnectorInterface box = ConnectorConstructor.boxInstance();
 	ConnectorInterface s3 = ConnectorConstructor.s3Instance();
@@ -657,7 +655,9 @@ public class Raid5
 	public synchronized void delete( String fn ) throws IOException
 	{// TODO IMPLEMENT RAID5
 		// LOGIK
-
+		// here we generate the 3 further files
+//		String[] fileNames = this.generateFileNames( fn, <HERE I NEED THE (SIZE % 2) );
+		
 		try
 		{
 			System.out.println( "Deleting" + fn + "from Box" );
@@ -666,19 +666,19 @@ public class Raid5
 		}
 		catch( Exception e )
 		{
-			log.fine( "Deleting drom Box failed" + e.getMessage() );
+			log.fine( "Deleting from Box failed" + e.getMessage() );
 			throw new IOException( e );
 		}
 
 		try
 		{
-			System.out.println( "Seleting" + fn + "from S3" );
+			System.out.println( "Deleting" + fn + "from S3" );
 			s3.delete( new FileObject( fn ) );
 
 		}
 		catch( Exception e )
 		{
-			log.fine( "Deleting drom S3 failed" + e.getMessage() );
+			log.fine( "Deleting from S3 failed" + e.getMessage() );
 			throw new IOException( e );
 		}
 
@@ -690,7 +690,7 @@ public class Raid5
 		}
 		catch( Exception e )
 		{
-			log.fine( "Deleting drom DB failed" + e.getMessage() );
+			log.fine( "Deleting from DB failed" + e.getMessage() );
 			throw new IOException( e );
 		}
 

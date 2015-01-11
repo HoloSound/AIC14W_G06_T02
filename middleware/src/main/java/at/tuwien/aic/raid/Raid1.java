@@ -4,25 +4,47 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import at.tuwien.aic.raid.connector.BoxImpl;
 import at.tuwien.aic.raid.connector.ConnectorConstructor;
-import at.tuwien.aic.raid.connector.DropBoxImpl;
-import at.tuwien.aic.raid.connector.S3Connector;
 import at.tuwien.aic.raid.data.FileObject;
 
 public class Raid1 {
 	
 	 java.util.logging.Logger log = java.util.logging.Logger.getLogger("Raid1");
-	    ConnectorInterface dbox =  ConnectorConstructor.dropBoxInstance();
-	    static ConnectorInterface box =  ConnectorConstructor.boxInstance();
-	    ConnectorInterface s3 =  ConnectorConstructor.s3Instance();
+	 
+    ConnectorInterface dbox =  ConnectorConstructor.dropBoxInstance();
+    // static
+    ConnectorInterface box =  ConnectorConstructor.boxInstance();
+    ConnectorInterface s3 =  ConnectorConstructor.s3Instance();
+
+
 	
 	
-	
-	public Raid1() {
-		System.out.println("NEW Raid1");
+	public Raid1() 
+	{
+		log.fine( "NEW Raid1" );
 	}
 
+	public int getMaxId()
+	{
+		return 3;
+	}
+	
+	public ConnectorInterface getInterface( int ii )
+	{
+		if( ii == 0 )
+		{
+			return (ConnectorInterface) dbox;
+		}
+		else if( ii == 1 )
+		{
+			return (ConnectorInterface) box;
+		}
+		else
+		{
+			return (ConnectorInterface) s3;
+		}
+	}
+	
 	/**
 	 * Compares the content of all connectors and try to fix missing files If
 	 * three is a file missing in a connector restore from other connectors
@@ -220,39 +242,76 @@ public class Raid1 {
 	 *             restored lazily
 	 * 
 	 */
-	public  synchronized  void delete(String fn) throws IOException {// TODO IMPLEMENT RAID1
-														// LOGIK
+	public synchronized void delete( String fn ) throws IOException
+	{
+		// definition of connector interfaces
+		ConnectorInterface[] cis = new ConnectorInterface[3];
 
-		try { 
-			System.out.println("Deleting" + fn + "from Box");
-			box.delete(new FileObject(fn));
-			
-		} catch (Exception e) {
-			log.fine("Deleting drom Box failed" + e.getMessage()); 
-			throw new IOException(e);
-			
-		
-		}
-		
-		try {
-			System.out.println("Seleting" + fn + "from S3");
-			s3.delete(new FileObject(fn));
-			
-		} catch (Exception e) {
-			log.fine("Deleting drom S3 failed" + e.getMessage()); 
-			throw new IOException(e);
-		}
-		
-		try {
-			System.out.println("Deleting" + fn + "from DB");
-			dbox.delete(new FileObject(fn));
-			
-		} catch (Exception e) {
-			log.fine("Deleting drom DB failed" + e.getMessage()); 
-			throw new IOException(e);
+		for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
+		{
+			cis[ii] = this.getInterface( ii );
 		}
 
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		for( ConnectorInterface ci : cis )
+		{
+			try
+			{
+				log.fine( "Deleting" + fn + "from " + ci.getName() + "." );
+				ci.delete( new FileObject( fn ) );
+			}
+			catch( Exception e )
+			{
+				log.fine( "Deleting from " + ci.getName() + " failed" + e.getMessage() );
+				throw new IOException( e );
+			}
+			
+			log.fine( "File " + fn + "deleted from " + ci.getName() + "." );
+		}
+
+		// unrolled loop
+/*
+		try
+		{
+			System.out.println( "Deleting" + fn + "from Box" );
+			box.delete( new FileObject( fn ) );
+
+		}
+		catch( Exception e )
+		{
+			log.fine( "Deleting from Box failed" + e.getMessage() );
+			throw new IOException( e );
+
+		}
+
+		try
+		{
+			System.out.println( "Deleting" + fn + "from S3" );
+			s3.delete( new FileObject( fn ) );
+
+		}
+		catch( Exception e )
+		{
+			log.fine( "Deleting from S3 failed" + e.getMessage() );
+			throw new IOException( e );
+		}
+
+		try
+		{
+			System.out.println( "Deleting" + fn + "from DB" );
+			dbox.delete( new FileObject( fn ) );
+
+		}
+		catch( Exception e )
+		{
+			log.fine( "Deleting from DB failed" + e.getMessage() );
+			throw new IOException( e );
+		}
+ */
 	}
+		
 /**
  * 
  * Calculates the hash values for each available  file and logs the result 
@@ -408,40 +467,85 @@ public class Raid1 {
 	 *
 	 */
 
-	public  synchronized  void write(FileObject f) throws IOException {// TODO IMPLEMENT RAID1
-														// LOGIK
-		int b = 0;	
+	public synchronized void write( FileObject f ) throws IOException
+	{
+		// TODO IMPLEMENT RAID1
+		// LOGIK
+		int b = 0;
 		
-		try {
-			log.fine("write" + f.getName());
-			dbox.create(f);
-		} catch (Exception e) {
-			b = b+1;
-			log.fine("Error" + e.getMessage());
+	    // definition of connector interfaces
+	    ConnectorInterface[] cis = new ConnectorInterface[3];
+	    
+	    for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
+	    {
+	    	cis[ii] = this.getInterface( ii );
+	    }
+	    
+
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		for( ConnectorInterface ci : cis )
+		{
+			try
+			{
+				log.fine( "Write" + f.getName() + " to " + ci.getName() );
+				ci.create( f );
+			}
+			catch( Exception e )
+			{
+				b = b + 1;
+				log.fine( "Error" + e.getMessage() );
+				e.printStackTrace();
+			}
+			
+			log.fine( "Write" + f.getName() + " to " + ci.getName() + " ... OK." );
+		}
+	
+		// unfolded loop ...
+/*		
+		try
+		{
+			log.fine( "write" + f.getName() );
+			dbox.create( f );
+		}
+		catch( Exception e )
+		{
+			b = b + 1;
+			log.fine( "Error" + e.getMessage() );
 			e.printStackTrace();
 		}
 
-		try {
-			log.fine("write" + f.getName());
-			s3.create(f);
-		} catch (Exception e) {
-			b = b+1;
-			log.fine("Error" + e.getMessage());
+		try
+		{
+			log.fine( "write" + f.getName() );
+			s3.create( f );
+		}
+		catch( Exception e )
+		{
+			b = b + 1;
+			log.fine( "Error" + e.getMessage() );
 			e.printStackTrace();
 		}
 
-		try {
-			log.fine("write" + f.getName());
-			System.out.println("write" + f.getName());
-			box.create(f);
-		} catch (Exception e) {
-			b = b+1;
-			log.fine("Error" + e.getMessage());
+		try
+		{
+			log.fine( "write" + f.getName() );
+			System.out.println( "write" + f.getName() );
+			box.create( f );
+		}
+		catch( Exception e )
+		{
+			b = b + 1;
+			log.fine( "Error" + e.getMessage() );
 			e.printStackTrace();
 		}
-
-		if (b == 3){
-		throw new IOException("Faild: The file is not stored in any of the connector!");
+ */
+		
+		if( b == 3 )
+		{
+			throw new IOException(
+					"Faild: The file is not stored in any of the connector!" );
 		}
 	}
 }

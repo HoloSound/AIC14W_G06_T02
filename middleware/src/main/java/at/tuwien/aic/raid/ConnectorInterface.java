@@ -1,6 +1,5 @@
 package at.tuwien.aic.raid;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import at.tuwien.aic.raid.data.FileObject;

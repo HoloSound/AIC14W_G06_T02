@@ -13,8 +13,10 @@ public class Raid1SessionBean implements RaidSessionBeanInterface {
 	
 	private Raid1 raid1;
 
-	public Raid1SessionBean() throws IOException {
-		raid1=new Raid1();
+	public Raid1SessionBean() 
+				throws IOException 
+	{
+		raid1 = new Raid1();
 	}
 
 	@Override
