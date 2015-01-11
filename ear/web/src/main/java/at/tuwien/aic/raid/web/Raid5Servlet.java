@@ -122,9 +122,9 @@ public class Raid5Servlet extends HttpServlet {
 
 		sb.append("<table border=\"1\">");
 		sb.append("<colgroup>");
-		sb.append("<col width=\"200\" />");
-		sb.append("<col width=\"100\" />");
-		sb.append("<col width=\"100\" />");
+		sb.append("<col width=\"300\" />");
+		sb.append("<col width=\"35\" />");
+		sb.append("<col width=\"35\" />");
 		sb.append("</colgroup>");
 		sb.append("<thead>");
 		sb.append("<tr>");
@@ -206,14 +206,14 @@ public class Raid5Servlet extends HttpServlet {
 
 		return "<a target='_blank' href=\"raid5?task="
 				+ Raid5Servlet.DOWNLOAD_OPERATION + "&"
-				+ Raid5Servlet.FILE_NAME + "="+f.getName()+"\"> download</a>";
+				+ Raid5Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
 	}
 
 	private String getDeleteLink(FileObject f) {
 
 		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid5?task="
 				+ Raid5Servlet.DELETE_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
-				+ "', '', callback5, 'text' )\" > delete</a>";
+				+ "', '', callback5, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
 
 }

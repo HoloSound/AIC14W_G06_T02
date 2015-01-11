@@ -129,7 +129,7 @@ public class Raid1Servlet extends HttpServlet {
 		sb.append("</colgroup>");
 		sb.append("<thead>");
 		sb.append("<tr>");
-		sb.append("<td><strong>FileName</strong></td>");
+		sb.append("<td colspan=\"3\"><strong>FileName</strong></td>");
 		sb.append("</tr>");
 		sb.append("</thead>");
 
@@ -202,19 +202,20 @@ public class Raid1Servlet extends HttpServlet {
 		resp.getOutputStream().write(string.getBytes());
 	}
 
-	
+	// This changes have no effect!
 	private String getDownloadLink(FileObject f) {
 
 		return "<a target='_blank' href=\"raid1?task="
 				+ Raid1Servlet.DOWNLOAD_OPERATION + "&"
-				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> download</a>";
+				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
 	}
 
+	// This changes have no effect!
 	private String getDeleteLink(FileObject f) {
 
 		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid1?task="
 				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME+"="+f.getName()
-				+ "', '', callback1, 'text' )\" > delete</a>";
+				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
 
 }

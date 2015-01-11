@@ -116,7 +116,7 @@ li {
 
 		</div>
 	</DIV>
-	</DIV>
+
 </BODY>
 
 </html>

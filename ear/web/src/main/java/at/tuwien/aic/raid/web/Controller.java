@@ -29,24 +29,43 @@ public class Controller {
 
 	}
 
+	// TODO why do we have the same condig twice?
+	// see also Raid1Servlet.listFiles() !?
 	public String listFiles() {
 		try {
 			StringBuilder sb = new StringBuilder();
 
+			// building up a table
 			sb.append("<table border=\"1\">");
 			sb.append("<colgroup>");
-			sb.append("<col width=\"200\" />");
-			sb.append("<col width=\"100\" />");
-			sb.append("<col width=\"100\" />");
+			sb.append("<col width=\"300\" />");
+			sb.append("<col width=\"35\" />");
+			sb.append("<col width=\"35\" />");
 			sb.append("</colgroup>");
+			
+			// building up the table header
 			sb.append("<thead>");
 			sb.append("<tr>");
-			sb.append("<td><strong>FileName</strong></td>");
+			sb.append("<td colspan=\"3\"><strong>FileName</strong></td>");
 			sb.append("</tr>");
 			sb.append("</thead>");
 
 			int ii=0;
+			
+			// this listFiles is method which compromizes the fileinformation --> global info
+			// We should here show a 
+			// ArrayList<FileObjectView> ... that means global info and information per interface!
 			ArrayList<FileObject> fl = raid.listFiles();
+			
+			// here we should to more things.
+			// we generate a column for each interface
+			// we fill the generated table with additional information
+//			ArrayList<FileObject> as = raid.listFiles( 0 );
+//			ArrayList<FileObject> box = raid.listFiles( 1 );
+//			ArrayList<FileObject> dBox = raid.listFiles( 2 );
+// The creation of viewing would be the wrong place - we should here only output it!
+			
+			// building up a table row
 			for (FileObject f : fl) {
 				sb.append("<tr>");
 
@@ -102,14 +121,14 @@ public class Controller {
 
 		return "<a target='_blank' href=\"raid1?task="
 				+ Raid1Servlet.DOWNLOAD_OPERATION + "&"
-				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> download</a>";
+				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
 	}
 
 	private String getDeleteLink(FileObject f) {
 
 		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid1?task="
 				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME+"="+f.getName()
-				+ "', '', callback1, 'text' )\" > delete</a>";
+				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
 
 }
