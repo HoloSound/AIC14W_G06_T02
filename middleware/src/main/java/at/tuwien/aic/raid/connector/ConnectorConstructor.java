@@ -7,6 +7,22 @@ public class ConnectorConstructor {
 	private static DropBoxImpl dropBox;
 	private static BoxImpl box;
 	private static S3Connector s3;
+	
+	public synchronized static ConnectorInterface getInstance( int ii )
+	{
+		if( ii == 0 )
+		{
+			return (ConnectorInterface) dropBoxInstance();
+		}
+		else if( ii == 1 )
+		{
+			return (ConnectorInterface) boxInstance();
+		}
+		else
+		{
+			return (ConnectorInterface) s3Instance();
+		}
+	}
 
 	public synchronized static ConnectorInterface dropBoxInstance() {
 		if (dropBox == null) {

@@ -26,7 +26,7 @@ public class FileImpl
 {
 	// directory is RAID level specific
 	private File baseDirectory = new File( "c:/tmp/FILE/RAID1/" );
-
+	private String name = "FILE" + baseDirectory;
 	
 	public FileImpl( File baseDirectory )
 	{
@@ -178,4 +178,8 @@ public class FileImpl
 		return null;
 	}
 
+	public String getName()
+	{
+		return name;
+	}
 }

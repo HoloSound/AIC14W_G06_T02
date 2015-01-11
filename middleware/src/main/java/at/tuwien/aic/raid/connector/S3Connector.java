@@ -1,9 +1,7 @@
 package at.tuwien.aic.raid.connector;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,7 +12,6 @@ import at.tuwien.aic.raid.ConnectorInterface;
 import at.tuwien.aic.raid.data.FileObject;
 
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
@@ -32,6 +29,8 @@ public class S3Connector implements ConnectorInterface {
 
 	private String bucketName = "g6-t2-test";
 	private AmazonS3 s3;
+	
+	private String name = "AS3";
 
 	public S3Connector() {
 
@@ -136,6 +135,11 @@ public class S3Connector implements ConnectorInterface {
 		}
 
 		return ret;
+	}
+	
+	public String getName()
+	{
+		return name;
 	}
 
 }

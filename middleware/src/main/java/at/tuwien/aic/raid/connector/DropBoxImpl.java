@@ -29,7 +29,7 @@ public class DropBoxImpl
 	// directory is RAID level specific
 	private File baseDirectory = new File( "/" );
 	private DbxClient client = null;
-	
+	private String name = "DropBox";
 	
 	public DropBoxImpl( File baseDirectory )
 	{
@@ -401,5 +401,10 @@ public class DropBoxImpl
 		String unixFn = getUnixPath( aFile );
 		
 		return lsContent( unixFn );
+	}
+	
+	public String getName()
+	{
+		return name;
 	}
 }

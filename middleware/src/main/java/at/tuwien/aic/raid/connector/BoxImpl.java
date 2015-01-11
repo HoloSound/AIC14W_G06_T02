@@ -57,7 +57,7 @@ public class BoxImpl implements ConnectorInterface
 	private BoxClient client;
 	private HashMap<String, String> fileIDs = null;
 	
-	
+	private String name = "BOX";
 
 	public BoxImpl()
 	{
@@ -325,4 +325,8 @@ public class BoxImpl implements ConnectorInterface
 		return null;
 	}
 	
+	public String getName()
+	{
+		return name;
+	}
 }
