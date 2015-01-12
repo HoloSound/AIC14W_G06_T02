@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
+
 import at.tuwien.aic.raid.ConnectorInterface;
 import at.tuwien.aic.raid.data.FileObject;
 
@@ -84,16 +86,26 @@ public class S3Connector implements ConnectorInterface {
 
 		S3Object object = s3.getObject(new GetObjectRequest(bucketName, file
 				.getName()));
-		ByteArrayOutputStream b = new ByteArrayOutputStream();
+
 		S3ObjectInputStream is = object.getObjectContent();
+		
+/* 		
+		// OLD CODE
+	 
+		ByteArrayOutputStream b = new ByteArrayOutputStream(); 
+		
 		byte[] buff=new byte[8];
 		while(-1!=is.read(buff)){
 			b.write(buff);
 		
 		}
-
-	
+		
 		file.setData(b.toByteArray());
+ */
+		byte[] buffer;	
+		buffer = IOUtils.toByteArray( is );
+	
+		file.setData( buffer );
 
 		return file;
 	}
