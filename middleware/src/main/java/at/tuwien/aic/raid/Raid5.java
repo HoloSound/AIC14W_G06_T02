@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import at.tuwien.aic.raid.connector.ConnectorConstructor;
 import at.tuwien.aic.raid.data.FileObject;
@@ -51,14 +53,49 @@ public class Raid5
 	java.util.logging.Logger log = java.util.logging.Logger.getLogger( "Raid5" );
 	
 	ConnectorInterface dbox = ConnectorConstructor.dropBoxInstance();
-	static ConnectorInterface box = ConnectorConstructor.boxInstance();
+	ConnectorInterface box = ConnectorConstructor.boxInstance();
 	ConnectorInterface s3 = ConnectorConstructor.s3Instance();
 
+	private ConnectorInterface[] connectorInterface = null;
+	
 	public Raid5()
 	{
 		System.out.println( "NEW Raid5" );
 	}
 
+	public int getMaxId()
+	{
+		return 3;
+	}
+
+	public void initConnectorInterface()
+	{
+		if( connectorInterface == null )
+		{
+			connectorInterface = new ConnectorInterface[3];
+			
+			for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
+			{
+				connectorInterface[ii] = this.getInterface( ii );
+			}
+		}
+	}
+	
+	public ConnectorInterface getInterface( int ii )
+	{
+		if( ii == 0 )
+		{
+			return (ConnectorInterface) dbox;
+		}
+		else if( ii == 1 )
+		{
+			return (ConnectorInterface) box;
+		}
+		else
+		{
+			return (ConnectorInterface) s3;
+		}
+	}
 	
 	public String[] generateFileNames( String fileName, int size )
 	{
@@ -202,7 +239,6 @@ public class Raid5
 		}
 		
 		// select the files we have
-		boolean even = true;
 		int ii = 0;
 		FileObject lonFo = null;
 		FileObject hinFo = null;
@@ -461,190 +497,189 @@ public class Raid5
 	 * 
 	 */
 
-	public synchronized ArrayList<FileViewObject> listFiles() throws IOException
+	public synchronized ArrayList<FileViewObject> listFiles() 
+				throws IOException
 	{
 		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
 
-		HashMap<String, FileObject> compare = new HashMap<String, FileObject>();
-		HashMap<String, ConnectorInterface> sourceIF = new HashMap<String, ConnectorInterface>();
+ 		HashMap<String,FileViewObject> compareViewMap = new HashMap<String,FileViewObject>();
+ 		
+		// FUTURE CODING STYLE
+	    // initialization of connector interfaces
+		initConnectorInterface();
 
-		ArrayList<FileObject> boxFiles = null;
-		HashMap<String, FileObject> boxHash = new HashMap<String, FileObject>();
-		ArrayList<FileObject> dBoxFiles = null;
-		HashMap<String, FileObject> dBoxHash = new HashMap<String, FileObject>();
-		ArrayList<FileObject> s3Files = null;
-		HashMap<String, FileObject> s3Hash = new HashMap<String, FileObject>();
-
-		// IMPLEMENT
-		// RAID5
-		try
+		ArrayList<FileObject> fileObjectList;
+		int errorCount = 0;
+		int interfaceId = 0; // running from 0 .. 2
+		
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		for( ConnectorInterface ci : connectorInterface )
 		{
-			boxFiles = box.listFiles();
-		}
-		catch( Exception e1 )
-		{
-			log.fine( "BOX Connector failed to retrieve files." );
-			e1.printStackTrace();
-		}
-
-		try
-		{
-			dBoxFiles = dbox.listFiles();
-		}
-		catch( Exception e1 )
-		{
-			log.fine( "DROP_BOX Connector failed to retrieve files." );
-			e1.printStackTrace();
-		}
-
-		try
-		{
-			s3Files = s3.listFiles();
-		}
-		catch( Exception e1 )
-		{
-			log.fine( "AMAZON_S3 Connector failed to retrieve files." );
-			e1.printStackTrace();
-		}
-
-		if( boxFiles == null && dBoxFiles == null && s3Files == null )
-		{
-			throw(new IOException( "No connection available." ));
-		}
-
-		// 1 st initialize the first ret - via box
-		for( FileObject aFO : boxFiles )
-		{
-			compare.put( aFO.getName(), aFO );
-			sourceIF.put( aFO.getName(), box );
-			boxHash.put( aFO.getName(), aFO );
-		}
-
-		// 2 st initialize the ret
-		for( FileObject aFO : dBoxFiles )
-		{
-			// search in ret the aFO.getName();
-			String aFileName = aFO.getName();
-
-			FileObject foundObject = compare.get( aFileName );
-
-			if( foundObject == null )
+			try
 			{
-				// we have a new file there!
-				compare.put( aFileName, aFO );
-				sourceIF.put( aFileName, dbox );
+				log.fine( "Querying files from " + ci.getName() + "." );
+				
+				fileObjectList = ci.listFiles();
 			}
-
-			dBoxHash.put( aFileName, aFO );
-		}
-
-		// 3nd initialize the ret
-		for( FileObject aFO : s3Files )
-		{
-			// search in ret the aFO.getName();
-			String aFileName = aFO.getName();
-
-			FileObject foundObject = compare.get( aFileName );
-
-			if( foundObject == null )
+			catch( Exception e )
 			{
-				// we have a new file there!
-				compare.put( aFileName, aFO );
-				sourceIF.put( aFileName, s3 );
+				errorCount++;
+				log.fine( "Querying files from " + ci.getName() + " failed: " + e.getMessage() );
+				throw new IOException( e );
 			}
-
-			s3Hash.put( aFileName, aFO );
-		}
-
-		// Now we have the other way round to create the files
-		for( String key : compare.keySet() )
-		{
-			FileObject toCreate = compare.get( key );
-			// search for each connector:
-			FileObject foundObject = boxHash.get( key );
-
-			if( foundObject == null )
-			{
-				try
-				{
-					String fileName = toCreate.getName();
-
-					log.fine( "Creation of file " + fileName
-							+ " (because missing) on BOX connection." );
-
-					// We have to read this file first - from where?
-					ConnectorInterface readIF = sourceIF.get( fileName );
-					FileObject searchFileObject = new FileObject( fileName );
-					FileObject newFileObject = readIF.read( searchFileObject );
-					box.create( newFileObject );
-				}
-				catch( Exception e )
-				{
-					log.fine( "Creation of " + toCreate
-							+ " failed at BOX connection." );
-					e.printStackTrace();
-				}
-			}
-
-			// search for each connector:
-			foundObject = dBoxHash.get( key );
-
-			if( foundObject == null )
-			{
-				try
-				{
-					String fileName = toCreate.getName();
-
-					log.fine( "Creation of file " + fileName
-							+ " (because missing) on DROPBOX connection." );
-
-					// We have to read this file first - from where?
-					ConnectorInterface readIF = sourceIF.get( fileName );
-					FileObject searchFileObject = new FileObject( fileName );
-					FileObject newFileObject = readIF.read( searchFileObject );
-					dbox.create( newFileObject );
-				}
-				catch( Exception e )
-				{
-					log.fine( "Creation of " + toCreate
-							+ " failed at DROP_BOX Connection." );
-					e.printStackTrace();
-				}
-			}
-
-			// search for each connector:
-			foundObject = s3Hash.get( key );
-
-			if( foundObject == null )
-			{
-				try
-				{
-					String fileName = toCreate.getName();
-
-					log.fine( "Creation of file " + fileName
-							+ " (because missing) on AMAZON_S3 connection." );
-
-					// We have to read this file first - from where?
-					ConnectorInterface readIF = sourceIF.get( fileName );
-					FileObject searchFileObject = new FileObject( fileName );
-					FileObject newFileObject = readIF.read( searchFileObject );
-					s3.create( newFileObject );
-				}
-				catch( Exception e )
-				{
-					log.fine( "Creation of " + toCreate
-							+ " failed at AMAZON_S3 Connection." );
-					e.printStackTrace();
-				}
-			}
-
-			// here we have to add an additional layer
-			FileViewObject actfvo = new FileViewObject();
-			actfvo.setGlobalFo( toCreate );
 			
-			ret.add( actfvo );
+			log.fine( "Got " + fileObjectList.size() + " files from " + ci.getName() + "." );
+			
+			// Now we build up the matrix using fileObjectList
+			for( FileObject aFO : fileObjectList )
+			{
+				// we take the filename
+				String aFileName = aFO.getName();
+				
+				// and in RAID5 we check if the filename is constructed in special way
+				
+				Pattern p = Pattern.compile( "[HLP][01]_.*" );
+				Matcher m = p.matcher( aFileName );
+				boolean b = m.matches();
+				
+				if( b == true )
+				{
+					// in this case the file names start with char [3] !
+					String mainFileName = aFileName.substring( 3 );
+System.out.println( "1: " + mainFileName );					
+					if( mainFileName.length() > 0 )
+					{
+						String raidType = aFileName.substring( 0, 3 );
+System.out.println( "2: " + raidType );
+
+						FileViewObject foundViewObject = compareViewMap.get( mainFileName );
+						
+						if( foundViewObject == null )
+						{
+							// we have a new file here - create a new entry
+							FileViewObject aNewViewEntry = new FileViewObject();
+							
+							// here we have to manipulate the FileObject
+							FileObject newFo = new FileObject( mainFileName );
+							aNewViewEntry.setGlobalFo( newFo );
+							
+							FileObject[] interfaceInformationFos = new FileObject[3];
+							
+							aFO.setName( raidType );
+							interfaceInformationFos[interfaceId] = aFO;
+							
+							aNewViewEntry.setInterfaceInformationFos( interfaceInformationFos );
+							
+							compareViewMap.put( mainFileName, aNewViewEntry );
+						}
+						else
+						{
+							// entry exists - append data
+							FileObject[] interfaceInformationFos = foundViewObject.getInterfaceInformationFos();
+							
+							aFO.setName( raidType );
+							interfaceInformationFos[interfaceId] = aFO;
+							
+							foundViewObject.setInterfaceInformationFos( interfaceInformationFos );				
+						}
+					}
+				}
+			}
+			
+			interfaceId++;
+		}
+	
+		if( errorCount == 3 )
+		{
+			throw( new IOException( "No connection available." ) );
+		}
+		
+		// Move it to return value
+		for( String key : compareViewMap.keySet() )
+		{
+			FileViewObject toView = compareViewMap.get( key );
+			
+			// TODO here we have to distinguish if
+			// History - or ACTUELL
+			// 	and in both cases
+			// RAID5 (else RAID5) 
+			
+			
+			// maybe we will update the hash - and 
+			// TODO delete the data - not necessary for viewing
+/*
+			FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
+			int ii = 0;
+			
+			for( ConnectorInterface ci : cis )
+			{
+				FileObject actFO = interfaceInformationFos[ii];
+				
+				if( actFO != null )
+				{
+					FileObject newFO;
+
+					// in RAID5 we do not HASHing
+					// we only show the naming parts
+
+					try
+					{
+						newFO = ci.read( actFO );
+						actFO.setHash( newFO.getHash() );
+					}
+					catch( Exception e )
+					{
+						log.fine( "An error occured while reading file "+ actFO.getName() 
+								+ " from " + ci.getName() + ": " + e.toString() );
+					}
+					
+					interfaceInformationFos[ii] = actFO;			
+				}
+			
+				actFO.setHash( actFO.getMd5() );
+				
+				interfaceInformationFos[ii] = actFO;			
+				
+				
+				ii++;
+			}
+	
+			toView.setInterfaceInformationFos( interfaceInformationFos );
+ */
+			
+			// TODO here we do another round if we want to duplicate files
+			
+			ret.add( toView );
 		}
 
+/*		
+		// add an additional line for showing the Interfaces
+		FileViewObject toView = new FileViewObject();
+		FileObject global = new FileObject();
+		global.setName( " === INTERFACE ===");
+		toView.setGlobalFo( global );
+		
+		FileObject[] interfaceInformationFos = new FileObject[3];
+		
+		int ii = 0;
+		
+		for( ConnectorInterface ci : cis )
+		{
+			FileObject actFO = new FileObject();
+			
+			actFO.setHash( ci.getName() );
+			interfaceInformationFos[ii] = actFO;
+			
+			ii++;
+		}		
+		
+		toView.setInterfaceInformationFos( interfaceInformationFos );
+		
+		ret.add( toView );	
+ */
+		
 		return ret;
 	}
 
@@ -663,42 +698,63 @@ public class Raid5
 		// here we generate the 3 further files
 //		String[] fileNames = this.generateFileNames( fn, <HERE I NEED THE (SIZE % 2) );
 		
-		try
+	    // initialization of connector interfaces
+		initConnectorInterface();
+		
+		ArrayList<FileViewObject> listViewObjects = listFiles();
+		FileObject actFileObject = null;
+		FileObject[] interfaceInformationFos = null;
+		
+		for( FileViewObject listViewObject : listViewObjects )
 		{
-			System.out.println( "Deleting" + fn + "from Box" );
-			box.delete( new FileObject( fn ) );
-
+			actFileObject = listViewObject.getGlobalFo();
+			
+			if( actFileObject.getName().compareTo( fn ) == 0 )
+			{
+				interfaceInformationFos = listViewObject.getInterfaceInformationFos();
+				
+				break;
+			}
 		}
-		catch( Exception e )
+		
+		if( interfaceInformationFos == null )
 		{
-			log.fine( "Deleting from Box failed" + e.getMessage() );
-			throw new IOException( e );
-		}
+			
+		}		
 
-		try
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		int ii = 0;
+		
+		for( ConnectorInterface ci : connectorInterface )
 		{
-			System.out.println( "Deleting" + fn + "from S3" );
-			s3.delete( new FileObject( fn ) );
-
+			FileObject aFileObject = interfaceInformationFos[ii];
+			
+			if( aFileObject != null )
+			{
+				String fileName = aFileObject.getName() + fn;
+			
+				try
+				{
+					log.fine( "Deleting " + fileName + " from " + ci.getName() + "." );
+					ci.delete( new FileObject( fileName ) );
+				}
+				catch( Exception e )
+				{
+					log.fine( "Deleting " + fileName + " from " + ci.getName() + " failed: " + e.getMessage() );
+					throw new IOException( e );
+				}
+				
+				log.fine( "File " + fileName + "deleted from " + ci.getName() + "." );
+			}
+			else
+			{
+				log.fine( "File " + fn + " can't be found @ " + ci.getName() + "." );
+			}
 		}
-		catch( Exception e )
-		{
-			log.fine( "Deleting from S3 failed" + e.getMessage() );
-			throw new IOException( e );
-		}
 
-		try
-		{
-			System.out.println( "Deleting" + fn + "from DB" );
-			dbox.delete( new FileObject( fn ) );
-
-		}
-		catch( Exception e )
-		{
-			log.fine( "Deleting from DB failed" + e.getMessage() );
-			throw new IOException( e );
-		}
-
+		ii++;
 	}
 
 	/**
@@ -713,225 +769,82 @@ public class Raid5
 	 *
 	 */
 	public synchronized FileObject getFile( String fn ) throws IOException
-	{// TODO IMPLEMENT
+	{
 		// RAID5 LOGIK
-		FileObject readFile = new FileObject( fn );
+		FileObject readFile;
+		FileObject[] fileObjects = new FileObject[3];
+		
+	    // initialization of connector interfaces
+		initConnectorInterface();
 
-		FileObject boxFile = null;
-		FileObject dboxFile = null;
-		FileObject s3File = null;
-
-		FileObject returnFile = null;
-
-		try
+		
+		ArrayList<FileViewObject> listViewObjects = listFiles();
+		FileObject actFileObject = null;
+		FileObject[] interfaceInformationFos = null;
+		
+		for( FileViewObject listViewObject : listViewObjects )
 		{
-			// System.out.println("getFile" + fn);
-			boxFile = box.read( readFile );
-
-		}
-		catch( Exception e )
-		{
-			log.fine( "An error occured while reading file " + fn
-					+ " from Box: " + e.toString() );
-		}
-
-		try
-		{
-			dboxFile = dbox.read( readFile );
-
-		}
-		catch( Exception e )
-		{
-			log.fine( "An error occured while reading file \"" + fn
-					+ "\" from DropBox: " + e.toString() );
-		}
-
-		try
-		{
-			s3File = s3.read( readFile );
-
-		}
-		catch( Exception e )
-		{
-			log.fine( "An error occured while reading file " + fn
-					+ " from S3: " + e.toString() );
-		}
-
-		if( boxFile == null && dboxFile == null && s3File == null )
-		{
-			log.fine( "Couldn't read the file \"" + fn
-					+ "\" from all connectors." );
-			throw new IOException( "I/O Error" );
-		}
-
-		String boxFileMd5 = null;
-		String dboxFileMd5 = null;
-		String s3FileMd5 = null;
-
-		if( boxFile != null )
-		{
-			boxFileMd5 = boxFile.getMd5();
-			log.fine( "File \"" + fn + "\": BoxMD5: " + boxFileMd5 );
-			returnFile = boxFile;
-		}
-
-		if( dboxFile != null )
-		{
-			dboxFileMd5 = dboxFile.getMd5();
-			log.fine( "File \"" + fn + "\": DropBoxMD5: " + dboxFileMd5 );
-			returnFile = dboxFile;
-		}
-
-		if( s3File != null )
-		{
-			s3FileMd5 = s3File.getMd5();
-			log.fine( "File \"" + fn + "\": S3MD5: " + s3FileMd5 );
-			returnFile = s3File;
-		}
-
-		// if all hashvalues are available
-		if( boxFileMd5 != null && dboxFileMd5 != null && s3FileMd5 != null )
-		{
-			// proof if all hashvalues are the same if not proof if two are the
-			// same and restore and if all three are different raise exception
-			if( boxFileMd5.equals( dboxFileMd5 )
-					&& boxFileMd5.equals( s3FileMd5 ) )
+			actFileObject = listViewObject.getGlobalFo();
+			
+			if( actFileObject.getName().compareTo( fn ) == 0 )
 			{
-				log.fine( "File: " + fn
-						+ ": All three hashvalues are the same: " + boxFileMd5 );
+				interfaceInformationFos = listViewObject.getInterfaceInformationFos();
+				
+				break;
 			}
-			else if( boxFileMd5.equals( dboxFileMd5 ) )
+		}
+		
+		
+		if( interfaceInformationFos == null )
+		{
+			
+		}
+		
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		int ii = 0;
+		
+		// Here we have the problem - that the filename fn is only a part
+		// of the downloadable files!
+		// We have to generate a listFile to determine where which file is download able!
+		
+		for( ConnectorInterface ci : connectorInterface )
+		{
+			FileObject aFileObject = interfaceInformationFos[ii];
+			
+			if( aFileObject != null )
 			{
-				returnFile = boxFile;
-
-				log.fine( "Inconsistency! S3 diffs to the other two hashes: S3: "
-						+ s3FileMd5
-						+ " Others: "
-						+ boxFileMd5
-						+ " trying to restore..." );
-				// restore s3
+				String fileName = aFileObject.getName() + fn;
+				
 				try
 				{
-					s3.delete( new FileObject( fn ) );
-					s3.create( boxFile );
-
+					log.fine( "Read" + fn + "from " + ci.getName() + "." );
+					fileObjects[ii] = ci.read( new FileObject( fileName ) );
 				}
 				catch( Exception e )
 				{
-					log.fine( "Restoring of File \"" + fn + "\" on S3 failed"
-							+ e.getMessage() );
+					log.fine( "Reading from " + ci.getName() + " failed" + e.getMessage() );
+					throw new IOException( e );
 				}
-
-			}
-			else if( boxFileMd5.equals( s3FileMd5 ) )
-			{
-				returnFile = boxFile;
-
-				log.fine( "Inconsistency! DropBox diffs to the other two hashes: DropBox: "
-						+ dboxFileMd5
-						+ " Others: "
-						+ boxFileMd5
-						+ " trying to restore..." );
-				// restore dbox
-				try
-				{
-					dbox.delete( new FileObject( fn ) );
-					dbox.create( boxFile );
-
-				}
-				catch( Exception e )
-				{
-					log.fine( "Restoring of File \"" + fn
-							+ "\" on DropBox failed" + e.getMessage() );
-				}
-
-			}
-			else if( dboxFileMd5.equals( s3FileMd5 ) )
-			{
-				returnFile = dboxFile;
-
-				log.fine( "Inconsistency! Box diffs to the other two hashes: Box: "
-						+ s3FileMd5
-						+ " Others: "
-						+ dboxFileMd5
-						+ " trying to restore..." );
-				// restore box
-				try
-				{
-					box.delete( new FileObject( fn ) );
-					box.create( dboxFile );
-
-				}
-				catch( Exception e )
-				{
-					log.fine( "Restoring of File \"" + fn + "\" on Box failed"
-							+ e.getMessage() );
-				}
-
+			
+				log.fine( "File " + fileName + " read from " + ci.getName() + "." );
 			}
 			else
 			{
-				log.fine( "Inconsistency! All three hashvalues are different! Box: "
-						+ boxFileMd5
-						+ " DropBox: "
-						+ dboxFileMd5
-						+ " S3: "
-						+ s3FileMd5 );
-				throw new IOException(
-						"Inconsistency! All three hashvalues are different! Box: "
-								+ boxFileMd5 + " DropBox: " + dboxFileMd5
-								+ " S3: " + s3FileMd5 );
+				log.fine( "File " + fn + " can't be found @ " + ci.getName() + "." );
 			}
 
+			ii++;
 		}
-		else
-		{
-			if( boxFileMd5 != null && dboxFileMd5 != null )
-			{
-				if( !boxFileMd5.equals( dboxFileMd5 ) )
-				{
-					log.fine( "File \"" + fn
-							+ "\" has inconsistency! Box MD5: " + boxFileMd5
-							+ " DropBox MD5: " + dboxFileMd5 );
-					throw new IOException( "Inconsistency! Box MD5: "
-							+ boxFileMd5 + " DropBox MD5: " + dboxFileMd5 );
-				}
-			}
+		
+		readFile = reconstructFile( fileObjects );
 
-			if( boxFileMd5 != null && s3FileMd5 != null )
-			{
-				if( !boxFileMd5.equals( s3FileMd5 ) )
-				{
-					log.fine( "File \"" + fn
-							+ "\" has inconsistency! Box MD5: " + boxFileMd5
-							+ " S3 MD5: " + dboxFileMd5 );
-					throw new IOException( "Inconsistency! Box MD5: "
-							+ boxFileMd5 + " S3 MD5: " + s3FileMd5 );
-				}
-			}
-
-			if( dboxFileMd5 != null && s3FileMd5 != null )
-			{
-				if( !dboxFileMd5.equals( s3FileMd5 ) )
-				{
-					log.fine( "File \"" + fn
-							+ "\" has inconsistency! DropBox MD5: "
-							+ boxFileMd5 + " S3 MD5: " + dboxFileMd5 );
-					throw new IOException( "Inconsistency! DropBox MD5: "
-							+ dboxFileMd5 + " S3 MD5: " + s3FileMd5 );
-				}
-			}
-
-		}
-
-		log.fine( "Successfully read file \"" + fn + "\"" );
-
-		return returnFile;
-
+		return readFile;
 	}
 
 	/**
-	 * Stores the file in at least one connector
+	 * Stores the file in at least TWO connectors
 	 * 
 	 * @param f
 	 * @throws IOException
@@ -940,51 +853,41 @@ public class Raid5
 	 */
 
 	public synchronized void write( FileObject f ) throws IOException
-	{// TODO IMPLEMENT RAID5
-		// LOGIK
+	{
+		// TODO IMPLEMENT RAID5 LOGIK
 		int b = 0;
+		
+	    // initialization of connector interfaces
+		initConnectorInterface();
+	    
+	    FileObject[] generatedFiles = generateFiles( f );
+	    
+	    // TODO here we should manage some randomness
+	    
+	    int ii = 0;
 
-		try
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		for( ConnectorInterface ci : connectorInterface )
 		{
-			log.fine( "write" + f.getName() );
-			dbox.create( f );
-		}
-		catch( Exception e )
-		{
-			b = b + 1;
-			log.fine( "Error" + e.getMessage() );
-			e.printStackTrace();
-		}
-
-		try
-		{
-			log.fine( "write" + f.getName() );
-			s3.create( f );
-		}
-		catch( Exception e )
-		{
-			b = b + 1;
-			log.fine( "Error" + e.getMessage() );
-			e.printStackTrace();
-		}
-
-		try
-		{
-			log.fine( "write" + f.getName() );
-			System.out.println( "write" + f.getName() );
-			box.create( f );
-		}
-		catch( Exception e )
-		{
-			b = b + 1;
-			log.fine( "Error" + e.getMessage() );
-			e.printStackTrace();
-		}
-
-		if( b == 3 )
-		{
-			throw new IOException(
-					"Faild: The file is not stored in any of the connector!" );
+			FileObject writeFO = generatedFiles[ii];
+			
+			try
+			{
+				log.fine( "Write" + writeFO.getName() + " to " + ci.getName() );
+				ci.create( writeFO );
+			}
+			catch( Exception e )
+			{
+				b = b + 1;
+				log.fine( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
+				e.printStackTrace();
+			}
+			
+			log.fine( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
+			
+			ii++;
 		}
 	}
 }

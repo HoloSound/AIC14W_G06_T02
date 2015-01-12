@@ -127,11 +127,16 @@ public class Raid5Servlet extends HttpServlet {
 		sb.append("<col width=\"35\" />");
 		sb.append("<col width=\"35\" />");
 		sb.append("</colgroup>");
-		sb.append("<thead>");
+		
 		sb.append("<tr>");
 		sb.append("<td colspan=\"3\"><strong>FileName</strong></td>");
+
+		sb.append("<td><strong>DropBox</strong></td>");
+
+		sb.append("<td><strong>Box</strong></td>");
+
+		sb.append("<td><strong>AS3</strong></td>");
 		sb.append("</tr>");
-		sb.append("</thead>");
 
 		int ii=0;
 		
@@ -174,6 +179,26 @@ public class Raid5Servlet extends HttpServlet {
 			
 			sb.append(getDeleteLink(f));
 			sb.append("</td>");
+			
+			
+			// now appending the further columns
+			FileObject[] interfaceInformationFos = fvo.getInterfaceInformationFos();
+			
+			for( int jj = 0 ; jj < 3 ; jj++ )
+			{
+				FileObject actFO = interfaceInformationFos[jj];		
+				
+				sb.append("<td");
+				if( ii % 2 == 0 )
+				{
+					sb.append( " bgcolor=\"#eeeeff\"" );
+				}
+				sb.append( ">" );
+				
+				sb.append( "<tt>" + actFO.getName() + "</tt>");
+				sb.append("</td>");						
+			}	
+			
 
 			sb.append("</tr>");
 			

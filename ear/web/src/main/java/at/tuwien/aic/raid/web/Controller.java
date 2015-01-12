@@ -103,10 +103,15 @@ public class Controller {
 				sb.append( ">" );
 				
 				sb.append(getDownloadLink(f));
-				
-				sb.append("<td>");
-				sb.append(getShowHistoryLink(f));
 				sb.append("</td>");
+				
+				sb.append("<td");
+				if( ii % 2 == 0 )
+				{
+					sb.append( " bgcolor=\"#eeeeff\"" );
+				}
+				sb.append( ">" );
+				sb.append(getShowHistoryLink(f));
 				sb.append("</td>");
 
 				sb.append("<td");
