@@ -49,11 +49,9 @@ public class Controller {
 			sb.append("<tr>");
 			sb.append("<td colspan=\"3\"><strong>FileName</strong></td>");
 
-			sb.append("<td><strong>DropBox</strong></td>");
+			sb.append("<td><strong>Info</strong></td>");
 
-			sb.append("<td><strong>Box</strong></td>");
-
-			sb.append("<td><strong>AS3</strong></td>");
+	
 			sb.append("</tr>");
 			
 			
@@ -113,28 +111,13 @@ public class Controller {
 					sb.append( " bgcolor=\"#eeeeff\"" );
 				}
 				sb.append( ">" );
-				
+				String id=f.getName().replace(".", "").replaceAll("#", "").replaceAll(" ", "")+"TD";
 				sb.append(getDeleteLink(f));
 				sb.append("</td>");
+				sb.append("<td id='"+id+"'>");
+				sb.append("<a href=\"javascript:void\" onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" > load</a>");
+				sb.append("</td>");
 
-				// now appending the further columns
-				FileObject[] interfaceInformationFos = fvo.getInterfaceInformationFos();
-				
-				for( int jj = 0 ; jj < 3 ; jj++ )
-				{
-					FileObject actFO = interfaceInformationFos[jj];		
-					
-					sb.append("<td");
-					if( ii % 2 == 0 )
-					{
-						sb.append( " bgcolor=\"#eeeeff\"" );
-					}
-					sb.append( ">" );
-					
-					sb.append( "<tt>" + actFO.getHash() + "</tt>");
-					sb.append("</td>");						
-				}				
-				
 				sb.append("</tr>");				
 				
 				ii++;

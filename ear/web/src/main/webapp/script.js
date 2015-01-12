@@ -1,3 +1,10 @@
+function loadFileInfo(name,td){
+	var a= jQuery("#"+td);
+	a.empty();
+	a.append("loading");
+	a.load("raid1?task=fileInfo&fileName="+encodeURIComponent(name));
+}
+
 
 function showRaid1(){
 jQuery("#raid5Div").fadeOut('fast',function(){jQuery("#raid1Div").fadeIn();});

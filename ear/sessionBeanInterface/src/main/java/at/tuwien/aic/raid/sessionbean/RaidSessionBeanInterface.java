@@ -31,4 +31,6 @@ public interface RaidSessionBeanInterface {
 
 	void write(FileObject f)throws IOException;
 
+	String getFileInfo(String fn);
+
 }

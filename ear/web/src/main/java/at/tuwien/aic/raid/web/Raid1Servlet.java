@@ -17,6 +17,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
+import at.tuwien.aic.raid.Raid1;
 import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
 import at.tuwien.aic.raid.sessionbean.RaidSessionBeanInterface;
@@ -28,6 +29,7 @@ public class Raid1Servlet extends HttpServlet {
 	public static final String FILE_NAME = "fileName";
 	public static final String DOWNLOAD_OPERATION = "download";
 	public static final String UPLOAD_OPERATION = "upload";
+	public static final String FILE_INFO = "fileInfo";
 	@EJB
 	private RaidSessionBeanInterface raid;
 	public static String GET_FILE_LIST = "list";
@@ -85,7 +87,10 @@ public class Raid1Servlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		try {
-
+			if (FILE_INFO.equals(req.getParameter("task"))) {// lets
+				String fn = req.getParameter(FILE_NAME);
+				getFileInfo(fn,req, resp);
+			}
 			if (GET_FILE_LIST.equals(req.getParameter("task"))) {// lets
 				listFiles(req, resp);
 			}
@@ -117,6 +122,11 @@ public class Raid1Servlet extends HttpServlet {
 			error(e.getMessage(), resp);
 		}
 
+	}
+
+	private void getFileInfo(String fn, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		resp.getOutputStream().write(raid.getFileInfo(fn).getBytes());
+		
 	}
 
 	private void listFiles(HttpServletRequest req, HttpServletResponse resp) throws IOException {

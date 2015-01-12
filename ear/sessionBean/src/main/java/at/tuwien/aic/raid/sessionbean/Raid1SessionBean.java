@@ -44,6 +44,12 @@ public class Raid1SessionBean implements RaidSessionBeanInterface {
 		
 	}
 
+	@Override
+	public String getFileInfo(String fn) {
+		
+		return raid1.getFileInfo(fn);
+	}
+
 	
 	
 }
