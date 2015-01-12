@@ -537,19 +537,25 @@ public class Raid1 {
 		
 		if(boxFile != null) {
 			boxFileMd5 = boxFile.getMd5();
+			log.fine("################### HASH VALUE FOR BOX ###################");
 			log.fine("File \""+fn+"\": BoxMD5: "+boxFileMd5);
+			log.fine("##########################################################");
 			returnFile = boxFile;
 		}
 		
 		if(dboxFile != null) {
 			dboxFileMd5 = dboxFile.getMd5();
+			log.fine("################### HASH VALUE FOR DBOX ###################");
 			log.fine("File \""+fn+"\": DropBoxMD5: "+dboxFileMd5);
+			log.fine("###########################################################");
 			returnFile = dboxFile;
 		}
 		
 		if(s3File != null) {
 			s3FileMd5 = s3File.getMd5();
+			log.fine("################### HASH VALUE FOR S3 ###################");
 			log.fine("File \""+fn+"\": S3MD5: "+s3FileMd5);
+			log.fine("#########################################################");
 			returnFile = s3File;
 		}
 		
@@ -561,10 +567,12 @@ public class Raid1 {
 			} else if(boxFileMd5.equals(dboxFileMd5)) {
 				returnFile = boxFile;
 				
+				log.fine("############ Inconsistency ############");
 				log.fine("Inconsistency! S3 diffs to the other two hashes: S3: "+s3FileMd5+" Others: "+boxFileMd5+" trying to restore...");
+				log.fine("#######################################");
 				//restore s3
 				try { 
-					s3.delete(new FileObject(fn));
+					s3.delete(new FileObject(fn)); 
 					s3.create(boxFile);
 					
 				} catch (Exception e) {
@@ -574,7 +582,9 @@ public class Raid1 {
 			} else if(boxFileMd5.equals(s3FileMd5)) {
 				returnFile = boxFile;
 				
+				log.fine("############ Inconsistency ############");
 				log.fine("Inconsistency! DropBox diffs to the other two hashes: DropBox: "+dboxFileMd5+" Others: "+boxFileMd5+" trying to restore...");
+				log.fine("#######################################");
 				//restore dbox
 				try { 
 					dbox.delete(new FileObject(fn));
@@ -587,7 +597,9 @@ public class Raid1 {
 			} else if(dboxFileMd5.equals(s3FileMd5)) {
 				returnFile = dboxFile;
 				
+				log.fine("############ Inconsistency ############");
 				log.fine("Inconsistency! Box diffs to the other two hashes: Box: "+s3FileMd5+" Others: "+dboxFileMd5+" trying to restore...");
+				log.fine("#######################################");
 				//restore box
 				try { 
 					box.delete(new FileObject(fn));
