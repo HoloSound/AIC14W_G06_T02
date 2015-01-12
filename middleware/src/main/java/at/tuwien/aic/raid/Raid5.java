@@ -862,16 +862,33 @@ System.out.println( "2: " + raidType );
 	    
 	    FileObject[] generatedFiles = generateFiles( f );
 	    
-	    // TODO here we should manage some randomness
+
+
+	    ArrayList<FileObject> aList = new ArrayList<FileObject>( Arrays.asList( generatedFiles ) );
 	    
-	    int ii = 0;
+	    // TODO here we should manage some randomness
+	    long mil = System.currentTimeMillis();
+	    long first = mil % 3;	// 0, 1, 2
+	    long second = mil % 2;	// 0, 1 
+	    
+	    ArrayList<FileObject> newList = new ArrayList<FileObject>();
+	    
+	    newList.add( aList.get( (int) first ) );
+	    aList.remove( (int) first );
+	    newList.add( aList.get( (int) second ) );
+	    aList.remove( (int) second );
+	    newList.add( aList.get( 0 ) );
+	    
+	    
+	    
+	    int index = 0;
 
 		// simple implementation:
 		// real implementation would run each interface in own thread
 		// to parallelize the writing action and minimize the waiting time.
 		for( ConnectorInterface ci : connectorInterface )
 		{
-			FileObject writeFO = generatedFiles[ii];
+			FileObject writeFO = newList.get( index );
 			
 			try
 			{
@@ -887,7 +904,7 @@ System.out.println( "2: " + raidType );
 			
 			log.fine( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
 			
-			ii++;
+			index++;
 		}
 	}
 }
