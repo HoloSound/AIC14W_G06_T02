@@ -47,7 +47,7 @@ public class Controller {
 			// building up the table header
 			sb.append("<thead>");
 			sb.append("<tr>");
-			sb.append("<td colspan=\"3\"><strong>FileName</strong></td>");
+			sb.append("<td colspan=\"4\"><strong>FileName</strong></td>");
 
 			sb.append("<td><strong>Info</strong></td>");
 
@@ -103,6 +103,10 @@ public class Controller {
 				sb.append( ">" );
 				
 				sb.append(getDownloadLink(f));
+				
+				sb.append("<td>");
+				sb.append(getShowHistoryLink(f));
+				sb.append("</td>");
 				sb.append("</td>");
 
 				sb.append("<td");
@@ -132,6 +136,12 @@ public class Controller {
 	}
 
 	
+
+	private Object getShowHistoryLink(FileObject f) {
+		return "<a target='_blank' href=\"raid1?task="
+				+ Raid1Servlet.SHOW_HISTORY + "&"
+				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
+	}
 
 	private String getDownloadLink(FileObject f) {
 
