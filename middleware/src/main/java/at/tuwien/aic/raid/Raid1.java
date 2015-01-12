@@ -59,12 +59,11 @@ public class Raid1 {
 	public synchronized ArrayList<FileViewObject> listFiles() throws IOException 
 	{ 
 		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
-		
-		HashMap<String,FileObject> compare = new HashMap<String,FileObject>();
-		HashMap<String,ConnectorInterface> sourceIF = new HashMap<String,ConnectorInterface>();
-		
-/*    // FUTURE CODING STYLE
-	
+
+ 		HashMap<String,FileViewObject> compareViewMap = new HashMap<String,FileViewObject>();
+ 		HashMap<String,ConnectorInterface> sourceIF = new HashMap<String,ConnectorInterface>();
+ 		
+		// FUTURE CODING STYLE
 		// definition of connector interfaces
 		ConnectorInterface[] cis = new ConnectorInterface[3];
 
@@ -74,6 +73,8 @@ public class Raid1 {
 		}
 
 		ArrayList<FileObject> fileObjectList;
+		int errorCount = 0;
+		int interfaceId = 0; // running from 0 .. 2
 		
 		// simple implementation:
 		// real implementation would run each interface in own thread
@@ -83,18 +84,144 @@ public class Raid1 {
 			try
 			{
 				log.fine( "Querying files from " + ci.getName() + "." );
+				
 				fileObjectList = ci.listFiles();
 			}
 			catch( Exception e )
 			{
+				errorCount++;
 				log.fine( "Querying files from " + ci.getName() + " failed: " + e.getMessage() );
 				throw new IOException( e );
 			}
 			
 			log.fine( "Got " + fileObjectList.size() + " files from " + ci.getName() + "." );
+			
+			// Now we build up the matrix using fileObjectList
+			for( FileObject aFO : fileObjectList )
+			{
+				// we take the filename
+				String aFileName = aFO.getName();
+				
+				FileViewObject foundViewObject = compareViewMap.get( aFileName );
+				
+				if( foundViewObject == null )
+				{
+					// we have a new file here - create a new entry
+					FileViewObject aNewEntry = new FileViewObject();
+					
+					aNewEntry.setGlobalFo( aFO );
+					
+					FileObject[] interfaceInformationFos = new FileObject[3];
+					interfaceInformationFos[interfaceId] = aFO;
+					
+					aNewEntry.setInterfaceInformationFos( interfaceInformationFos );
+					
+					compareViewMap.put( aFileName, aNewEntry );
+					sourceIF.put( aFileName, ci );
+				}
+				else
+				{
+					// entry exists - append data
+					FileObject[] interfaceInformationFos = foundViewObject.getInterfaceInformationFos();
+					
+					interfaceInformationFos[interfaceId] = aFO;
+					
+					foundViewObject.setInterfaceInformationFos( interfaceInformationFos );
+					sourceIF.put( aFileName, ci );					
+				}				
+			}
+			
+			interfaceId++;
 		}
 	
+		if( errorCount == 3 )
+		{
+			throw( new IOException( "No connection available." ) );
+		}
+		
+		// Move it to return value
+		for( String key : compareViewMap.keySet() )
+		{
+			FileViewObject toView = compareViewMap.get( key );
+			
+			// TODO here we have to distinguish if
+			// History - or ACTUELL
+			// 	and in both cases
+			// RAID5 (else RAID5) 
+			
+			
+			// maybe we will update the hash - and 
+			// TODO delete the data - not necessary for viewing
+			FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
+			int ii = 0;
+			
+			for( ConnectorInterface ci : cis )
+			{
+				FileObject actFO = interfaceInformationFos[ii];
+				
+				if( actFO != null )
+				{
+					FileObject newFO;
+					
+					try
+					{
+						newFO = ci.read( actFO );
+						actFO.setHash( newFO.getHash() );
+					}
+					catch( Exception e )
+					{
+						log.fine( "An error occured while reading file "+ actFO.getName() 
+								+ " from " + ci.getName() + ": " + e.toString() );
+					}
+					
+					interfaceInformationFos[ii] = actFO;			
+				}
+				
+				actFO.setHash( actFO.getMd5() );
+				
+				interfaceInformationFos[ii] = actFO;			
+				
+				
+				ii++;
+			}
+			
+			toView.setInterfaceInformationFos( interfaceInformationFos );
+			
+			// TODO here we do another round if we want to duplicate files
+			
+			ret.add( toView );
+		}
+
+/*		
+		// add an additional line for showing the Interfaces
+		FileViewObject toView = new FileViewObject();
+		FileObject global = new FileObject();
+		global.setName( " === INTERFACE ===");
+		toView.setGlobalFo( global );
+		
+		FileObject[] interfaceInformationFos = new FileObject[3];
+		
+		int ii = 0;
+		
+		for( ConnectorInterface ci : cis )
+		{
+			FileObject actFO = new FileObject();
+			
+			actFO.setHash( ci.getName() );
+			interfaceInformationFos[ii] = actFO;
+			
+			ii++;
+		}		
+		
+		toView.setInterfaceInformationFos( interfaceInformationFos );
+		
+		ret.add( toView );	
  */
+		
+/*	
+ 		HashMap<String,FileObject> compare = new HashMap<String,FileObject>();
+		HashMap<String,ConnectorInterface> sourceIF = new HashMap<String,ConnectorInterface>();
+		
 		
 		ArrayList<FileObject> boxFiles = null;
 		HashMap<String,FileObject> boxHash = new HashMap<String,FileObject>();
@@ -136,6 +263,8 @@ public class Raid1 {
 			log.fine( "AMAZON_S3 Connector failed to retrieve files." );
 			e1.printStackTrace();
 		}
+
+		
 		
 		if( boxFiles == null && dBoxFiles == null && s3Files == null )
 		{
@@ -186,6 +315,9 @@ public class Raid1 {
 			s3Hash.put( aFileName, aFO );
 		}	
 		
+		
+		// restore missing files:
+		// In case RAID1 - they are only copied !
 		// Now we have the other way round to create the files
 		for( String key : compare.keySet() )
 		{
@@ -268,7 +400,8 @@ public class Raid1 {
 			
 			ret.add( actfvo );
 		}
-				
+ */
+		
 		return ret;
 	}
 

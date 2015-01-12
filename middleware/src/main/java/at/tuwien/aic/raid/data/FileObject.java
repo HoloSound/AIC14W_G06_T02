@@ -26,6 +26,7 @@ public class FileObject
 	private byte[] data;
 	private boolean isFile = false;
 	private boolean isDirectory = false;
+	private String hash = null;
 	
 
 	public FileObject( String name )
@@ -193,5 +194,15 @@ public class FileObject
 		}
 		
 		return md5hash;
+	}
+
+	public String getHash()
+	{
+		return hash;
+	}
+
+	public void setHash( String hash )
+	{
+		this.hash = hash;
 	}
 }
