@@ -21,6 +21,7 @@ public class Raid1 {
 	ConnectorInterface s3 = ConnectorConstructor.s3Instance();
 
 	private ConnectorInterface[] connectorInterface = null;
+	private String NON_EXISTENT = "========";
 	
 	
 	public Raid1() {
@@ -419,6 +420,41 @@ public class Raid1 {
 			throw new IOException("Faild: The file is not stored in any of the connector!");
 		}
 	}
+	
+	private void addTwoLinks( StringBuffer b, String file, 
+			int from, boolean fromIsEmpty,
+			int to, boolean toIsEmpty )
+	{
+		b.append("&nbsp;");	
+		
+System.out.println( "File: " + file + " FROM: " + from + " | " + fromIsEmpty 
+		+ " TO: " + to + " | " + toIsEmpty );
+		
+		if( toIsEmpty == false )
+			addLink( b, file, to, from, true );
+		
+		b.append("&nbsp;|&nbsp;");	
+		
+		if( fromIsEmpty == false )
+			addLink( b, file, from, to, false );
+		
+		b.append("&nbsp;");	
+	}
+	
+	private void addLink( StringBuffer b, String file, int from, int to, boolean isLeft )
+	{
+		b.append("<a target='_blank' href=\"raid1?task=copy&from=" + from  
+				+ "&to=" + to 
+				+ "&file=" + file + "\">" );
+		
+		if( isLeft == true )
+			b.append( "<img src=\"/web/pic/copy_left.png\" alt=\"copy left\" />");
+		else
+			b.append( "<img src=\"/web/pic/copy_right.png\" alt=\"copy right\" />");
+			
+		b.append("</a>");			
+	}
+	
 
 	public String getFileInfo(String fn) {
 		try {
@@ -433,7 +469,7 @@ public class Raid1 {
 			for( ConnectorInterface ci : connectorInterface ) {
 				try {
 					FileObject actFileObject = new FileObject(fn);
-					hashValues[ii] = "====";
+					hashValues[ii] = NON_EXISTENT;
 					
 					try
 					{
@@ -483,6 +519,9 @@ public class Raid1 {
 			int actId = 0;
 			int firstId = -1;
 			int previousId = -1;
+			boolean firstIsEmpty = false;
+			boolean actIsEmpty = false;
+			boolean previousIsEmpty = false;
 
 			
 			b.append("<p>");
@@ -491,33 +530,33 @@ public class Raid1 {
 			{			
 				actHashValue = hashValues[actId];
 				
+				if( actHashValue.compareTo( NON_EXISTENT ) == 0 )
+					actIsEmpty = true;
+				else
+					actIsEmpty = false;
+			
+				
 				if( firstHashValue == null )
 				{
 					firstHashValue = actHashValue;
 					firstId = actId;
 					firstConnectorInterfaceName = ci.getName();
+					
+					if( firstHashValue.compareTo( NON_EXISTENT ) == 0 )
+					{
+						firstIsEmpty = true;
+					}
 				}
 				
 
 				
 				if( previousHashValue != null )
 				{
+System.out.println(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue );
 					if( previousHashValue.compareTo( actHashValue ) != 0  )
 					{
 						// generate "<" and ">" button
-						b.append("&nbsp;");	
-						b.append("<a href=\"task=copy?from=" + previousId  
-								+ "&to=" + actId 
-								+ "&file=" + fn + "\">" );
-						b.append( "&lt;" );
-						b.append("</a>");		
-						b.append("&nbsp;|&nbsp;");			
-						b.append("<a href=\"task=copy?from=" + actId 
-								+ "&to=" + previousId 
-								+ "&file=" + fn + "\">" );
-						b.append( "&gt;" );
-						b.append("</a>");	
-						b.append("&nbsp;");	
+						addTwoLinks( b, fn, previousId, previousIsEmpty, actId, actIsEmpty );
 					}
 					else
 					{
@@ -534,6 +573,11 @@ public class Raid1 {
 				previousHashValue = actHashValue;
 				previousId = actId;
 				
+				if( previousHashValue.compareTo( NON_EXISTENT ) == 0 )
+					previousIsEmpty = true;
+				else
+					previousIsEmpty = false;
+				
 				actId++;
 			}
 			
@@ -542,19 +586,7 @@ public class Raid1 {
 				if( firstHashValue.compareTo( actHashValue ) != 0  )
 				{
 					// generate "<" and ">" button
-					b.append("&nbsp;");	
-					b.append("<a href=\"task=copy?from=" + previousId  
-							+ "&to=" + firstId 
-							+ "&file=" + fn + "\">" );
-					b.append( "&lt;" );
-					b.append("</a>");		
-					b.append("&nbsp;|&nbsp;");		
-					b.append("<a href=\"task=copy?from=" + firstId
-							+ "&to=" + previousId 
-							+ "&file=" + fn + "\">" );
-					b.append( "&gt;" );
-					b.append("</a>");
-					b.append("&nbsp;");	
+					addTwoLinks( b, fn, previousId, previousIsEmpty, firstId, firstIsEmpty );
 				}
 				else
 				{
@@ -567,7 +599,6 @@ public class Raid1 {
 			}
 			
 			b.append( "<bold>" + firstConnectorInterfaceName + "</bold>&nbsp;|" );
-
 			
 			b.append("</p>");
 			
