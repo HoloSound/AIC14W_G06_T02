@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -241,6 +242,7 @@ public class DropBoxImpl
 
 	@Override
 	public FileObject read( FileObject name )
+			throws IOException
 	{
 		/**
 		 * check file existence ?
@@ -251,10 +253,16 @@ public class DropBoxImpl
 		String unixFn = getUnixPath( absPath );
 		
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		DbxEntry.File downloadedFile = null;
 		
 		try 
-		{			
-			DbxEntry.File downloadedFile = client.getFile( unixFn, null, os );
+		{		
+			downloadedFile = client.getFile( unixFn, null, os );
+			
+			if( downloadedFile == null )
+			{
+				throw new FileNotFoundException();
+			}	
 			
 			byte[] bytes = os.toByteArray();
 			

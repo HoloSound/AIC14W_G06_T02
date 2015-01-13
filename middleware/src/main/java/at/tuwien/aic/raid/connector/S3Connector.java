@@ -1,7 +1,7 @@
 package at.tuwien.aic.raid.connector;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,6 +18,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -84,28 +85,38 @@ public class S3Connector implements ConnectorInterface {
 		 * ETags, and selectively downloading a range of an object.
 		 */
 
-		S3Object object = s3.getObject(new GetObjectRequest(bucketName, file
-				.getName()));
-
-		S3ObjectInputStream is = object.getObjectContent();
-		
-/* 		
-		// OLD CODE
-	 
-		ByteArrayOutputStream b = new ByteArrayOutputStream(); 
-		
-		byte[] buff=new byte[8];
-		while(-1!=is.read(buff)){
-			b.write(buff);
-		
-		}
-		
-		file.setData(b.toByteArray());
- */
-		byte[] buffer;	
-		buffer = IOUtils.toByteArray( is );
+		try
+		{
+			S3Object object = s3.getObject(new GetObjectRequest(bucketName, file
+					.getName()));
 	
-		file.setData( buffer );
+			S3ObjectInputStream is = object.getObjectContent();
+			
+			/* 		
+			// OLD CODE
+		 
+			ByteArrayOutputStream b = new ByteArrayOutputStream(); 
+			
+			byte[] buff=new byte[8];
+			while(-1!=is.read(buff)){
+				b.write(buff);
+			
+			}
+			
+			file.setData(b.toByteArray());
+	 */
+			byte[] buffer;	
+			buffer = IOUtils.toByteArray( is );
+		
+			file.setData( buffer );
+		}
+		catch( AmazonS3Exception as3e )
+		{
+			if( as3e.getMessage().compareTo( " The specified key does not exist." ) == 0 )
+			{
+				throw new FileNotFoundException();
+			}
+		}
 
 		return file;
 	}

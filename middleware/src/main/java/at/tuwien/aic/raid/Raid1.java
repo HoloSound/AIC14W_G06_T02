@@ -1,5 +1,6 @@
 package at.tuwien.aic.raid;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -415,17 +416,45 @@ public class Raid1 {
 			}
 			for (ConnectorInterface ci : cis) {
 				try {
+					FileObject actFileObject = new FileObject(fn);
 					
-					b.append( "<tt>" + ci.read(new FileObject(fn)).getMd5() + "</tt>" );
+					try
+					{
+						FileObject readFileObject = ci.read( actFileObject );
+						
+						if( readFileObject != null )
+						{
+							if( readFileObject.getMd5() != null )
+							{
+								b.append( "<tt>" + readFileObject.getMd5() + "</tt>" );
+							}
+							else
+							{
+								b.append( "<tt>--------------------------------</tt>" );
+							}
+						}
+						else
+						{
+							b.append( "<tt>--------------------------------</tt>" );
+						}
+					}
+					catch( FileNotFoundException fnfe )
+					{
+						b.append( "<tt>--------------------------------</tt>" );
+					}
+					
 					b.append(" ");
-					b.append(ci.getName());
-					b.append("</br>");
+					b.append( ci.getName() );
+
 				} catch (Exception e) {
 					e.printStackTrace();
-					b.append(ci.getName()+":error");
+					b.append(ci.getName()+": error");
 				}
+				
+				b.append("</br>");
 			}
-		return	b.toString();
+			
+			return	b.toString();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "error:"+e.getMessage();

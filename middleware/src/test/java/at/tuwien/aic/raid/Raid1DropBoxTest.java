@@ -27,11 +27,10 @@ import at.tuwien.aic.raid.data.FileObject;
  *
  */
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FixMethodOrder( MethodSorters.NAME_ASCENDING )
 public class Raid1DropBoxTest
 {
 	private DropBoxImpl dropBoxIF = null;
-
 
 	@Before
 	public void init()
@@ -42,9 +41,9 @@ public class Raid1DropBoxTest
 	private FileObject createFileObject( String filename )
 	{
 		FileObject fo = new FileObject();
-		
+
 		fo.setName( filename );
-		
+
 		// TODO ... same in each *Impl object? --> REDESIGN
 		File baseDirectory = new File( "src/test/data" );
 		File absPath = new File( baseDirectory, filename );
@@ -57,7 +56,7 @@ public class Raid1DropBoxTest
 			try
 			{
 				is = new FileInputStream( absPath );
-				
+
 				buffer = IOUtils.toByteArray( is );
 
 				fo.setData( buffer );
@@ -82,8 +81,8 @@ public class Raid1DropBoxTest
 					}
 				}
 			}
-		}		
-		
+		}
+
 		return fo;
 	}
 
@@ -91,7 +90,7 @@ public class Raid1DropBoxTest
 	public void t00_listTest()
 	{
 		ArrayList<FileObject> list = dropBoxIF.listFiles();
-		
+
 		for( FileObject aFO : list )
 		{
 			System.out.println( " " + aFO.getName() );
@@ -99,134 +98,161 @@ public class Raid1DropBoxTest
 
 		System.out.println( "============================" );
 	}
-	
-	
+
 	@Test
 	public void t00_createTest()
 	{
 		FileObject fo = createFileObject( "hex.bin" );
-		
+
 		dropBoxIF.create( fo );
 	}
 
-	
 	// @Test
 	public void t01_deleteAllFiles()
 	{
 		FileObject fo = new FileObject();
-		
+
 		ArrayList<FileObject> list = dropBoxIF.listFiles();
-		
+
 		for( FileObject aFO : list )
 		{
 			System.out.println( " " + aFO.getName() );
-			fo.setName(  aFO.getName() );
-				
-			dropBoxIF.delete( fo );			
+			fo.setName( aFO.getName() );
+
+			dropBoxIF.delete( fo );
 		}
-	}	
-	
-	
+	}
+
 	@Test
 	public void t01_deleteTest()
 	{
 		FileObject fo = new FileObject();
-		fo.setName(  "hex.bin" );
-		
+		fo.setName( "hex.bin" );
+
 		dropBoxIF.delete( fo );
-	}	
-	
+	}
+
 	@Test
 	public void t02_readTest()
 	{
 		FileObject fo = createFileObject( "hex.bin" );
-		
+
 		dropBoxIF.create( fo );
-		
+
 		FileObject readFo = new FileObject();
 		readFo.setName( fo.getName() );
-		
-		
+
 		// compare
 		boolean ret = false;
-		
-		dropBoxIF.read( readFo );		
+
+		try
+		{
+			dropBoxIF.read( readFo );
+		}
+		catch( IOException e )
+		{
+			fail();
+			e.printStackTrace();
+		}
 		
 		// compare
-		
+
 		System.out.println( "Original file: " + fo.getName() );
 		fo.showHexData();
 
 		System.out.println( "Re-read file: " + readFo.getName() );
 		readFo.showHexData();
-		
+
 		ret = fo.compare( readFo );
-		assertEquals( "creation and read = document with same content and name", true, ret );
-	}		
-	
+		assertEquals(
+				"creation and read = document with same content and name",
+				true, ret );
+	}
+
 	@Test
 	public void t03_idempotentCreateTest()
 	{
 		FileObject fo = createFileObject( "hex.bin" );
-		
+
 		dropBoxIF.create( fo );
-		
+
 		// and now a second time
 		dropBoxIF.create( fo );
-	}	
-	
+	}
+
 	@Test
 	public void t04_updateTest()
 	{
 		FileObject fo = createFileObject( "hex_mirror.bin" );
-		
+
 		fo.setName( "hex.bin" );
-		
+
 		dropBoxIF.create( fo );
-		
+
 		// create palindrom
 		byte[] data = fo.getData();
 		byte tmp;
-		
+
 		for( int ii = 0 ; ii < (data.length / 2) ; ii++ )
 		{
 			tmp = data[ii];
-			data[ii] = data[data.length-1-ii];
-			data[data.length-1-ii] = tmp;
+			data[ii] = data[data.length - 1 - ii];
+			data[data.length - 1 - ii] = tmp;
 		}
-		
+
 		fo.setData( data );
-		
+
 		// and now a second time
 		dropBoxIF.update( fo );
 	}
-	
-	
+
 	@Test
 	public void t05_update2Test()
 	{
 		FileObject fo = createFileObject( "hex.bin" );
-		
+
 		dropBoxIF.create( fo );
-		
+
 		// create diagonal swap
 		byte[] data = fo.getData();
 		byte tmp;
-		
+
 		for( int ii = 0 ; ii < 16 ; ii++ )
 		{
-			for( int jj = 0 ; jj < ii ; jj ++ )
+			for( int jj = 0 ; jj < ii ; jj++ )
 			{
-					tmp = data[ii*16+jj];
-					data[ii*16+jj] = data[jj*16+ii];
-					data[jj*16+ii] = tmp;
+				tmp = data[ii * 16 + jj];
+				data[ii * 16 + jj] = data[jj * 16 + ii];
+				data[jj * 16 + ii] = tmp;
 			}
 		}
-		
+
 		fo.setData( data );
-		
+
 		// and now a second time
 		dropBoxIF.update( fo );
+	}
+
+	
+	@Test
+	public void t06_readDummy2Test()
+	{
+		FileObject fo = createFileObject( "dummy_0123456789.bin" );
+
+		// read a nonexistent file
+		FileObject dummy = null;
+		
+		try
+		{
+			dummy = dropBoxIF.read( fo );
+		}
+		catch( IOException e )
+		{
+			fail();
+			e.printStackTrace();
+		}
+		
+		assertEquals( "read of nonexistent file returns null object", null, dummy );
 	}
 	
 }

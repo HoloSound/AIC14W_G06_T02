@@ -184,5 +184,16 @@ public class Raid1FileTest
 		// and now a second time
 		fileIF.update( fo );
 	}
+
+	@Test
+	public void t06_readDummy2Test()
+	{
+		FileObject fo = createFileObject( "dummy_0123456789.bin" );
+
+		// read a nonexistent file
+		FileObject dummy = fileIF.read( fo );
+		
+		assertEquals( "read of nonexistent file returns null object", null, dummy );
+	}
 	
 }

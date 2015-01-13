@@ -195,7 +195,15 @@ public class Raid5Servlet extends HttpServlet {
 				}
 				sb.append( ">" );
 				
-				sb.append( "<tt>" + actFO.getName() + "</tt>");
+				if( actFO != null )
+				{
+					sb.append( "<tt>" + actFO.getName() + "</tt>");
+				}
+				else
+				{
+					sb.append( "&nbsp;" );
+				}
+				
 				sb.append("</td>");						
 			}	
 			

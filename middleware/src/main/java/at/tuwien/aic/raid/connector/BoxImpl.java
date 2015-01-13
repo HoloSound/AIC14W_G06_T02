@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -221,6 +222,9 @@ public class BoxImpl implements ConnectorInterface
 
 	/**
 	 * reads a FileObject
+	 * This is done in the way that the requested file is stored local
+	 * and then put into the fileobject.
+	 * 
 	 * @param The file to read
 	 * @return FileObject
 	 */
@@ -240,7 +244,14 @@ public class BoxImpl implements ConnectorInterface
 			throw new IOException(e);
 		} catch (BoxServerException e) {
 			//e.printStackTrace();
-			throw new IOException(e);
+			if( e.getMessage().compareTo( "Not Found" ) == 0 )
+			{
+				throw new FileNotFoundException();
+			}
+			else
+			{
+				throw new IOException(e);
+			}
 		} catch (IllegalStateException e) {
 			//e.printStackTrace();
 			throw new IOException(e);

@@ -125,8 +125,16 @@ public class Raid1Test
 		boolean ret = fo.compare( readFo );
 		assertEquals( "creation and read = document with same content and name", true, ret );
 		ret = fo.compare( readFo );
-		
-		dropBoxIF.read( readFo );		
+
+		try
+		{
+			dropBoxIF.read( readFo );
+		}
+		catch( IOException e )
+		{
+			fail();
+			e.printStackTrace();
+		}
 		
 		// compare
 		ret = fo.compare( readFo );
