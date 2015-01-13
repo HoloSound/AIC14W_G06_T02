@@ -20,6 +20,9 @@ public class Raid1 {
 	ConnectorInterface box = ConnectorConstructor.boxInstance();
 	ConnectorInterface s3 = ConnectorConstructor.s3Instance();
 
+	private ConnectorInterface[] connectorInterface = null;
+	
+	
 	public Raid1() {
 		log.fine("NEW Raid1");
 	}
@@ -27,7 +30,20 @@ public class Raid1 {
 	public int getMaxId() {
 		return 3;
 	}
-
+	
+	public void initConnectorInterface()
+	{
+		if( connectorInterface == null )
+		{
+			connectorInterface = new ConnectorInterface[3];
+			
+			for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
+			{
+				connectorInterface[ii] = this.getInterface( ii );
+			}
+		}
+	}
+	
 	public ConnectorInterface getInterface(int ii) {
 		if (ii == 0) {
 			return (ConnectorInterface) dbox;
@@ -56,11 +72,8 @@ public class Raid1 {
 
 		// FUTURE CODING STYLE
 		// definition of connector interfaces
-		ConnectorInterface[] cis = new ConnectorInterface[3];
-
-		for (int ii = 0; ii < this.getMaxId(); ii++) {
-			cis[ii] = this.getInterface(ii);
-		}
+	    // initialization of connector interfaces
+		initConnectorInterface();
 
 		ArrayList<FileObject> fileObjectList;
 		int errorCount = 0;
@@ -69,7 +82,7 @@ public class Raid1 {
 		// simple implementation:
 		// real implementation would run each interface in own thread
 		// to parallelize the writing action and minimize the waiting time.
-		for (ConnectorInterface ci : cis) {
+		for( ConnectorInterface ci : connectorInterface ) {
 			try {
 				log.fine("Querying files from " + ci.getName() + ".");
 
@@ -409,14 +422,18 @@ public class Raid1 {
 
 	public String getFileInfo(String fn) {
 		try {
-			ConnectorInterface[] cis = new ConnectorInterface[3];
 			StringBuffer b = new StringBuffer();
-			for (int ii = 0; ii < this.getMaxId(); ii++) {
-				cis[ii] = this.getInterface(ii);
-			}
-			for (ConnectorInterface ci : cis) {
+			
+		    // initialization of connector interfaces
+			initConnectorInterface();
+			
+			int ii = 0;
+			String hashValues[] = new String[3];
+			
+			for( ConnectorInterface ci : connectorInterface ) {
 				try {
 					FileObject actFileObject = new FileObject(fn);
+					hashValues[ii] = "====";
 					
 					try
 					{
@@ -426,7 +443,9 @@ public class Raid1 {
 						{
 							if( readFileObject.getMd5() != null )
 							{
-								b.append( "<tt>" + readFileObject.getMd5() + "</tt>" );
+								String hashValue = readFileObject.getMd5();
+								b.append( "<tt>" + hashValue + "</tt>" );
+								hashValues[ii] = hashValue;
 							}
 							else
 							{
@@ -452,7 +471,105 @@ public class Raid1 {
 				}
 				
 				b.append("</br>");
+				ii++;
 			}
+			
+			// now we are generating some exchange Buttons
+
+			String firstHashValue = null;
+			String actHashValue = null;
+			String previousHashValue = null;
+			String firstConnectorInterfaceName = null;
+			int actId = 0;
+			int firstId = -1;
+			int previousId = -1;
+
+			
+			b.append("<p>");
+			
+			for( ConnectorInterface ci : connectorInterface ) 
+			{			
+				actHashValue = hashValues[actId];
+				
+				if( firstHashValue == null )
+				{
+					firstHashValue = actHashValue;
+					firstId = actId;
+					firstConnectorInterfaceName = ci.getName();
+				}
+				
+
+				
+				if( previousHashValue != null )
+				{
+					if( previousHashValue.compareTo( actHashValue ) != 0  )
+					{
+						// generate "<" and ">" button
+						b.append("&nbsp;");	
+						b.append("<a href=\"task=copy?from=" + previousId  
+								+ "&to=" + actId 
+								+ "&file=" + fn + "\">" );
+						b.append( "&lt;" );
+						b.append("</a>");		
+						b.append("&nbsp;|&nbsp;");			
+						b.append("<a href=\"task=copy?from=" + actId 
+								+ "&to=" + previousId 
+								+ "&file=" + fn + "\">" );
+						b.append( "&gt;" );
+						b.append("</a>");	
+						b.append("&nbsp;");	
+					}
+					else
+					{
+						b.append("&nbsp;|&nbsp;");							
+					}
+				}
+				else
+				{
+					b.append("&nbsp;|&nbsp;");							
+				}
+				
+				b.append( "<bold>" + ci.getName() + "</bold>" );
+				
+				previousHashValue = actHashValue;
+				previousId = actId;
+				
+				actId++;
+			}
+			
+			if( firstHashValue != null )
+			{
+				if( firstHashValue.compareTo( actHashValue ) != 0  )
+				{
+					// generate "<" and ">" button
+					b.append("&nbsp;");	
+					b.append("<a href=\"task=copy?from=" + previousId  
+							+ "&to=" + firstId 
+							+ "&file=" + fn + "\">" );
+					b.append( "&lt;" );
+					b.append("</a>");		
+					b.append("&nbsp;|&nbsp;");		
+					b.append("<a href=\"task=copy?from=" + firstId
+							+ "&to=" + previousId 
+							+ "&file=" + fn + "\">" );
+					b.append( "&gt;" );
+					b.append("</a>");
+					b.append("&nbsp;");	
+				}
+				else
+				{
+					b.append("&nbsp;|&nbsp;");							
+				}
+			}
+			else
+			{
+				b.append("&nbsp;|&nbsp;");							
+			}
+			
+			b.append( "<bold>" + firstConnectorInterfaceName + "</bold>&nbsp;|" );
+
+			
+			b.append("</p>");
 			
 			return	b.toString();
 		} catch (Exception e) {
