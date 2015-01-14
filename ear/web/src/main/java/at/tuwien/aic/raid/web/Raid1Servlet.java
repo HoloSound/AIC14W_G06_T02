@@ -30,6 +30,10 @@ public class Raid1Servlet extends HttpServlet {
 	public static final String DOWNLOAD_OPERATION = "download";
 	public static final String UPLOAD_OPERATION = "upload";
 	public static final String FILE_INFO = "fileInfo";
+	public static final String COPY = "copy";
+	public static final String FROM = "from";
+	public static final String TO = "to";
+	
 	public static final String SHOW_HISTORY = "history";
 	@EJB
 	private RaidSessionBeanInterface raid;
@@ -87,6 +91,13 @@ public class Raid1Servlet extends HttpServlet {
 				getFileInfo(fn, req, resp);
 			}
 
+			if (COPY.equals(req.getParameter("task"))) {// lets
+				String from = req.getParameter(FROM);
+				String to = req.getParameter(TO);
+				String fn = req.getParameter(FILE_NAME);
+							
+				copyFile(from,to,fn, req, resp);
+			}
 			if (SHOW_HISTORY.equals(req.getParameter("task"))) {// lets
 				String fn = req.getParameter(FILE_NAME);
 				getFileHistory(fn, req, resp);
@@ -122,6 +133,11 @@ public class Raid1Servlet extends HttpServlet {
 			error(e.getMessage(), resp);
 		}
 
+	}
+
+	private void copyFile(String from2, String to2, String fn, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		resp.getOutputStream().write("TODO ".getBytes());
+		
 	}
 
 	private void getFileHistory(String fn, HttpServletRequest req, HttpServletResponse resp) throws IOException {
