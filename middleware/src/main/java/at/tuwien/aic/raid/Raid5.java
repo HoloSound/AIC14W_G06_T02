@@ -546,12 +546,16 @@ public class Raid5
 				String aFileName = aFO.getName();
 				
 				// and in RAID5 we check if the filename is constructed in special way
+				Pattern p1 = Pattern.compile( "[HLP][01]_.*" );
+				Matcher m1 = p1.matcher( aFileName );
+				boolean b1 = m1.matches();
 				
-				Pattern p = Pattern.compile( "[HLP][01]_.*" );
-				Matcher m = p.matcher( aFileName );
-				boolean b = m.matches();
+				// in RAID5 we do NOT show HISTORY files!
+				Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
+				Matcher m2 = p2.matcher( aFileName );
+				boolean b2 = m2.matches();				
 				
-				if( b == true )
+				if( b1 == true && b2 == false )
 				{
 					// in this case the file names start with char [3] !
 					String mainFileName = aFileName.substring( 3 );
@@ -611,82 +615,15 @@ System.out.println( "2: " + raidType );
 			// TODO here we have to distinguish if
 			// History - or ACTUELL
 			// 	and in both cases
-			// RAID5 (else RAID5) 
-			
-			
+			// RAID5 (else RAID1) 
+				
 			// maybe we will update the hash - and 
-			// TODO delete the data - not necessary for viewing
-/*
-			FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
-			int ii = 0;
-			
-			for( ConnectorInterface ci : cis )
-			{
-				FileObject actFO = interfaceInformationFos[ii];
-				
-				if( actFO != null )
-				{
-					FileObject newFO;
-
-					// in RAID5 we do not HASHing
-					// we only show the naming parts
-
-					try
-					{
-						newFO = ci.read( actFO );
-						actFO.setHash( newFO.getHash() );
-					}
-					catch( Exception e )
-					{
-						log.fine( "An error occured while reading file "+ actFO.getName() 
-								+ " from " + ci.getName() + ": " + e.toString() );
-					}
-					
-					interfaceInformationFos[ii] = actFO;			
-				}
-			
-				actFO.setHash( actFO.getMd5() );
-				
-				interfaceInformationFos[ii] = actFO;			
-				
-				
-				ii++;
-			}
-	
-			toView.setInterfaceInformationFos( interfaceInformationFos );
- */
-			
+			// TODO delete the data - not necessary for viewing	
 			// TODO here we do another round if we want to duplicate files
 			
 			ret.add( toView );
 		}
-
-/*		
-		// add an additional line for showing the Interfaces
-		FileViewObject toView = new FileViewObject();
-		FileObject global = new FileObject();
-		global.setName( " === INTERFACE ===");
-		toView.setGlobalFo( global );
-		
-		FileObject[] interfaceInformationFos = new FileObject[3];
-		
-		int ii = 0;
-		
-		for( ConnectorInterface ci : cis )
-		{
-			FileObject actFO = new FileObject();
-			
-			actFO.setHash( ci.getName() );
-			interfaceInformationFos[ii] = actFO;
-			
-			ii++;
-		}		
-		
-		toView.setInterfaceInformationFos( interfaceInformationFos );
-		
-		ret.add( toView );	
- */
-		
+	
 		return ret;
 	}
 

@@ -108,11 +108,16 @@ public class Raid1 {
 				String aFileName = aFO.getName();
 
 				// in RAID1 we do NOT show RAID5 files!
-				Pattern p = Pattern.compile( "[HLP][01]_.*" );
-				Matcher m = p.matcher( aFileName );
-				boolean b = m.matches();
+				Pattern p1 = Pattern.compile( "[HLP][01]_.*" );
+				Matcher m1= p1.matcher( aFileName );
+				boolean b1 = m1.matches();
 				
-				if( b == false )
+				// in RAID1 we do NOT show HISTORY files!
+				Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
+				Matcher m2 = p2.matcher( aFileName );
+				boolean b2 = m2.matches();				
+				
+				if( b1 == false && b2 == false )
 				{
 					FileViewObject foundViewObject = compareViewMap.get(aFileName);
 	
@@ -155,7 +160,7 @@ public class Raid1 {
 			// TODO here we have to distinguish if
 			// History - or ACTUELL
 			// and in both cases
-			// RAID5 (else RAID5)
+			// RAID1 (else RAID5)
 
 			// maybe we will update the hash - and
 			// TODO delete the data - not necessary for viewing
@@ -167,27 +172,6 @@ public class Raid1 {
 
 			ret.add(toView);
 		}
-
-		/*
-		 * // add an additional line for showing the Interfaces FileViewObject
-		 * toView = new FileViewObject(); FileObject global = new FileObject();
-		 * global.setName( " === INTERFACE ==="); toView.setGlobalFo( global );
-		 * 
-		 * FileObject[] interfaceInformationFos = new FileObject[3];
-		 * 
-		 * int ii = 0;
-		 * 
-		 * for( ConnectorInterface ci : cis ) { FileObject actFO = new
-		 * FileObject();
-		 * 
-		 * actFO.setHash( ci.getName() ); interfaceInformationFos[ii] = actFO;
-		 * 
-		 * ii++; }
-		 * 
-		 * toView.setInterfaceInformationFos( interfaceInformationFos );
-		 * 
-		 * ret.add( toView );
-		 */
 
 		return ret;
 	}
