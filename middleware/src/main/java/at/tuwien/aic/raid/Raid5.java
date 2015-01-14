@@ -1,8 +1,11 @@
 package at.tuwien.aic.raid;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,6 +54,9 @@ public class Raid5
 	 */
 
 	java.util.logging.Logger log = java.util.logging.Logger.getLogger( "Raid5" );
+
+	private static final String DATE_TIME_PREFIX_FORMAT = "yyyyMMdd_HHmmss_";
+	private boolean writeHistory = true;
 	
 	ConnectorInterface dbox = ConnectorConstructor.dropBoxInstance();
 	ConnectorInterface box = ConnectorConstructor.boxInstance();
@@ -58,6 +64,7 @@ public class Raid5
 
 	private ConnectorInterface[] connectorInterface = null;
 	
+
 	public Raid5()
 	{
 		System.out.println( "NEW Raid5" );
@@ -851,7 +858,7 @@ System.out.println( "2: " + raidType );
 	 *             if no write operation success
 	 *
 	 */
-
+	
 	public synchronized void write( FileObject f ) throws IOException
 	{
 		// TODO IMPLEMENT RAID5 LOGIK
@@ -862,8 +869,6 @@ System.out.println( "2: " + raidType );
 	    
 	    FileObject[] generatedFiles = generateFiles( f );
 	    
-
-
 	    ArrayList<FileObject> aList = new ArrayList<FileObject>( Arrays.asList( generatedFiles ) );
 	    
 	    // TODO here we should manage some randomness
@@ -879,8 +884,12 @@ System.out.println( "2: " + raidType );
 	    aList.remove( (int) second );
 	    newList.add( aList.get( 0 ) );
 	    
-	    
-	    
+		// generate a date_time_prefix	 
+	    DateFormat dateFormat = new SimpleDateFormat( DATE_TIME_PREFIX_FORMAT );
+	    Date date = new Date();
+	    String dateAndTimePrefix = dateFormat.format(date); 
+
+		
 	    int index = 0;
 
 		// simple implementation:
@@ -892,7 +901,7 @@ System.out.println( "2: " + raidType );
 			
 			try
 			{
-				log.fine( "Write" + writeFO.getName() + " to " + ci.getName() );
+				log.fine( "Write File: " + writeFO.getName() + " to " + ci.getName() );
 				ci.create( writeFO );
 			}
 			catch( Exception e )
@@ -904,7 +913,41 @@ System.out.println( "2: " + raidType );
 			
 			log.fine( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
 			
+			if( writeHistory )
+			{
+				// add date_time_prefix
+				String originalName = writeFO.getName();
+				writeFO.setName( dateAndTimePrefix + originalName );
+				
+				try
+				{
+					log.fine( "Write History File: " + writeFO.getName() + " to " + ci.getName() );
+					ci.create( writeFO );
+				}
+				catch( Exception e )
+				{
+					b = b + 1;
+					log.fine( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
+					e.printStackTrace();
+				}
+				
+				log.fine( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
+				
+				writeFO.setName( originalName );
+				// in case of exception --> modified file name exists!
+			}
+			
 			index++;
 		}
+	}
+
+	public boolean isWriteHistory()
+	{
+		return writeHistory;
+	}
+
+	public void setWriteHistory( boolean writeHistory )
+	{
+		this.writeHistory = writeHistory;
 	}
 }

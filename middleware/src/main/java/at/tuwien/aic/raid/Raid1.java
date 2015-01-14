@@ -2,7 +2,10 @@ package at.tuwien.aic.raid;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +17,9 @@ import at.tuwien.aic.raid.data.FileViewObject;
 public class Raid1 {
 
 	java.util.logging.Logger log = java.util.logging.Logger.getLogger("Raid1");
+	
+	private static final String DATE_TIME_PREFIX_FORMAT = "yyyyMMdd_HHmmss_";
+	private boolean writeHistory = true;
 
 	ConnectorInterface dbox = ConnectorConstructor.dropBoxInstance();
 	// static
@@ -391,7 +397,17 @@ public class Raid1 {
 	public synchronized void write(FileObject f) throws IOException {
 		// TODO IMPLEMENT RAID1
 		// LOGIK
-		int b = 0;
+		int baseErrors = 0;
+		int historyErrors = 0;
+		
+		// generate a date_time_prefix	 
+	    DateFormat dateFormat = new SimpleDateFormat( DATE_TIME_PREFIX_FORMAT );
+	    Date date = new Date();
+	    String dateAndTimePrefix = dateFormat.format(date); 
+	    FileObject historyFile = new FileObject( f );
+		// add date_time_prefix
+	    historyFile.setName( dateAndTimePrefix + f.getName() );				
+		
 
 		// definition of connector interfaces
 		ConnectorInterface[] cis = new ConnectorInterface[3];
@@ -405,19 +421,37 @@ public class Raid1 {
 		// to parallelize the writing action and minimize the waiting time.
 		for (ConnectorInterface ci : cis) {
 			try {
-				log.fine("Write" + f.getName() + " to " + ci.getName());
+				log.fine("Write file: " + f.getName() + " to " + ci.getName());
 				ci.create(f);
 			} catch (Exception e) {
-				b = b + 1;
+				baseErrors += 1;
 				log.fine("Error" + e.getMessage());
 				e.printStackTrace();
 			}
 
 			log.fine("Write" + f.getName() + " to " + ci.getName() + " ... OK.");
+			
+			if( writeHistory )
+			{
+				try {
+					log.fine("Write HISTORY file: " + historyFile.getName() + " to " + ci.getName());
+					ci.create(historyFile);
+				} catch (Exception e) {
+					historyErrors += 1;
+					log.fine("Error" + e.getMessage());
+					e.printStackTrace();
+				}
+
+				log.fine("Write" + historyFile.getName() + " to " + ci.getName() + " ... OK.");				
+			}
 		}
 
-		if (b == 3) {
+		if (baseErrors == 3) {
 			throw new IOException("Faild: The file is not stored in any of the connector!");
+		}
+		
+		if (historyErrors == 3) {
+			throw new IOException("Faild: The history file is not stored in any of the connector!");
 		}
 	}
 	

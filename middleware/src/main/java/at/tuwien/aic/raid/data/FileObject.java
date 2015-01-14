@@ -40,6 +40,16 @@ public class FileObject
 		// TODO Auto-generated constructor stub
 	}
 
+	public FileObject( FileObject f )
+	{
+		// TODO Auto-generated constructor stub
+		this.name = f.getName();
+		this.data = f.getData();
+		// this.isFile = f.getIsFile();
+		// this.isDirectory = f.getIsDirectory();
+		this.hash = f.getHash();
+	}
+
 	public String getName()
 	{
 		return name;
