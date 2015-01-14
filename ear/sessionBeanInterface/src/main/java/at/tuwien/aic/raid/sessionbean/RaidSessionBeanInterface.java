@@ -32,5 +32,7 @@ public interface RaidSessionBeanInterface {
 	void write(FileObject f)throws IOException;
 
 	String getFileInfo(String fn);
+	String getFileHistory( String fn );
 
+	String copyFile(String fn, String from2, String to2);
 }

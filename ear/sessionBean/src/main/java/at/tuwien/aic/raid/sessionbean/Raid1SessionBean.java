@@ -10,7 +10,9 @@ import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
 
 @Stateless()
-public class Raid1SessionBean implements RaidSessionBeanInterface {
+public class Raid1SessionBean 
+		implements RaidSessionBeanInterface 
+{
 	
 	private Raid1 raid1;
 
@@ -50,6 +52,15 @@ public class Raid1SessionBean implements RaidSessionBeanInterface {
 		return raid1.getFileInfo(fn);
 	}
 
-	
-	
+	@Override
+	public String getFileHistory( String fn )
+	{
+		return raid1.getFileHistory( fn );
+	}
+
+	@Override
+	public String copyFile(String fn, String fromInterface, String toInterface ) 
+	{
+		return raid1.copyFile( fn, fromInterface, toInterface );
+	}
 }

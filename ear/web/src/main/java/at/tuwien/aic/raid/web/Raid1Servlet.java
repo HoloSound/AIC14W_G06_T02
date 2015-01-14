@@ -135,20 +135,25 @@ public class Raid1Servlet extends HttpServlet {
 
 	}
 
-	private void copyFile(String from2, String to2, String fn, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		resp.getOutputStream().write("TODO ".getBytes());
+	private void copyFile(String from2, String to2, String fn, HttpServletRequest req, HttpServletResponse resp) 
+			throws IOException 
+	{
+		resp.getOutputStream().write( raid.copyFile(fn, from2, to2 ).getBytes() );
 		
 	}
 
-	private void getFileHistory(String fn, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	private void getFileHistory(String fn, HttpServletRequest req, HttpServletResponse resp) 
+			throws IOException 
+	{
 
-		resp.getOutputStream().write(("<h1>the history for  " + fn + " will be here </h1>").getBytes());
+		resp.getOutputStream().write( raid.getFileHistory(fn).getBytes() );
 
 	}
 
-	private void getFileInfo(String fn, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		resp.getOutputStream().write(raid.getFileInfo(fn).getBytes());
-
+	private void getFileInfo(String fn, HttpServletRequest req, HttpServletResponse resp) 
+			throws IOException 
+	{
+		resp.getOutputStream().write( raid.getFileInfo(fn).getBytes() );
 	}
 
 	private void listFiles(HttpServletRequest req, HttpServletResponse resp) throws IOException {
