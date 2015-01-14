@@ -628,7 +628,7 @@ System.out.println( "2: " + raidType );
 	}
 
 	/**
-	 * Try to remove the file from all connector
+	 * Remove the different files from all connectors
 	 * 
 	 * @param fn
 	 * @throws IOException
@@ -637,11 +637,8 @@ System.out.println( "2: " + raidType );
 	 * 
 	 */
 	public synchronized void delete( String fn ) throws IOException
-	{// TODO IMPLEMENT RAID5
-		// LOGIK
-		// here we generate the 3 further files
-//		String[] fileNames = this.generateFileNames( fn, <HERE I NEED THE (SIZE % 2) );
-		
+	{
+		// here we generate the 3 different files
 	    // initialization of connector interfaces
 		initConnectorInterface();
 		
@@ -741,7 +738,7 @@ System.out.println( "2: " + raidType );
 		
 		if( interfaceInformationFos == null )
 		{
-			
+			throw new IOException("Faild: got not interface inforation objects!");
 		}
 		
 		// simple implementation:
@@ -798,8 +795,8 @@ System.out.println( "2: " + raidType );
 	
 	public synchronized void write( FileObject f ) throws IOException
 	{
-		// TODO IMPLEMENT RAID5 LOGIK
-		int b = 0;
+		int writtenFiles = 0;
+		int writtenHistoryFiles = 0;
 		
 	    // initialization of connector interfaces
 		initConnectorInterface();
@@ -808,7 +805,7 @@ System.out.println( "2: " + raidType );
 	    
 	    ArrayList<FileObject> aList = new ArrayList<FileObject>( Arrays.asList( generatedFiles ) );
 	    
-	    // TODO here we should manage some randomness
+	    // here we manage some randomness
 	    long mil = System.currentTimeMillis();
 	    long first = mil % 3;	// 0, 1, 2
 	    long second = mil % 2;	// 0, 1 
@@ -843,7 +840,7 @@ System.out.println( "2: " + raidType );
 			}
 			catch( Exception e )
 			{
-				b = b + 1;
+				writtenFiles++;
 				log.fine( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
 				e.printStackTrace();
 			}
@@ -863,7 +860,7 @@ System.out.println( "2: " + raidType );
 				}
 				catch( Exception e )
 				{
-					b = b + 1;
+					writtenHistoryFiles++;
 					log.fine( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
 					e.printStackTrace();
 				}
@@ -875,6 +872,14 @@ System.out.println( "2: " + raidType );
 			}
 			
 			index++;
+		}
+		
+		if (writtenFiles < 2) {
+			throw new IOException("Faild: The file could not be stored in at least 2 interfaces!");
+		}
+		
+		if (writtenHistoryFiles < 2) {
+			throw new IOException("Faild: The history file could not be stored in at least 2 interfaces!");
 		}
 	}
 

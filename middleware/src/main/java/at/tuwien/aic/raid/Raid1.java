@@ -60,6 +60,9 @@ public class Raid1 {
 			return (ConnectorInterface) s3;
 		}
 	}
+	
+	
+	
 
 	/**
 	 * Compares the content of all connectors and try to fix missing files If
