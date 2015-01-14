@@ -455,8 +455,100 @@ System.out.println( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 		b.append("</a>");			
 	}
 	
+	private void generateCopyButtons( StringBuffer b, String fileName, String[] hashValues )
+	{
+		String firstHashValue = null;
+		String actHashValue = null;
+		String previousHashValue = null;
+		String firstConnectorInterfaceName = null;
+		int actId = 0;
+		int firstId = -1;
+		int previousId = -1;
+		boolean firstIsEmpty = false;
+		boolean actIsEmpty = false;
+		boolean previousIsEmpty = false;
 
-	public String getFileInfo(String fn) {
+		
+		b.append("<p>");
+		
+		for( ConnectorInterface ci : connectorInterface ) 
+		{			
+			actHashValue = hashValues[actId];
+			
+			if( actHashValue.compareTo( NON_EXISTENT ) == 0 )
+				actIsEmpty = true;
+			else
+				actIsEmpty = false;
+		
+			
+			if( firstHashValue == null )
+			{
+				firstHashValue = actHashValue;
+				firstId = actId;
+				firstConnectorInterfaceName = ci.getName();
+				
+				if( firstHashValue.compareTo( NON_EXISTENT ) == 0 )
+				{
+					firstIsEmpty = true;
+				}
+			}
+			
+			
+			if( previousHashValue != null )
+			{
+System.out.println(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue );
+				if( previousHashValue.compareTo( actHashValue ) != 0  )
+				{
+					// generate "<" and ">" button
+					addTwoLinks( b, fileName, previousId, previousIsEmpty, actId, actIsEmpty );
+				}
+				else
+				{
+					b.append("&nbsp;|&nbsp;");							
+				}
+			}
+			else
+			{
+				b.append("&nbsp;|&nbsp;");							
+			}
+			
+			b.append( "<bold>" + ci.getName() + "</bold>" );
+			
+			previousHashValue = actHashValue;
+			previousId = actId;
+			
+			if( previousHashValue.compareTo( NON_EXISTENT ) == 0 )
+				previousIsEmpty = true;
+			else
+				previousIsEmpty = false;
+			
+			actId++;
+		}
+		
+		if( firstHashValue != null )
+		{
+			if( firstHashValue.compareTo( actHashValue ) != 0  )
+			{
+				// generate "<" and ">" button
+				addTwoLinks( b, fileName, previousId, previousIsEmpty, firstId, firstIsEmpty );
+			}
+			else
+			{
+				b.append("&nbsp;|&nbsp;");							
+			}
+		}
+		else
+		{
+			b.append("&nbsp;|&nbsp;");							
+		}
+		
+		b.append( "<bold>" + firstConnectorInterfaceName + "</bold>&nbsp;|" );
+		
+		b.append("</p>");		
+	}
+	
+
+	public String getFileInfo(String fileName ) {
 		try {
 			StringBuffer b = new StringBuffer();
 			
@@ -468,7 +560,7 @@ System.out.println( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 			
 			for( ConnectorInterface ci : connectorInterface ) {
 				try {
-					FileObject actFileObject = new FileObject(fn);
+					FileObject actFileObject = new FileObject( fileName );
 					hashValues[ii] = NON_EXISTENT;
 					
 					try
@@ -510,97 +602,30 @@ System.out.println( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 				ii++;
 			}
 			
+			boolean differentHashvalues = false;
+			String preHash = null;
+			
+			for( String hashValue : hashValues )
+			{
+				if( preHash == null )
+				{
+					preHash = hashValue;
+				}
+				else
+				{
+					if( preHash.compareTo( hashValue ) != 0 )
+					{
+						differentHashvalues = true;
+						break;
+					}
+				}
+			}
+				
 			// now we are generating some exchange Buttons
-
-			String firstHashValue = null;
-			String actHashValue = null;
-			String previousHashValue = null;
-			String firstConnectorInterfaceName = null;
-			int actId = 0;
-			int firstId = -1;
-			int previousId = -1;
-			boolean firstIsEmpty = false;
-			boolean actIsEmpty = false;
-			boolean previousIsEmpty = false;
-
-			
-			b.append("<p>");
-			
-			for( ConnectorInterface ci : connectorInterface ) 
-			{			
-				actHashValue = hashValues[actId];
-				
-				if( actHashValue.compareTo( NON_EXISTENT ) == 0 )
-					actIsEmpty = true;
-				else
-					actIsEmpty = false;
-			
-				
-				if( firstHashValue == null )
-				{
-					firstHashValue = actHashValue;
-					firstId = actId;
-					firstConnectorInterfaceName = ci.getName();
-					
-					if( firstHashValue.compareTo( NON_EXISTENT ) == 0 )
-					{
-						firstIsEmpty = true;
-					}
-				}
-				
-
-				
-				if( previousHashValue != null )
-				{
-System.out.println(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue );
-					if( previousHashValue.compareTo( actHashValue ) != 0  )
-					{
-						// generate "<" and ">" button
-						addTwoLinks( b, fn, previousId, previousIsEmpty, actId, actIsEmpty );
-					}
-					else
-					{
-						b.append("&nbsp;|&nbsp;");							
-					}
-				}
-				else
-				{
-					b.append("&nbsp;|&nbsp;");							
-				}
-				
-				b.append( "<bold>" + ci.getName() + "</bold>" );
-				
-				previousHashValue = actHashValue;
-				previousId = actId;
-				
-				if( previousHashValue.compareTo( NON_EXISTENT ) == 0 )
-					previousIsEmpty = true;
-				else
-					previousIsEmpty = false;
-				
-				actId++;
-			}
-			
-			if( firstHashValue != null )
+			if( differentHashvalues )
 			{
-				if( firstHashValue.compareTo( actHashValue ) != 0  )
-				{
-					// generate "<" and ">" button
-					addTwoLinks( b, fn, previousId, previousIsEmpty, firstId, firstIsEmpty );
-				}
-				else
-				{
-					b.append("&nbsp;|&nbsp;");							
-				}
+				generateCopyButtons( b, fileName, hashValues );
 			}
-			else
-			{
-				b.append("&nbsp;|&nbsp;");							
-			}
-			
-			b.append( "<bold>" + firstConnectorInterfaceName + "</bold>&nbsp;|" );
-			
-			b.append("</p>");
 			
 			return	b.toString();
 		} catch (Exception e) {
