@@ -62,21 +62,9 @@ public class Raid1 {
 	}
 	
 	
-	
-
-	/**
-	 * Compares the content of all connectors and try to fix missing files If
-	 * three is a file missing in a connector restore from other connectors
-	 * 
-	 * @return list of files which should be consistent on every connector
-	 * @throws IOException
-	 *             If ALL connectors fail. Log all other exception
-	 * 
-	 */
-
-	public synchronized ArrayList<FileViewObject> listFiles() throws IOException {
-		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
-
+	private HashMap<String, FileViewObject> buildListFileMap()
+			throws IOException 
+	{
 		HashMap<String, FileViewObject> compareViewMap = new HashMap<String, FileViewObject>();
 		HashMap<String, ConnectorInterface> sourceIF = new HashMap<String, ConnectorInterface>();
 
@@ -114,13 +102,8 @@ public class Raid1 {
 				Pattern p1 = Pattern.compile( "[HLP][01]_.*" );
 				Matcher m1= p1.matcher( aFileName );
 				boolean b1 = m1.matches();
-				
-				// in RAID1 we do NOT show HISTORY files!
-				Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
-				Matcher m2 = p2.matcher( aFileName );
-				boolean b2 = m2.matches();				
-				
-				if( b1 == false && b2 == false )
+							
+				if( b1 == false )
 				{
 					FileViewObject foundViewObject = compareViewMap.get(aFileName);
 	
@@ -154,26 +137,57 @@ public class Raid1 {
 
 		if (errorCount == 3) {
 			throw (new IOException("No connection available."));
-		}
+		}		
+		
+		return compareViewMap;
+	}
+	
+	
+	
+	/**
+	 * Compares the content of all connectors and try to fix missing files If
+	 * three is a file missing in a connector restore from other connectors
+	 * 
+	 * @return list of files which should be consistent on every connector
+	 * @throws IOException
+	 *             If ALL connectors fail. Log all other exception
+	 * 
+	 */
+
+	public synchronized ArrayList<FileViewObject> listFiles() 
+			throws IOException 
+	{
+		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
+
+		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
 		// Move it to return value
-		for (String key : compareViewMap.keySet()) {
+		for (String key : compareViewMap.keySet()) 
+		{
 			FileViewObject toView = compareViewMap.get(key);
 
-			// TODO here we have to distinguish if
+			// here we have to distinguish if
 			// History - or ACTUELL
 			// and in both cases
 			// RAID1 (else RAID5)
+			
+			// in RAID1 we do NOT show HISTORY files!
+			Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
+			Matcher m2 = p2.matcher( toView.getGlobalFo().getName() );
+			boolean b2 = m2.matches();				
+			
+			if( b2 == false )
+			{		
+				// maybe we will update the hash - and
 
-			// maybe we will update the hash - and
-			// TODO delete the data - not necessary for viewing
-			FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
-
-			toView.setInterfaceInformationFos(interfaceInformationFos);
-
-			// TODO here we do another round if we want to duplicate files
-
-			ret.add(toView);
+				FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
+	
+				toView.setInterfaceInformationFos(interfaceInformationFos);
+	
+				// TODO here we do another round if we want to duplicate files
+				ret.add(toView);
+			}
+			// we do not take data - if not necessary for viewing
 		}
 
 		return ret;
@@ -233,7 +247,7 @@ public class Raid1 {
 		FileObject returnFile = null;
 
 		try {
-			// System.out.println("getFile" + fn);
+			// log.fine( "getFile" + fn );
 			boxFile = box.read(readFile);
 
 		} catch (Exception e) {
@@ -448,7 +462,7 @@ public class Raid1 {
 	{
 		b.append("&nbsp;");	
 		
-System.out.println( "File: " + file + " FROM: " + from + " | " + fromIsEmpty 
+log.fine( "File: " + file + " FROM: " + from + " | " + fromIsEmpty 
 		+ " TO: " + to + " | " + toIsEmpty );
 		
 		if( toIsEmpty == false )
@@ -517,7 +531,7 @@ System.out.println( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 			
 			if( previousHashValue != null )
 			{
-System.out.println(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue );
+				log.fine(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue );
 				if( previousHashValue.compareTo( actHashValue ) != 0  )
 				{
 					// generate "<" and ">" button
@@ -663,7 +677,7 @@ System.out.println(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue )
 
 	public String copyFile( String fn, String fromInterface, String toInterface )
 	{
-		System.out.println( "copyFile(): file: " + fn + ", fromInterface: " + fromInterface + ", toInterface: " + toInterface );
+		log.fine( "copyFile(): file: " + fn + ", fromInterface: " + fromInterface + ", toInterface: " + toInterface );
 		
 		initConnectorInterface();
 		
@@ -674,8 +688,8 @@ System.out.println(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue )
 		ConnectorInterface fromConnection = getInterface( fromId );
 		ConnectorInterface toConnection = getInterface( toId );
 		
-		System.out.println( "copyFile(): file: " + fn + ", fromInterface: " + fromId + ", toInterface: " + toId );		
-		System.out.println( "copyFile(): file: " + fn + ", fromInterface: " + fromConnection.getName() + ", toInterface: " + toConnection.getName() );	
+		log.fine( "copyFile(): file: " + fn + ", fromInterface: " + fromId + ", toInterface: " + toId );		
+		log.fine( "copyFile(): file: " + fn + ", fromInterface: " + fromConnection.getName() + ", toInterface: " + toConnection.getName() );	
 		
 		FileObject actFileObject = new FileObject( fn );
 		

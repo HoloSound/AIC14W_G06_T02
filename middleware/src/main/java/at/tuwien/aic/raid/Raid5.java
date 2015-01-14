@@ -67,7 +67,7 @@ public class Raid5
 
 	public Raid5()
 	{
-		System.out.println( "NEW Raid5" );
+		log.fine( "NEW Raid5" );
 	}
 
 	public int getMaxId()
@@ -559,11 +559,11 @@ public class Raid5
 				{
 					// in this case the file names start with char [3] !
 					String mainFileName = aFileName.substring( 3 );
-System.out.println( "1: " + mainFileName );					
+					log.fine( "1: " + mainFileName );					
 					if( mainFileName.length() > 0 )
 					{
 						String raidType = aFileName.substring( 0, 3 );
-System.out.println( "2: " + raidType );
+						log.fine( "2: " + raidType );
 
 						FileViewObject foundViewObject = compareViewMap.get( mainFileName );
 						

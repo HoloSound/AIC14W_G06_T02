@@ -47,7 +47,7 @@ public class Controller {
 			// building up the table header
 			sb.append("<thead>");
 			sb.append("<tr>");
-			sb.append("<td colspan=\"4\"><strong>FileName</strong></td>");
+			sb.append("<td colspan=\"5\"><strong>FileName</strong></td>");
 
 			sb.append("<td><strong>Info</strong></td>");
 
@@ -79,7 +79,8 @@ public class Controller {
 			for( FileViewObject fvo : fvol ) 
 			{
 				FileObject f = fvo.getGlobalFo();
-			
+				String id=f.getName().replace(".", "").replaceAll("#", "").replaceAll(" ", "")+"TD";
+				
 				sb.append("<tr>");
 
 				// may be done via class - and css definition
@@ -111,8 +112,17 @@ public class Controller {
 					sb.append( " bgcolor=\"#eeeeff\"" );
 				}
 				sb.append( ">" );
-				sb.append(getShowHistoryLink(f));
+				sb.append(getDeleteLink(f));
 				sb.append("</td>");
+				
+				sb.append("<td");
+				if( ii % 2 == 0 )
+				{
+					sb.append( " bgcolor=\"#eeeeff\"" );
+				}
+				sb.append( ">" );
+				sb.append( getShowHistoryLink(f) );
+				sb.append("</td>");				
 
 				sb.append("<td");
 				if( ii % 2 == 0 )
@@ -120,9 +130,9 @@ public class Controller {
 					sb.append( " bgcolor=\"#eeeeff\"" );
 				}
 				sb.append( ">" );
-				String id=f.getName().replace(".", "").replaceAll("#", "").replaceAll(" ", "")+"TD";
-				sb.append(getDeleteLink(f));
-				sb.append("</td>");
+				sb.append( getShowInfoLink( id, f ) );
+				sb.append("</td>");	
+				
 				sb.append("<td id='"+id+"'>");
 				sb.append("<a href=\"javascript:void\" onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" > load</a>");
 				sb.append("</td>");
@@ -148,6 +158,10 @@ public class Controller {
 				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
 	}
 
+	private Object getShowInfoLink( String id, FileObject f ) {
+		return "<a href=\"javascript:void\" onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" ><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
+	}
+	
 	private String getDownloadLink(FileObject f) {
 
 		return "<a target='_blank' href=\"raid1?task="
