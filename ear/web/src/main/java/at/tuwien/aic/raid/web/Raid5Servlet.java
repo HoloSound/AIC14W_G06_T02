@@ -242,14 +242,14 @@ public class Raid5Servlet extends HttpServlet {
 	
 	private String getDownloadLink(FileObject f) {
 
-		return "<a target='_blank' href=\"raid5?task="
+		return "<a target='_blank' title=\"Download file\" href=\"raid5?task="
 				+ Raid5Servlet.DOWNLOAD_OPERATION + "&"
 				+ Raid5Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
 	}
 
 	private String getDeleteLink(FileObject f) {
 
-		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid5?task="
+		return "<a target='_blank' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid5?task="
 				+ Raid5Servlet.DELETE_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
 				+ "', '', callback5, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}

@@ -65,9 +65,9 @@ li {
 
 		<ul>
 			<li id='raid1li'><a href='javascript:void(0)'
-				onclick="showRaid1()">RAID1</a></li>
+				onclick="showRaid1()" title="RAID1">RAID1</a></li>
 			<li id='raid5li'><a href='javascript:void(0)'
-				onclick="showRaid5()">RAID5</a></li>
+				onclick="showRaid5()" title="RAID5.3">RAID5</a></li>
 		</ul>
 
 		<DIV>

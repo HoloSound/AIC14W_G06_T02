@@ -254,7 +254,7 @@ public class Raid1Servlet extends HttpServlet {
 				sb.append("</td>");
 				
 				sb.append("<td id='" + id + "'>");
-				sb.append("<a href=\"javascript:void\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" > load</a>");
+				sb.append("<a href=\"javascript:void\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" title=\"Show file info\"> load</a>");
 				sb.append("</td>");
 
 				sb.append("</tr>");
@@ -291,22 +291,22 @@ public class Raid1Servlet extends HttpServlet {
 	// This changes have no effect!
 	private String getDownloadLink(FileObject f) {
 
-		return "<a target='_blank' href=\"raid1?task=" + Raid1Servlet.DOWNLOAD_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+		return "<a target='_blank' title=\"Download file\" href=\"raid1?task=" + Raid1Servlet.DOWNLOAD_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
 				+ "\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
 	}
 
 	// This changes have no effect!
 	private String getDeleteLink(FileObject f) {
 
-		return "<a target='_blank' href='javascript:void' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+		return "<a target='_blank' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
 				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
 
 	private Object getShowHistoryLink(FileObject f) {
-		return "<a target='_blank' href=\"raid1?task=" + Raid1Servlet.SHOW_HISTORY + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName() + "\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
+		return "<a target='_blank' title=\"Show file history\" href=\"raid1?task=" + Raid1Servlet.SHOW_HISTORY + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName() + "\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
 	}
 
 	private Object getShowInfoLink(String id, FileObject f) {
-		return "<a href=\"javascript:void\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" ><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
+		return "<a href=\"javascript:void\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" title=\"Show file info\"><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
 	}
 }
