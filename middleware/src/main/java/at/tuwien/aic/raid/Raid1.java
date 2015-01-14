@@ -445,7 +445,7 @@ System.out.println( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 	{
 		b.append("<a target='_blank' href=\"raid1?task=copy&from=" + from  
 				+ "&to=" + to 
-				+ "&file=" + file + "\">" );
+				+ "&fileName=" + file + "\">" );
 		
 		if( isLeft == true )
 			b.append( "<img src=\"/web/pic/copy_left.png\" alt=\"copy left\" />");
@@ -633,5 +633,45 @@ System.out.println(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue )
 			return "error:"+e.getMessage();
 		}
 		
+	}
+	
+	public String getFileHistory( String fn )
+	{
+		return "<h1>the history for  " + fn + " will be here </h1>";
+	}
+
+	public String copyFile( String fn, String fromInterface, String toInterface )
+	{
+		System.out.println( "copyFile(): file: " + fn + ", fromInterface: " + fromInterface + ", toInterface: " + toInterface );
+		
+		initConnectorInterface();
+		
+		// convert InterfaceNames to Ids
+		int fromId = Integer.parseInt( fromInterface );
+		int toId = Integer.parseInt( toInterface );
+		
+		ConnectorInterface fromConnection = getInterface( fromId );
+		ConnectorInterface toConnection = getInterface( toId );
+		
+		System.out.println( "copyFile(): file: " + fn + ", fromInterface: " + fromId + ", toInterface: " + toId );		
+		System.out.println( "copyFile(): file: " + fn + ", fromInterface: " + fromConnection.getName() + ", toInterface: " + toConnection.getName() );	
+		
+		FileObject actFileObject = new FileObject( fn );
+		
+		try
+		{
+			// first read file
+			actFileObject = fromConnection.read( actFileObject );
+			
+			// second write file
+			toConnection.create( actFileObject );		
+		}
+		catch( Exception e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
+		return getFileInfo( fn );
 	}
 }
