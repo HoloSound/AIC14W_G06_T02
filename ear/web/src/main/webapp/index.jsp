@@ -73,12 +73,13 @@ li {
 		<DIV>
 			<div id='raid1Div'>
 				<div class="uploadDiv">
-
+					
 					<form action="raid1?task=upload" method="post"
 						enctype="multipart/form-data">
 						<input id="raid1FileInput" type="file" name="file" size="50" /> <br />
 						<input type="submit" value="Upload File" />
 					</form>
+					<a href="javascript:void" onclick="reloadRaid1();" > RELOAD </a>
 				</div>
 
 				<%=c.listFiles()%>
@@ -92,8 +93,7 @@ li {
 						<input id="raid5FileInput" type="file" name="file" size="50" /> <br />
 						<input type="submit" value="Upload File" />
 					</form>
-
-
+<a href="javascript:void" onclick="reloadRaid5();" > RELOAD </a>
 					<table border="1">
 						<colgroup>
 							<col width="200">

@@ -39,8 +39,8 @@ $( document ).ready(function() {
 	           {
 	    	       $("#raid1Div :submit").prop("disabled",false);
 	               alert(data); // show response from the php script.
-	               showLoadingInFileList();
-	               $('#raid1Div table' ).load("raid1?task=list" );//RELOAD LIST
+	               reloadRaid1();
+	              
 	           },
 		    error: function(data)
 	        {
@@ -102,8 +102,7 @@ $( document ).ready(function() {
 	           {
 	    	       $("#raid5Div :submit").prop("disabled",false);
 	               alert(data); // show response from the php script.
-	               showLoadingInFileList();
-	               $('#raid5Div table' ).load("raid5?task=list" );//RELOAD LIST
+	               reloadRaid5();
 	           },
 		    error: function(data)
 	        {
@@ -120,6 +119,15 @@ $( document ).ready(function() {
 	
 });
 
+
+function reloadRaid5(){
+		 showLoadingInFileList5();
+	     $('#raid5Div table' ).load("raid5?task=list" );//RELOAD LIST
+}
+function reloadRaid1(){
+	 showLoadingInFileList();
+     $('#raid1Div table' ).load("raid1?task=list" );//RELOAD LIST
+}
 var callback5 = function(dataReceived){
 
 	alert(dataReceived);
