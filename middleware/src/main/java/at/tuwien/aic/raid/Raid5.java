@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,7 +54,7 @@ public class Raid5
 	 * (Because from the given data it is not possible to reconstruct it!)
 	 */
 
-	java.util.logging.Logger log = java.util.logging.Logger.getLogger( "Raid5" );
+	java.util.logging.Logger log= java.util.logging.Logger.getLogger( "Raid5" );
 
 	private static final String DATE_TIME_PREFIX_FORMAT = "yyyyMMdd_HHmmss_";
 	private boolean writeHistory = true;
@@ -63,11 +64,14 @@ public class Raid5
 	ConnectorInterface s3 = ConnectorConstructor.s3Instance();
 
 	private ConnectorInterface[] connectorInterface = null;
-	
+	private void log(String string) {
+		log.log(Level.INFO,string);
+		
+	}
 
 	public Raid5()
 	{
-		log.fine( "NEW Raid5" );
+		log( "NEW Raid5" );
 	}
 
 	public int getMaxId()
@@ -526,18 +530,18 @@ public class Raid5
 		{
 			try
 			{
-				log.fine( "Querying files from " + ci.getName() + "." );
+				log( "Querying files from " + ci.getName() + "." );
 				
 				fileObjectList = ci.listFiles();
 			}
 			catch( Exception e )
 			{
 				errorCount++;
-				log.fine( "Querying files from " + ci.getName() + " failed: " + e.getMessage() );
+				log( "Querying files from " + ci.getName() + " failed: " + e.getMessage() );
 				throw new IOException( e );
 			}
 			
-			log.fine( "Got " + fileObjectList.size() + " files from " + ci.getName() + "." );
+			log( "Got " + fileObjectList.size() + " files from " + ci.getName() + "." );
 			
 			// Now we build up the matrix using fileObjectList
 			for( FileObject aFO : fileObjectList )
@@ -559,11 +563,11 @@ public class Raid5
 				{
 					// in this case the file names start with char [3] !
 					String mainFileName = aFileName.substring( 3 );
-					log.fine( "1: " + mainFileName );					
+					log( "1: " + mainFileName );					
 					if( mainFileName.length() > 0 )
 					{
 						String raidType = aFileName.substring( 0, 3 );
-						log.fine( "2: " + raidType );
+						log( "2: " + raidType );
 
 						FileViewObject foundViewObject = compareViewMap.get( mainFileName );
 						
@@ -678,20 +682,20 @@ public class Raid5
 			
 				try
 				{
-					log.fine( "Deleting " + fileName + " from " + ci.getName() + "." );
+					log( "Deleting " + fileName + " from " + ci.getName() + "." );
 					ci.delete( new FileObject( fileName ) );
 				}
 				catch( Exception e )
 				{
-					log.fine( "Deleting " + fileName + " from " + ci.getName() + " failed: " + e.getMessage() );
+					log( "Deleting " + fileName + " from " + ci.getName() + " failed: " + e.getMessage() );
 					throw new IOException( e );
 				}
 				
-				log.fine( "File " + fileName + "deleted from " + ci.getName() + "." );
+				log( "File " + fileName + "deleted from " + ci.getName() + "." );
 			}
 			else
 			{
-				log.fine( "File " + fn + " can't be found @ " + ci.getName() + "." );
+				log( "File " + fn + " can't be found @ " + ci.getName() + "." );
 			}
 		}
 
@@ -760,20 +764,20 @@ public class Raid5
 				
 				try
 				{
-					log.fine( "Read" + fn + "from " + ci.getName() + "." );
+					log( "Read" + fn + "from " + ci.getName() + "." );
 					fileObjects[ii] = ci.read( new FileObject( fileName ) );
 				}
 				catch( Exception e )
 				{
-					log.fine( "Reading from " + ci.getName() + " failed" + e.getMessage() );
+					log( "Reading from " + ci.getName() + " failed" + e.getMessage() );
 					throw new IOException( e );
 				}
 			
-				log.fine( "File " + fileName + " read from " + ci.getName() + "." );
+				log( "File " + fileName + " read from " + ci.getName() + "." );
 			}
 			else
 			{
-				log.fine( "File " + fn + " can't be found @ " + ci.getName() + "." );
+				log( "File " + fn + " can't be found @ " + ci.getName() + "." );
 			}
 
 			ii++;
@@ -835,17 +839,17 @@ public class Raid5
 			
 			try
 			{
-				log.fine( "Write File: " + writeFO.getName() + " to " + ci.getName() );
+				log( "Write File: " + writeFO.getName() + " to " + ci.getName() );
 				ci.create( writeFO );
 			}
 			catch( Exception e )
 			{
 				writtenFiles++;
-				log.fine( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
+				log( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
 				e.printStackTrace();
 			}
 			
-			log.fine( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
+			log( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
 			
 			if( writeHistory )
 			{
@@ -855,17 +859,17 @@ public class Raid5
 				
 				try
 				{
-					log.fine( "Write History File: " + writeFO.getName() + " to " + ci.getName() );
+					log( "Write History File: " + writeFO.getName() + " to " + ci.getName() );
 					ci.create( writeFO );
 				}
 				catch( Exception e )
 				{
 					writtenHistoryFiles++;
-					log.fine( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
+					log( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
 					e.printStackTrace();
 				}
 				
-				log.fine( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
+				log( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
 				
 				writeFO.setName( originalName );
 				// in case of exception --> modified file name exists!

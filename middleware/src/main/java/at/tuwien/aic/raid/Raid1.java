@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,14 @@ public class Raid1 {
 	
 	
 	public Raid1() {
-		log.fine("NEW Raid1");
+	
+		log("new RAID 1");
+		
+	}
+
+	private void log(String string) {
+		log.log(Level.INFO,string);
+		
 	}
 
 	public int getMaxId() {
@@ -82,16 +90,16 @@ public class Raid1 {
 		// to parallelize the writing action and minimize the waiting time.
 		for( ConnectorInterface ci : connectorInterface ) {
 			try {
-				log.fine("Querying files from " + ci.getName() + ".");
+				log("Querying files from " + ci.getName() + ".");
 
 				fileObjectList = ci.listFiles();
 			} catch (Exception e) {
 				errorCount++;
-				log.fine("Querying files from " + ci.getName() + " failed: " + e.getMessage());
+				log("Querying files from " + ci.getName() + " failed: " + e.getMessage());
 				throw new IOException(e);
 			}
 
-			log.fine("Got " + fileObjectList.size() + " files from " + ci.getName() + ".");
+			log("Got " + fileObjectList.size() + " files from " + ci.getName() + ".");
 
 			// Now we build up the matrix using fileObjectList
 			for (FileObject aFO : fileObjectList) {
@@ -215,14 +223,14 @@ public class Raid1 {
 		// to parallelize the writing action and minimize the waiting time.
 		for (ConnectorInterface ci : cis) {
 			try {
-				log.fine("Deleting" + fn + "from " + ci.getName() + ".");
+				log("Deleting" + fn + "from " + ci.getName() + ".");
 				ci.delete(new FileObject(fn));
 			} catch (Exception e) {
-				log.fine("Deleting from " + ci.getName() + " failed" + e.getMessage());
+				log("Deleting from " + ci.getName() + " failed" + e.getMessage());
 				throw new IOException(e);
 			}
 
-			log.fine("File " + fn + "deleted from " + ci.getName() + ".");
+			log("File " + fn + "deleted from " + ci.getName() + ".");
 		}
 	}
 
@@ -247,29 +255,29 @@ public class Raid1 {
 		FileObject returnFile = null;
 
 		try {
-			// log.fine( "getFile" + fn );
+			// log( "getFile" + fn );
 			boxFile = box.read(readFile);
 
 		} catch (Exception e) {
-			log.fine("An error occured while reading file " + fn + " from Box: " + e.toString());
+			log("An error occured while reading file " + fn + " from Box: " + e.toString());
 		}
 
 		try {
 			dboxFile = dbox.read(readFile);
 
 		} catch (Exception e) {
-			log.fine("An error occured while reading file \"" + fn + "\" from DropBox: " + e.toString());
+			log("An error occured while reading file \"" + fn + "\" from DropBox: " + e.toString());
 		}
 
 		try {
 			s3File = s3.read(readFile);
 
 		} catch (Exception e) {
-			log.fine("An error occured while reading file " + fn + " from S3: " + e.toString());
+			log("An error occured while reading file " + fn + " from S3: " + e.toString());
 		}
 
 		if (boxFile == null && dboxFile == null && s3File == null) {
-			log.fine("Couldn't read the file \"" + fn + "\" from all connectors.");
+			log("Couldn't read the file \"" + fn + "\" from all connectors.");
 			throw new IOException("I/O Error");
 		}
 
@@ -279,25 +287,25 @@ public class Raid1 {
 
 		if (boxFile != null) {
 			boxFileMd5 = boxFile.getMd5();
-			log.fine("################### HASH VALUE FOR BOX ###################");
-			log.fine("File \"" + fn + "\": BoxMD5: " + boxFileMd5);
-			log.fine("##########################################################");
+			log("################### HASH VALUE FOR BOX ###################");
+			log("File \"" + fn + "\": BoxMD5: " + boxFileMd5);
+			log("##########################################################");
 			returnFile = boxFile;
 		}
 
 		if (dboxFile != null) {
 			dboxFileMd5 = dboxFile.getMd5();
-			log.fine("################### HASH VALUE FOR DBOX ###################");
-			log.fine("File \"" + fn + "\": DropBoxMD5: " + dboxFileMd5);
-			log.fine("###########################################################");
+			log("################### HASH VALUE FOR DBOX ###################");
+			log("File \"" + fn + "\": DropBoxMD5: " + dboxFileMd5);
+			log("###########################################################");
 			returnFile = dboxFile;
 		}
 
 		if (s3File != null) {
 			s3FileMd5 = s3File.getMd5();
-			log.fine("################### HASH VALUE FOR S3 ###################");
-			log.fine("File \"" + fn + "\": S3MD5: " + s3FileMd5);
-			log.fine("#########################################################");
+			log("################### HASH VALUE FOR S3 ###################");
+			log("File \"" + fn + "\": S3MD5: " + s3FileMd5);
+			log("#########################################################");
 			returnFile = s3File;
 		}
 
@@ -306,82 +314,82 @@ public class Raid1 {
 			// proof if all hashvalues are the same if not proof if two are the
 			// same and restore and if all three are different raise exception
 			if (boxFileMd5.equals(dboxFileMd5) && boxFileMd5.equals(s3FileMd5)) {
-				log.fine("File: " + fn + ": All three hashvalues are the same: " + boxFileMd5);
+				log("File: " + fn + ": All three hashvalues are the same: " + boxFileMd5);
 			} else if (boxFileMd5.equals(dboxFileMd5)) {
 				returnFile = boxFile;
 
-				log.fine("############ Inconsistency ############");
-				log.fine("Inconsistency! S3 diffs to the other two hashes: S3: " + s3FileMd5 + " Others: " + boxFileMd5 + " trying to restore...");
-				log.fine("#######################################");
+				log("############ Inconsistency ############");
+				log("Inconsistency! S3 diffs to the other two hashes: S3: " + s3FileMd5 + " Others: " + boxFileMd5 + " trying to restore...");
+				log("#######################################");
 				// restore s3
 				try {
 					s3.delete(new FileObject(fn));
 					s3.create(boxFile);
 
 				} catch (Exception e) {
-					log.fine("Restoring of File \"" + fn + "\" on S3 failed" + e.getMessage());
+					log("Restoring of File \"" + fn + "\" on S3 failed" + e.getMessage());
 				}
 
 			} else if (boxFileMd5.equals(s3FileMd5)) {
 				returnFile = boxFile;
 
-				log.fine("############ Inconsistency ############");
-				log.fine("Inconsistency! DropBox diffs to the other two hashes: DropBox: " + dboxFileMd5 + " Others: " + boxFileMd5 + " trying to restore...");
-				log.fine("#######################################");
+				log("############ Inconsistency ############");
+				log("Inconsistency! DropBox diffs to the other two hashes: DropBox: " + dboxFileMd5 + " Others: " + boxFileMd5 + " trying to restore...");
+				log("#######################################");
 				// restore dbox
 				try {
 					dbox.delete(new FileObject(fn));
 					dbox.create(boxFile);
 
 				} catch (Exception e) {
-					log.fine("Restoring of File \"" + fn + "\" on DropBox failed" + e.getMessage());
+					log("Restoring of File \"" + fn + "\" on DropBox failed" + e.getMessage());
 				}
 
 			} else if (dboxFileMd5.equals(s3FileMd5)) {
 				returnFile = dboxFile;
 
-				log.fine("############ Inconsistency ############");
-				log.fine("Inconsistency! Box diffs to the other two hashes: Box: " + s3FileMd5 + " Others: " + dboxFileMd5 + " trying to restore...");
-				log.fine("#######################################");
+				log("############ Inconsistency ############");
+				log("Inconsistency! Box diffs to the other two hashes: Box: " + s3FileMd5 + " Others: " + dboxFileMd5 + " trying to restore...");
+				log("#######################################");
 				// restore box
 				try {
 					box.delete(new FileObject(fn));
 					box.create(dboxFile);
 
 				} catch (Exception e) {
-					log.fine("Restoring of File \"" + fn + "\" on Box failed" + e.getMessage());
+					log("Restoring of File \"" + fn + "\" on Box failed" + e.getMessage());
 				}
 
 			} else {
-				log.fine("Inconsistency! All three hashvalues are different! Box: " + boxFileMd5 + " DropBox: " + dboxFileMd5 + " S3: " + s3FileMd5);
+				log("Inconsistency! All three hashvalues are different! Box: " + boxFileMd5 + " DropBox: " + dboxFileMd5 + " S3: " + s3FileMd5);
 				throw new IOException("Inconsistency! All three hashvalues are different! Box: " + boxFileMd5 + " DropBox: " + dboxFileMd5 + " S3: " + s3FileMd5);
 			}
 
 		} else {
 			if (boxFileMd5 != null && dboxFileMd5 != null) {
 				if (!boxFileMd5.equals(dboxFileMd5)) {
-					log.fine("File \"" + fn + "\" has inconsistency! Box MD5: " + boxFileMd5 + " DropBox MD5: " + dboxFileMd5);
+					log("File \"" + fn + "\" has inconsistency! Box MD5: " + boxFileMd5 + " DropBox MD5: " + dboxFileMd5);
 					throw new IOException("Inconsistency! Box MD5: " + boxFileMd5 + " DropBox MD5: " + dboxFileMd5);
 				}
 			}
 
 			if (boxFileMd5 != null && s3FileMd5 != null) {
 				if (!boxFileMd5.equals(s3FileMd5)) {
-					log.fine("File \"" + fn + "\" has inconsistency! Box MD5: " + boxFileMd5 + " S3 MD5: " + dboxFileMd5);
+					log("File \"" + fn + "\" has inconsistency! Box MD5: " + boxFileMd5 + " S3 MD5: " + dboxFileMd5);
 					throw new IOException("Inconsistency! Box MD5: " + boxFileMd5 + " S3 MD5: " + s3FileMd5);
 				}
 			}
 
 			if (dboxFileMd5 != null && s3FileMd5 != null) {
 				if (!dboxFileMd5.equals(s3FileMd5)) {
-					log.fine("File \"" + fn + "\" has inconsistency! DropBox MD5: " + boxFileMd5 + " S3 MD5: " + dboxFileMd5);
+					log("File \"" + fn + "\" has inconsistency! DropBox MD5: " + boxFileMd5 + " S3 MD5: " + dboxFileMd5);
 					throw new IOException("Inconsistency! DropBox MD5: " + dboxFileMd5 + " S3 MD5: " + s3FileMd5);
 				}
 			}
 
 		}
 
-		log.fine("Successfully read file \"" + fn + "\"");
+		log("Successfully read file \"" + fn + "\"");
 
 		return returnFile;
 
@@ -422,28 +430,28 @@ public class Raid1 {
 		// to parallelize the writing action and minimize the waiting time.
 		for (ConnectorInterface ci : cis) {
 			try {
-				log.fine("Write file: " + f.getName() + " to " + ci.getName());
+				log("Write file: " + f.getName() + " to " + ci.getName());
 				ci.create(f);
 			} catch (Exception e) {
 				baseErrors += 1;
-				log.fine("Error" + e.getMessage());
+				log("Error" + e.getMessage());
 				e.printStackTrace();
 			}
 
-			log.fine("Write" + f.getName() + " to " + ci.getName() + " ... OK.");
+			log("Write" + f.getName() + " to " + ci.getName() + " ... OK.");
 			
 			if( writeHistory )
 			{
 				try {
-					log.fine("Write HISTORY file: " + historyFile.getName() + " to " + ci.getName());
+					log("Write HISTORY file: " + historyFile.getName() + " to " + ci.getName());
 					ci.create(historyFile);
 				} catch (Exception e) {
 					historyErrors += 1;
-					log.fine("Error" + e.getMessage());
+					log("Error" + e.getMessage());
 					e.printStackTrace();
 				}
 
-				log.fine("Write" + historyFile.getName() + " to " + ci.getName() + " ... OK.");				
+				log("Write" + historyFile.getName() + " to " + ci.getName() + " ... OK.");				
 			}
 		}
 
@@ -462,7 +470,7 @@ public class Raid1 {
 	{
 		b.append("&nbsp;");	
 		
-log.fine( "File: " + file + " FROM: " + from + " | " + fromIsEmpty 
+log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty 
 		+ " TO: " + to + " | " + toIsEmpty );
 		
 		if( toIsEmpty == false )
@@ -531,7 +539,7 @@ log.fine( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 			
 			if( previousHashValue != null )
 			{
-				log.fine(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue );
+				log(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue );
 				if( previousHashValue.compareTo( actHashValue ) != 0  )
 				{
 					// generate "<" and ">" button
@@ -677,7 +685,7 @@ log.fine( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 
 	public String copyFile( String fn, String fromInterface, String toInterface )
 	{
-		log.fine( "copyFile(): file: " + fn + ", fromInterface: " + fromInterface + ", toInterface: " + toInterface );
+		log( "copyFile(): file: " + fn + ", fromInterface: " + fromInterface + ", toInterface: " + toInterface );
 		
 		initConnectorInterface();
 		
@@ -688,8 +696,8 @@ log.fine( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 		ConnectorInterface fromConnection = getInterface( fromId );
 		ConnectorInterface toConnection = getInterface( toId );
 		
-		log.fine( "copyFile(): file: " + fn + ", fromInterface: " + fromId + ", toInterface: " + toId );		
-		log.fine( "copyFile(): file: " + fn + ", fromInterface: " + fromConnection.getName() + ", toInterface: " + toConnection.getName() );	
+		log( "copyFile(): file: " + fn + ", fromInterface: " + fromId + ", toInterface: " + toId );		
+		log( "copyFile(): file: " + fn + ", fromInterface: " + fromConnection.getName() + ", toInterface: " + toConnection.getName() );	
 		
 		FileObject actFileObject = new FileObject( fn );
 		
