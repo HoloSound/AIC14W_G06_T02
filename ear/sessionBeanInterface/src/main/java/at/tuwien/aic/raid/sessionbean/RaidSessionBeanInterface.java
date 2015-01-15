@@ -17,7 +17,8 @@ public interface RaidSessionBeanInterface {
 	 * 
 	 */
 	ArrayList<FileViewObject> listFiles() throws IOException;
-
+	ArrayList<FileViewObject> getFileHistory( String fn ) throws IOException;
+	
 	void delete(String fn) throws IOException;
 
 	/**
@@ -32,7 +33,7 @@ public interface RaidSessionBeanInterface {
 	void write(FileObject f)throws IOException;
 
 	String getFileInfo(String fn);
-	String getFileHistory( String fn );
+
 
 	String copyFile(String fn, String from2, String to2);
 }

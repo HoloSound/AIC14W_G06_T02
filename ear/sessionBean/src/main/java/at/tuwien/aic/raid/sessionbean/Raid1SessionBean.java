@@ -53,7 +53,8 @@ public class Raid1SessionBean
 	}
 
 	@Override
-	public String getFileHistory( String fn )
+	public ArrayList<FileViewObject>  getFileHistory( String fn )
+			 throws IOException 
 	{
 		return raid1.getFileHistory( fn );
 	}

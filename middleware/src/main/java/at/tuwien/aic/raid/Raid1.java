@@ -201,6 +201,50 @@ public class Raid1 {
 		return ret;
 	}
 
+	
+	public ArrayList<FileViewObject> getFileHistory( String fn )
+				throws IOException 
+	{
+		// "<h1>the history for  " + fn + " will be here </h1>";
+		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
+
+		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
+
+		// Move it to return value
+		for (String key : compareViewMap.keySet()) 
+		{
+			FileViewObject toView = compareViewMap.get(key);
+
+			// here we have to distinguish if
+			// History - or ACTUELL
+			// and in both cases
+			// RAID1 (else RAID5)
+			
+			// in RAID1 we do NOT show HISTORY files!
+			Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
+			Matcher m2 = p2.matcher( toView.getGlobalFo().getName() );
+			boolean b2 = m2.matches();				
+			
+			if( b2 == true )
+			{		
+				// maybe we will update the hash - and
+				FileObject globalFileObject = toView.getGlobalFo();
+				String fileName = globalFileObject.getName();
+				
+				String readFileName = fileName.substring( 16 );
+				
+				if( readFileName.compareTo( fn ) == 0 )
+				{
+					ret.add( toView );
+				}
+			}
+			// we do not take data - if not necessary for viewing
+		}
+
+		return ret;
+	}
+	
+	
 	/**
 	 * Try to remove the file from all connector
 	 * 
@@ -677,11 +721,7 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 		}
 		
 	}
-	
-	public String getFileHistory( String fn )
-	{
-		return "<h1>the history for  " + fn + " will be here </h1>";
-	}
+
 
 	public String copyFile( String fn, String fromInterface, String toInterface )
 	{
