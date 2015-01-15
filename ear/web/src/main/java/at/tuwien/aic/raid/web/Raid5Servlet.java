@@ -27,6 +27,8 @@ public class Raid5Servlet extends HttpServlet {
 	public static final String FILE_NAME = "fileName";
 	public static final String DOWNLOAD_OPERATION = "download";
 	public static final String UPLOAD_OPERATION = "upload";
+	public static final String SHOW_HISTORY = "history";
+	
 	@EJB
 	private Raid5sessionBeanInterface raid;
 	public static String GET_FILE_LIST = "list";
@@ -84,7 +86,10 @@ public class Raid5Servlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		try {
-
+			if (SHOW_HISTORY.equals(req.getParameter("task"))) {// lets
+				String fn = req.getParameter(FILE_NAME);
+				getFileHistory(fn, req, resp);
+			}
 			if (GET_FILE_LIST.equals(req.getParameter("task"))) {// lets
 				listFiles(req, resp);
 			}
@@ -129,7 +134,7 @@ public class Raid5Servlet extends HttpServlet {
 		sb.append("</colgroup>");
 		
 		sb.append("<tr>");
-		sb.append("<td colspan=\"3\"><strong>FileName</strong></td>");
+		sb.append("<td colspan=\"4\"><strong>FileName</strong></td>");
 
 		sb.append("<td><strong>DropBox</strong></td>");
 
@@ -180,6 +185,15 @@ public class Raid5Servlet extends HttpServlet {
 			sb.append(getDeleteLink(f));
 			sb.append("</td>");
 			
+			sb.append("<td");
+			if (ii % 2 == 0) {
+				sb.append(" bgcolor=\"#eeeeff\"");
+			}
+			sb.append(">");
+			sb.append( getShowHistoryLink( f ) );
+			sb.append("</td>");
+			
+			
 			
 			// now appending the further columns
 			FileObject[] interfaceInformationFos = fvo.getInterfaceInformationFos();
@@ -217,6 +231,100 @@ public class Raid5Servlet extends HttpServlet {
 		resp.getWriter().write(sb.toString());
 	}
 
+	private void getFileHistory(String fn, HttpServletRequest req, HttpServletResponse resp) 
+			throws IOException 
+	{
+	
+		try {
+			StringBuilder sb = new StringBuilder();
+
+			// building up a table
+			sb.append("<table border=\"1\">");
+			sb.append("<colgroup>");
+			sb.append("<col width=\"300\" />");
+			sb.append("<col width=\"35\" />");
+			sb.append("<col width=\"35\" />");
+			sb.append("</colgroup>");
+
+			// building up the table header
+			sb.append("<thead>");
+			sb.append("<tr>");
+			sb.append("<td colspan=\"3\"><strong>FileName</strong></td>");
+
+			sb.append("</tr>");
+
+			sb.append("</thead>");
+
+			int ii = 0;
+
+			// this listFiles is method which compromizes the fileinformation
+			// --> global info
+			// We should here show a
+			// ArrayList<FileObjectView> ... that means global info and
+			// information per interface!
+			// ArrayList<FileObject> fl = raid.listFiles();
+
+			// here we should to more things.
+			// we generate a column for each interface
+			// we fill the generated table with additional information
+			// ArrayList<FileObject> as = raid.listFiles( 0 );
+			// ArrayList<FileObject> box = raid.listFiles( 1 );
+			// ArrayList<FileObject> dBox = raid.listFiles( 2 );
+			// The creation of viewing would be the wrong place - we should here
+			// only output it!
+
+			// building up a table row
+
+			ArrayList<FileViewObject> fvol = raid.getFileHistory( fn );
+
+			for (FileViewObject fvo : fvol) {
+				FileObject f = fvo.getGlobalFo();
+				String id = f.getName().replace(".", "").replaceAll("#", "").replaceAll(" ", "") + "TD";
+
+				sb.append("<tr>");
+
+				// may be done via class - and css definition
+				sb.append("<td");
+				if (ii % 2 == 0) {
+					sb.append(" bgcolor=\"#eeeeff\"");
+				}
+				sb.append(">");
+
+				// in principle the name itself may be the downloadlink
+				sb.append("<tt>");
+				sb.append(f.getName());
+				sb.append("</tt></td>");
+
+				sb.append("<td");
+				if (ii % 2 == 0) {
+					sb.append(" bgcolor=\"#eeeeff\"");
+				}
+				sb.append(">");
+
+				sb.append(getDownloadLink(f));
+				sb.append("</td>");				
+				
+				sb.append("<td");
+				if (ii % 2 == 0) {
+					sb.append(" bgcolor=\"#eeeeff\"");
+				}
+				sb.append(">");
+				sb.append(getDeleteLink(f));
+				sb.append("</td>");
+
+				sb.append("</tr>");
+
+				ii++;
+			}
+
+			sb.append("</table>");
+			resp.getWriter().write(sb.toString());
+		} catch (Exception e) {
+			resp.getWriter().write("error " + e.getMessage());
+		}
+
+	}
+	
 	private void downloadFile(String fn, HttpServletResponse resp)
 			throws IOException {
 		FileObject f = raid.getFile(fn);
@@ -254,4 +362,8 @@ public class Raid5Servlet extends HttpServlet {
 				+ "', '', callback5, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
 
+	private Object getShowHistoryLink(FileObject f) {
+		return "<a target='_blank' title=\"Show file history\" href=\"raid5?task=" + Raid5Servlet.SHOW_HISTORY + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName() + "\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
+	}
+	
 }

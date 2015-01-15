@@ -17,7 +17,8 @@ public interface Raid5sessionBeanInterface {
 	 * 
 	 */
 	ArrayList<FileViewObject> listFiles() throws IOException;
-
+	ArrayList<FileViewObject> getFileHistory(String fn) throws IOException;
+	
 	void delete(String fn) throws IOException;
 
 	/**

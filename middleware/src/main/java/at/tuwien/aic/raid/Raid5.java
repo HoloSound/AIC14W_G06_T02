@@ -498,21 +498,10 @@ public class Raid5
 		return ret;
 	}
 	
-	/**
-	 * Compares the content of all connectors and try to fix missing files If
-	 * three is a file missing in a connector restore from other connectors
-	 * 
-	 * @return list of files which should be consistent on every connector
-	 * @throws IOException
-	 *             If ALL connectors fail. Log all other exception
-	 * 
-	 */
-
-	public synchronized ArrayList<FileViewObject> listFiles() 
-				throws IOException
+	
+	private HashMap<String, FileViewObject> buildListFileMap()
+			throws IOException 
 	{
-		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
-
  		HashMap<String,FileViewObject> compareViewMap = new HashMap<String,FileViewObject>();
  		
 		// FUTURE CODING STYLE
@@ -553,17 +542,15 @@ public class Raid5
 				Pattern p1 = Pattern.compile( "[HLP][01]_.*" );
 				Matcher m1 = p1.matcher( aFileName );
 				boolean b1 = m1.matches();
+			
 				
-				// in RAID5 we do NOT show HISTORY files!
-				Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
-				Matcher m2 = p2.matcher( aFileName );
-				boolean b2 = m2.matches();				
-				
-				if( b1 == true && b2 == false )
+				if( b1 == true )
 				{
 					// in this case the file names start with char [3] !
 					String mainFileName = aFileName.substring( 3 );
-					log( "1: " + mainFileName );					
+					
+					log( "1: " + mainFileName );
+					
 					if( mainFileName.length() > 0 )
 					{
 						String raidType = aFileName.substring( 0, 3 );
@@ -609,28 +596,101 @@ public class Raid5
 		if( errorCount == 3 )
 		{
 			throw( new IOException( "No connection available." ) );
-		}
+		}		
+		
+		return compareViewMap;		
+	}
+	
+	
+	/**
+	 * Compares the content of all connectors and try to fix missing files If
+	 * three is a file missing in a connector restore from other connectors
+	 * 
+	 * @return list of files which should be consistent on every connector
+	 * @throws IOException
+	 *             If ALL connectors fail. Log all other exception
+	 * 
+	 */
+
+	public synchronized ArrayList<FileViewObject> listFiles() 
+				throws IOException
+	{
+		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
+
+		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 		
 		// Move it to return value
 		for( String key : compareViewMap.keySet() )
 		{
 			FileViewObject toView = compareViewMap.get( key );
 			
-			// TODO here we have to distinguish if
-			// History - or ACTUELL
-			// 	and in both cases
-			// RAID5 (else RAID1) 
-				
-			// maybe we will update the hash - and 
-			// TODO delete the data - not necessary for viewing	
-			// TODO here we do another round if we want to duplicate files
+			// in RAID5 we do NOT show HISTORY files!
+			Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
+			Matcher m2 = p2.matcher( toView.getGlobalFo().getName() );
+			boolean b2 = m2.matches();				
 			
-			ret.add( toView );
+			if( b2 == false )
+			{		
+				// maybe we will update the hash - and
+
+				FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
+	
+				toView.setInterfaceInformationFos(interfaceInformationFos);
+	
+				// TODO here we do another round if we want to duplicate files
+				ret.add(toView);
+			}
 		}
 	
 		return ret;
 	}
 
+	public ArrayList<FileViewObject> getFileHistory( String fn )
+			throws IOException 
+{
+	// "<h1>the history for  " + fn + " will be here </h1>";
+	ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
+
+	HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
+
+	// Move it to return value
+	for (String key : compareViewMap.keySet()) 
+	{
+		FileViewObject toView = compareViewMap.get(key);
+		String FileName = toView.getGlobalFo().getName();
+		
+		log( "getFileHistory(): " + FileName  );
+		
+		// here we have to distinguish if
+		// History - or ACTUELL
+		// and in both cases
+		// RAID1 (else RAID5)
+		
+		// in RAID1 we do NOT show HISTORY files!
+		Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
+		Matcher m2 = p2.matcher( toView.getGlobalFo().getName() );
+		boolean b2 = m2.matches();				
+		
+		if( b2 == true )
+		{		
+			// maybe we will update the hash - and
+			FileObject globalFileObject = toView.getGlobalFo();
+			String fileName = globalFileObject.getName();
+			
+			String readFileName = fileName.substring( 16 );
+			
+			if( readFileName.compareTo( fn ) == 0 )
+			{
+				ret.add( toView );
+			}
+		}
+		// we do not take data - if not necessary for viewing
+	}
+
+	return ret;
+}
+	
+	
 	/**
 	 * Remove the different files from all connectors
 	 * 
@@ -855,7 +915,10 @@ public class Raid5
 			{
 				// add date_time_prefix
 				String originalName = writeFO.getName();
-				writeFO.setName( dateAndTimePrefix + originalName );
+				String firstPart = originalName.substring( 0, 3 );
+				String secondPart = originalName.substring( 3 );
+				
+				writeFO.setName( firstPart + dateAndTimePrefix + secondPart );
 				
 				try
 				{

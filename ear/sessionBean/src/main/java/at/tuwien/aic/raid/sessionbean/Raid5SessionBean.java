@@ -25,6 +25,13 @@ public class Raid5SessionBean implements Raid5sessionBeanInterface {
 	}
 
 	@Override
+	public ArrayList<FileViewObject> getFileHistory( String fn )
+			throws IOException 
+	{	
+		return raid.getFileHistory(fn);
+	}
+	
+	@Override
 	public void delete(String fn) throws IOException {
 		raid.delete(fn);
 		
