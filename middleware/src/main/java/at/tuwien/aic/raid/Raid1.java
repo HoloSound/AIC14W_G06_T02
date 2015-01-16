@@ -706,6 +706,7 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 			for( ConnectorInterface ci : connectorInterface )
 			{
 				FileObject readFileObject = new FileObject( fileName ); 
+				readFileObject.setHash( "--------------------------------" );
 				
 				try
 				{		
@@ -735,6 +736,7 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 					catch( FileNotFoundException fnfe )
 					{
 						readFileObject.setHash( "--------------------------------" );
+						log( "getFileInfo(): FILE NOT FOUND: " + fnfe.getMessage() );
 					}
 				}
 				catch( Exception e )
@@ -764,7 +766,7 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 		log( "getFileInfo(): returning " + dataRow.size() + " datasets.");
 		
 		// HERE WE DEBUGGING the whole dataset
-		log( "getFileInfo(): " );
+/*		log( "getFileInfo(): " );
 		String[] nameList = ret.getInterfaceNames();
 		for( String name : nameList )
 		{
@@ -790,7 +792,8 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 			}
 		}
 		
-		log( "getFileInfo(): === END ===" );		
+		log( "getFileInfo(): === END ===" );	
+ */	
 		
 		return ret;
 	}

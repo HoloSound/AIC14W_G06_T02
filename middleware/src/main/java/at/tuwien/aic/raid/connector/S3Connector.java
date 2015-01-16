@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import org.apache.commons.io.IOUtils;
 
@@ -35,6 +36,13 @@ public class S3Connector implements ConnectorInterface {
 	
 	private String name = "AS3";
 
+	java.util.logging.Logger log= java.util.logging.Logger.getLogger( name );
+	
+	private void log( String string ) 
+	{
+		log.log( Level.INFO, string );
+	}
+	
 	public S3Connector() {
 
 		/*
@@ -112,7 +120,9 @@ public class S3Connector implements ConnectorInterface {
 		}
 		catch( AmazonS3Exception as3e )
 		{
-			if( as3e.getMessage().compareTo( " The specified key does not exist." ) == 0 )
+			log( "Exception: " + as3e.getMessage() );
+			
+			if( as3e.getMessage().startsWith( "The specified key does not exist." ) )
 			{
 				throw new FileNotFoundException();
 			}
