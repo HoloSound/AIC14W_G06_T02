@@ -28,18 +28,19 @@ public class Raid1 {
 	ConnectorInterface s3 = ConnectorConstructor.s3Instance();
 
 	private ConnectorInterface[] connectorInterface = null;
+	private String[] connectorNames = null;
+	
 	private String NON_EXISTENT = "========";
 	
 	
-	public Raid1() {
-	
-		log("new RAID 1");
-		
+	public Raid1() 
+	{
+		log("NEW RAID 1");
 	}
 
-	private void log(String string) {
-		log.log(Level.INFO,string);
-		
+	private void log(String string) 
+	{
+		log.log(Level.INFO,string);	
 	}
 
 	public int getMaxId() {
@@ -55,6 +56,16 @@ public class Raid1 {
 			for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
 			{
 				connectorInterface[ii] = this.getInterface( ii );
+			}
+		}
+		
+		if( connectorNames == null )
+		{
+			connectorNames = new String[3];
+			
+			for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
+			{
+				connectorNames[ii] = this.getInterface( ii ).getName();
 			}
 		}
 	}
@@ -75,7 +86,7 @@ public class Raid1 {
 	{
 		HashMap<String, FileViewObject> compareViewMap = new HashMap<String, FileViewObject>();
 		HashMap<String, ConnectorInterface> sourceIF = new HashMap<String, ConnectorInterface>();
-
+	
 		// FUTURE CODING STYLE
 		// definition of connector interfaces
 	    // initialization of connector interfaces
@@ -90,16 +101,16 @@ public class Raid1 {
 		// to parallelize the writing action and minimize the waiting time.
 		for( ConnectorInterface ci : connectorInterface ) {
 			try {
-				log("Querying files from " + ci.getName() + ".");
+				log("  Querying files from " + ci.getName() + ".");
 
 				fileObjectList = ci.listFiles();
 			} catch (Exception e) {
 				errorCount++;
-				log("Querying files from " + ci.getName() + " failed: " + e.getMessage());
+				log("  Querying files from " + ci.getName() + " failed: " + e.getMessage());
 				throw new IOException(e);
 			}
 
-			log("Got " + fileObjectList.size() + " files from " + ci.getName() + ".");
+			log("  Got " + fileObjectList.size() + " files from " + ci.getName() + ".");
 
 			// Now we build up the matrix using fileObjectList
 			for (FileObject aFO : fileObjectList) {
@@ -167,6 +178,8 @@ public class Raid1 {
 	{
 		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
 
+		log( "listFiles(): ");
+		
 		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
 		// Move it to return value
@@ -198,6 +211,8 @@ public class Raid1 {
 			// we do not take data - if not necessary for viewing
 		}
 
+		log( "listFiles(): retunring " + ret.size() + " datasets.");
+		
 		return ret;
 	}
 
@@ -208,6 +223,8 @@ public class Raid1 {
 		// "<h1>the history for  " + fn + " will be here </h1>";
 		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
 
+		log( "getFileHistory(): ");
+		
 		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
 		// Move it to return value
@@ -241,6 +258,8 @@ public class Raid1 {
 			// we do not take data - if not necessary for viewing
 		}
 
+		log( "getFileHistory(): returning " + ret.size() + " datasets.");
+		
 		return ret;
 	}
 	
@@ -482,7 +501,7 @@ public class Raid1 {
 				e.printStackTrace();
 			}
 
-			log("Write" + f.getName() + " to " + ci.getName() + " ... OK.");
+			log("Write " + f.getName() + " to " + ci.getName() + " ... OK.");
 			
 			if( writeHistory )
 			{
@@ -495,7 +514,7 @@ public class Raid1 {
 					e.printStackTrace();
 				}
 
-				log("Write" + historyFile.getName() + " to " + ci.getName() + " ... OK.");				
+				log("Write " + historyFile.getName() + " to " + ci.getName() + " ... OK.");				
 			}
 		}
 

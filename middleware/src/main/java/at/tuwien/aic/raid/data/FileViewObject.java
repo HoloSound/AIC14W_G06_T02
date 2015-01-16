@@ -16,8 +16,8 @@ public class FileViewObject
 {
 	private FileObject globalFo;
 	private FileObject[] interfaceInformationFos;
-	
 	private String[] interfaceNames;
+	
 
 	public FileObject getGlobalFo()
 	{

@@ -149,6 +149,8 @@ public class Raid1Servlet extends HttpServlet {
 		try {
 			StringBuilder sb = new StringBuilder();
 
+			sb.append( "<h1>RAID1 history of file: " + fn + "</h1>" );
+			
 			// building up a table
 			sb.append("<table border=\"1\">");
 			sb.append("<colgroup>");

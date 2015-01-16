@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import com.dropbox.core.DbxAppInfo;
 import com.dropbox.core.DbxAuthFinish;
@@ -27,10 +28,17 @@ import at.tuwien.aic.raid.data.FileObject;
 public class DropBoxImpl 
 		implements ConnectorInterface
 {
+	java.util.logging.Logger log= java.util.logging.Logger.getLogger( "DropBox" );
+	
 	// directory is RAID level specific
 	private File baseDirectory = new File( "/" );
 	private DbxClient client = null;
 	private String name = "DropBox";
+	
+	private void log( String string ) 
+	{
+		log.log( Level.INFO, string );
+	}
 	
 	public DropBoxImpl( File baseDirectory )
 	{
@@ -81,9 +89,9 @@ public class DropBoxImpl
 			// possible to register a recall URL.
 			// This URL would get a &code= parameter which has to be inserted
 			// into to properties file.
-			System.out.println( "1. Go to: " + authorizeUrl );
-			System.out.println( "2. Click \"Allow\" (you might have to log in first)" );
-			System.out.println( "3. Copy the authorization code." );
+			log( "1. Go to: " + authorizeUrl );
+			log( "2. Click \"Allow\" (you might have to log in first)" );
+			log( "3. Copy the authorization code." );
 			
 			String code;
 			// This will fail if the user enters an invalid authorization code.
@@ -131,15 +139,15 @@ public class DropBoxImpl
 		String fn = absPath.getPath();
 		String ret = fn;
 		
-//		System.out.println(  "PATH-Seperator: " +  absPath.separator + " WINDOWs like?" );
+//		log(  "PATH-Seperator: " +  absPath.separator + " WINDOWs like?" );
 		
 		if( absPath.separator.indexOf( "\\" ) != -1 )
 		{
-//			System.out.println( "Found: \\" );
+//			log( "Found: \\" );
 			ret = fn.replaceAll( "\\\\", "/" );
 		}
 		
-//		System.out.println( "Name: " + ret );	
+//		log( "Name: " + ret );	
 		
 		return ret;
 	}
@@ -159,7 +167,7 @@ public class DropBoxImpl
 		
 		while( dirName!= null && ! dirName.toString().equals( File.pathSeparator ) )
 		{
-			System.out.println( "create: check existance of dir " + dirName.toString() );
+			log( "create: check existance of file in dir " + dirName.toString() );
 			
 			dirName = dirName.getParentFile();
 		}
@@ -174,11 +182,11 @@ public class DropBoxImpl
 		
 		for( FileObject aFO : list )
 		{
-			System.out.println( " List objects: " + aFO.getName() + " compare with: " +  absPath.getName() );
+			log( " List objects: " + aFO.getName() + " compare with: " +  absPath.getName() );
 			
 			if( aFO.getName().equals( absPath.getName() ) )
 			{
-				System.out.println( "DELETE: " + aFO.getName() );
+				log( "DELETE: " + aFO.getName() );
 		
 				this.delete( file );
 				// there can only be ONE file with the same name!
@@ -196,9 +204,8 @@ public class DropBoxImpl
 		try 
 		{
 			/*
-				System.out.println( "client.getAccountInfo()" + client.getAccountInfo() ); 
-				System.out.println( "Linked account: " + client.getAccountInfo().displayName );
-				System.out.flush();
+				log( "client.getAccountInfo()" + client.getAccountInfo() ); 
+				log( "Linked account: " + client.getAccountInfo().displayName );
 			 */
 
 			byte[] bytes = file.getData();
@@ -209,7 +216,7 @@ public class DropBoxImpl
 			DbxEntry.File uploadedFile = client.uploadFile( unixFn,
 					DbxWriteMode.add(), bytes.length, is );
 			
-			System.out.println( "Uploaded: " + uploadedFile.toString() );
+			log( "Uploaded: " + uploadedFile.toString() );
 		}
 		catch( DbxException e )
 		{
@@ -316,7 +323,7 @@ public class DropBoxImpl
 	public void delete( FileObject file )
 	{
 		// TODO !!!
-		// System.out.println( "Function delete - at the moment not implemented!" );
+		// log( "Function delete - at the moment not implemented!" );
 		// See: http://stackoverflow.com/questions/17703250/how-can-i-delete-a-file-folder-from-dropbox-using-the-java-api
 		// a rest implementation!? - Not beautiful!
 		File absPath = new File( baseDirectory, file.getName() );
@@ -391,7 +398,7 @@ public class DropBoxImpl
 				aFileObject.setName(  child.name.replace( "/", "" ) );
 				ret.add( aFileObject );
 				
-				System.out.println( "    " + child.name + ": " + child.toString() );
+				log( "    " + child.name + ": " + child.toString() );
 			}
 		}
 		catch( DbxException e )

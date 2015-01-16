@@ -64,6 +64,8 @@ public class Raid5
 	ConnectorInterface s3 = ConnectorConstructor.s3Instance();
 
 	private ConnectorInterface[] connectorInterface = null;
+	private String[] connectorNames = null;
+	
 	private void log(String string) {
 		log.log(Level.INFO,string);
 		
@@ -88,6 +90,16 @@ public class Raid5
 			for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
 			{
 				connectorInterface[ii] = this.getInterface( ii );
+			}
+		}
+		
+		if( connectorNames == null )
+		{
+			connectorNames = new String[3];
+			
+			for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
+			{
+				connectorNames[ii] = this.getInterface( ii ).getName();
 			}
 		}
 	}
@@ -519,18 +531,18 @@ public class Raid5
 		{
 			try
 			{
-				log( "Querying files from " + ci.getName() + "." );
+				log( "  Querying files from " + ci.getName() + "." );
 				
 				fileObjectList = ci.listFiles();
 			}
 			catch( Exception e )
 			{
 				errorCount++;
-				log( "Querying files from " + ci.getName() + " failed: " + e.getMessage() );
+				log( "  Querying files from " + ci.getName() + " failed: " + e.getMessage() );
 				throw new IOException( e );
 			}
 			
-			log( "Got " + fileObjectList.size() + " files from " + ci.getName() + "." );
+			log( "  Got " + fileObjectList.size() + " files from " + ci.getName() + "." );
 			
 			// Now we build up the matrix using fileObjectList
 			for( FileObject aFO : fileObjectList )
@@ -616,7 +628,9 @@ public class Raid5
 				throws IOException
 	{
 		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
-
+		
+		log( "listFiles():" );
+		
 		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 		
 		// Move it to return value
@@ -642,6 +656,8 @@ public class Raid5
 			}
 		}
 	
+		log( "listFiles(): returning " + ret.size() + " datasets.");
+		
 		return ret;
 	}
 
@@ -659,7 +675,7 @@ public class Raid5
 		FileViewObject toView = compareViewMap.get(key);
 		String FileName = toView.getGlobalFo().getName();
 		
-		log( "getFileHistory(): " + FileName  );
+		log( "getFileHistory( " + FileName + " ):" );
 		
 		// here we have to distinguish if
 		// History - or ACTUELL
@@ -687,6 +703,8 @@ public class Raid5
 		// we do not take data - if not necessary for viewing
 	}
 
+	log( "getFileHistory(): returning " + ret.size() + " datasets.");
+	
 	return ret;
 }
 	
@@ -859,8 +877,8 @@ public class Raid5
 	
 	public synchronized void write( FileObject f ) throws IOException
 	{
-		int writtenFiles = 0;
-		int writtenHistoryFiles = 0;
+		int errorFiles = 0;
+		int errorHistoryFiles = 0;
 		
 	    // initialization of connector interfaces
 		initConnectorInterface();
@@ -904,12 +922,12 @@ public class Raid5
 			}
 			catch( Exception e )
 			{
-				writtenFiles++;
+				errorFiles++;
 				log( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
 				e.printStackTrace();
 			}
 			
-			log( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
+			log( "Write " + writeFO.getName() + " to " + ci.getName() + " ... OK." );
 			
 			if( writeHistory )
 			{
@@ -927,12 +945,12 @@ public class Raid5
 				}
 				catch( Exception e )
 				{
-					writtenHistoryFiles++;
+					errorHistoryFiles++;
 					log( "Write problem at Interface" + ci.getName() + " Error" + e.getMessage() );
 					e.printStackTrace();
 				}
 				
-				log( "Write" + writeFO.getName() + " to " + ci.getName() + " ... OK." );
+				log( "Write " + writeFO.getName() + " to " + ci.getName() + " ... OK." );
 				
 				writeFO.setName( originalName );
 				// in case of exception --> modified file name exists!
@@ -941,11 +959,11 @@ public class Raid5
 			index++;
 		}
 		
-		if (writtenFiles < 2) {
+		if (errorFiles <= 1) {
 			throw new IOException("Faild: The file could not be stored in at least 2 interfaces!");
 		}
 		
-		if (writtenHistoryFiles < 2) {
+		if (errorHistoryFiles <= 1) {
 			throw new IOException("Faild: The history file could not be stored in at least 2 interfaces!");
 		}
 	}

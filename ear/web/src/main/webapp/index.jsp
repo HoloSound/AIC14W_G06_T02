@@ -79,7 +79,8 @@ li {
 						<input id="raid1FileInput" type="file" name="file" size="50" /> <br />
 						<input type="submit" value="Upload File" />
 					</form>
-					<a href="javascript:void" onclick="reloadRaid1();" > RELOAD </a>
+					<a href="javascript:void" onclick="reloadRaid1();" ><img src="/web/pic/reload.png" alt="reload"/>&nbsp;RELOAD&nbsp;</a>
+					<br /><br />
 				</div>
 
 				<%=c.listFiles()%>
@@ -93,7 +94,8 @@ li {
 						<input id="raid5FileInput" type="file" name="file" size="50" /> <br />
 						<input type="submit" value="Upload File" />
 					</form>
-<a href="javascript:void" onclick="reloadRaid5();" > RELOAD </a>
+<a href="javascript:void" onclick="reloadRaid5();" ><img src="/web/pic/reload.png" alt="reload"/>&nbsp;RELOAD&nbsp;</a>
+					<br /><br />
 					<table border="1">
 						<colgroup>
 							<col width="200">
