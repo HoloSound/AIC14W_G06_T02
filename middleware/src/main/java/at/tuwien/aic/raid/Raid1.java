@@ -745,7 +745,7 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 
 				log( "getFileInfo(): Id=" + interfaceId + " | " + readFileObject.getHash() );
 				
-				interfaceInformationFos[interfaceId] = readFileObject;
+				interfaceInformationFos[interfaceId] = new FileObject( readFileObject );
 				
 				interfaceId++;
 			}
@@ -762,6 +762,35 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 		ret.setInterfaceNames( connectorNames );
 
 		log( "getFileInfo(): returning " + dataRow.size() + " datasets.");
+		
+		// HERE WE DEBUGGING the whole dataset
+		log( "getFileInfo(): " );
+		String[] nameList = ret.getInterfaceNames();
+		for( String name : nameList )
+		{
+			log( "name: " + name );
+		}
+		
+		ArrayList<FileViewObject> fvos = ret.getFileViewObjects();
+		for( FileViewObject fo : fvos )
+		{
+			FileObject gfo = fo.getGlobalFo();
+			
+			log( "name: " + gfo.getName() );
+			log( "hash: " + gfo.getHash() );
+			
+			FileObject[] interfaceInfos = fo.getInterfaceInformationFos();
+			int ii = 0;
+			for( FileObject interfaceInfo : interfaceInfos )
+			{
+				log( "ID: " + ii + " name: " + interfaceInfo.getName() );
+				log( "ID: " + ii + " hash: " + interfaceInfo.getHash() );		
+				
+				ii++;
+			}
+		}
+		
+		log( "getFileInfo(): === END ===" );		
 		
 		return ret;
 	}
