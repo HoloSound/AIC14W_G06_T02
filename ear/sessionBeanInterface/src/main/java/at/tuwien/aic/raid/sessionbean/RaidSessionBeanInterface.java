@@ -1,12 +1,11 @@
 package at.tuwien.aic.raid.sessionbean;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.ejb.Local;
 
 import at.tuwien.aic.raid.data.FileObject;
-import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid1DTO;
 
 @Local
 public interface RaidSessionBeanInterface {
@@ -16,11 +15,12 @@ public interface RaidSessionBeanInterface {
 	 *         file content eg data is set to null
 	 * 
 	 */
-	ArrayList<FileViewObject> listFiles() throws IOException;
-	ArrayList<FileViewObject> getFileHistory( String fn ) throws IOException;
-	
-	void delete(String fn) throws IOException;
+	Raid1DTO listFiles() throws IOException;
+	Raid1DTO getFileHistory( String fn ) throws IOException;
 
+	Raid1DTO getFileInfo(String fn);
+	Raid1DTO copyFile(String fn, String from2, String to2);
+	
 	/**
 	 * 
 	 * @param file name
@@ -31,9 +31,6 @@ public interface RaidSessionBeanInterface {
 	FileObject getFile(String fn) throws IOException;
 
 	void write(FileObject f)throws IOException;
+	void delete(String fn) throws IOException;
 
-	String getFileInfo(String fn);
-
-
-	String copyFile(String fn, String from2, String to2);
 }

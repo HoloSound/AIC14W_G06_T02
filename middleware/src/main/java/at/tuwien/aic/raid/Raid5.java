@@ -1,5 +1,6 @@
 package at.tuwien.aic.raid;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
 import at.tuwien.aic.raid.connector.ConnectorConstructor;
 import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid5DTO;
 
 
 /**
@@ -624,10 +626,11 @@ public class Raid5
 	 * 
 	 */
 
-	public synchronized ArrayList<FileViewObject> listFiles() 
+	public synchronized Raid5DTO listFiles() 
 				throws IOException
 	{
-		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
+		Raid5DTO ret = new Raid5DTO();
+		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 		
 		log( "listFiles():" );
 		
@@ -646,36 +649,40 @@ public class Raid5
 			if( b2 == false )
 			{		
 				// maybe we will update the hash - and
-
 				FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
 	
 				toView.setInterfaceInformationFos(interfaceInformationFos);
-	
-				// TODO here we do another round if we want to duplicate files
-				ret.add(toView);
+// TODO:	setInterfaceNames
+//				toView.setInterfaceNames( connectorNames );
+				dataRow.add(toView);
 			}
 		}
 	
-		log( "listFiles(): returning " + ret.size() + " datasets.");
+		log( "listFiles(): returning " + dataRow.size() + " datasets.");
+		
+		ret.setFileViewObjects( dataRow );
+		ret.setInterfaceNames( connectorNames );
 		
 		return ret;
 	}
 
-	public ArrayList<FileViewObject> getFileHistory( String fn )
+	public Raid5DTO getFileHistory( String fn )
 			throws IOException 
 {
-	// "<h1>the history for  " + fn + " will be here </h1>";
-	ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
+	Raid5DTO ret = new Raid5DTO();
+	ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 
 	HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
+	log( "getFileHistory( " + fn + " ):" );
+	
 	// Move it to return value
 	for (String key : compareViewMap.keySet()) 
 	{
 		FileViewObject toView = compareViewMap.get(key);
-		String FileName = toView.getGlobalFo().getName();
+		String keyFileName = toView.getGlobalFo().getName();
 		
-		log( "getFileHistory( " + FileName + " ):" );
+		log( "getFileHistory(): checking " + keyFileName );
 		
 		// here we have to distinguish if
 		// History - or ACTUELL
@@ -697,13 +704,18 @@ public class Raid5
 			
 			if( readFileName.compareTo( fn ) == 0 )
 			{
-				ret.add( toView );
+				// TODO setInterfaceNames
+				// toView.setInterfaceNames( connectorNames );
+				dataRow.add( toView );
 			}
 		}
 		// we do not take data - if not necessary for viewing
 	}
 
-	log( "getFileHistory(): returning " + ret.size() + " datasets.");
+	log( "getFileHistory(): returning " + dataRow.size() + " datasets.");
+	
+	ret.setFileViewObjects( dataRow );
+	ret.setInterfaceNames( connectorNames );
 	
 	return ret;
 }
@@ -724,7 +736,7 @@ public class Raid5
 	    // initialization of connector interfaces
 		initConnectorInterface();
 		
-		ArrayList<FileViewObject> listViewObjects = listFiles();
+		ArrayList<FileViewObject> listViewObjects = listFiles().getFileViewObjects();
 		FileObject actFileObject = null;
 		FileObject[] interfaceInformationFos = null;
 		
@@ -762,6 +774,10 @@ public class Raid5
 				{
 					log( "Deleting " + fileName + " from " + ci.getName() + "." );
 					ci.delete( new FileObject( fileName ) );
+				}
+				catch( FileNotFoundException e )
+				{
+					log( "Deleting " + fileName + " from " + ci.getName() + " failed: " + e.getMessage() );
 				}
 				catch( Exception e )
 				{
@@ -801,7 +817,7 @@ public class Raid5
 		initConnectorInterface();
 
 		
-		ArrayList<FileViewObject> listViewObjects = listFiles();
+		ArrayList<FileViewObject> listViewObjects = listFiles().getFileViewObjects();
 		FileObject actFileObject = null;
 		FileObject[] interfaceInformationFos = null;
 		
@@ -959,12 +975,16 @@ public class Raid5
 			index++;
 		}
 		
-		if (errorFiles <= 1) {
-			throw new IOException("Faild: The file could not be stored in at least 2 interfaces!");
+		if( errorFiles > 1 )
+		{
+			throw new IOException(
+					"Faild: The file could not be stored in at least 2 interfaces!" );
 		}
-		
-		if (errorHistoryFiles <= 1) {
-			throw new IOException("Faild: The history file could not be stored in at least 2 interfaces!");
+
+		if( errorHistoryFiles > 1 )
+		{
+			throw new IOException(
+					"Faild: The history file could not be stored in at least 2 interfaces!" );
 		}
 	}
 

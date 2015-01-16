@@ -18,6 +18,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid5DTO;
 import at.tuwien.aic.raid.sessionbean.Raid5sessionBeanInterface;
 
 @WebServlet("/raid5")
@@ -145,7 +146,8 @@ public class Raid5Servlet extends HttpServlet {
 
 		int ii=0;
 		
-		ArrayList<FileViewObject> fvol = raid.listFiles();
+		Raid5DTO raid5Dto =  raid.listFiles();
+		ArrayList<FileViewObject> fvol = raid5Dto.getFileViewObjects();
 		
 		for( FileViewObject fvo : fvol ) 
 		{
@@ -237,6 +239,8 @@ public class Raid5Servlet extends HttpServlet {
 	
 		try {
 			StringBuilder sb = new StringBuilder();
+			
+			sb.append( "<h1>RAID5 history of file: " + fn + "</h1>" );
 
 			// building up a table
 			sb.append("<table border=\"1\">");
@@ -275,7 +279,8 @@ public class Raid5Servlet extends HttpServlet {
 
 			// building up a table row
 
-			ArrayList<FileViewObject> fvol = raid.getFileHistory( fn );
+			Raid5DTO raid5Dto =  raid.getFileHistory( fn );
+			ArrayList<FileViewObject> fvol = raid5Dto.getFileViewObjects();
 
 			for (FileViewObject fvo : fvol) {
 				FileObject f = fvo.getGlobalFo();

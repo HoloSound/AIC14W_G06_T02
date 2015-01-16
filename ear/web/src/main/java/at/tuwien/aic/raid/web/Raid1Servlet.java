@@ -1,6 +1,5 @@
 package at.tuwien.aic.raid.web;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,9 +16,10 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import at.tuwien.aic.raid.Raid1;
+import at.tuwien.aic.raid.ConnectorInterface;
 import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid1DTO;
 import at.tuwien.aic.raid.sessionbean.RaidSessionBeanInterface;
 
 @WebServlet("/raid1")
@@ -33,11 +33,13 @@ public class Raid1Servlet extends HttpServlet {
 	public static final String COPY = "copy";
 	public static final String FROM = "from";
 	public static final String TO = "to";
+	public static final String GET_FILE_LIST = "list";	
+	private static final String NON_EXISTENT = "--------------------------------";
 	
 	public static final String SHOW_HISTORY = "history";
 	@EJB
 	private RaidSessionBeanInterface raid;
-	public static String GET_FILE_LIST = "list";
+
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -135,12 +137,7 @@ public class Raid1Servlet extends HttpServlet {
 
 	}
 
-	private void copyFile(String from2, String to2, String fn, HttpServletRequest req, HttpServletResponse resp) 
-			throws IOException 
-	{
-		resp.getOutputStream().write( raid.copyFile(fn, from2, to2 ).getBytes() );
-		
-	}
+
 
 	private void getFileHistory(String fn, HttpServletRequest req, HttpServletResponse resp) 
 			throws IOException 
@@ -187,8 +184,8 @@ public class Raid1Servlet extends HttpServlet {
 			// only output it!
 
 			// building up a table row
-
-			ArrayList<FileViewObject> fvol = raid.getFileHistory( fn );
+			Raid1DTO raid1Dto = raid.getFileHistory( fn );
+			ArrayList<FileViewObject> fvol = raid1Dto.getFileViewObjects();
 
 			for (FileViewObject fvo : fvol) {
 				FileObject f = fvo.getGlobalFo();
@@ -238,10 +235,106 @@ public class Raid1Servlet extends HttpServlet {
 
 	}
 
-	private void getFileInfo(String fn, HttpServletRequest req, HttpServletResponse resp) 
+	private void copyFile(String from2, String to2, String fn, HttpServletRequest req, HttpServletResponse resp) 
 			throws IOException 
 	{
-		resp.getOutputStream().write( raid.getFileInfo(fn).getBytes() );
+		// resp.getOutputStream().write( raid.copyFile(fn, from2, to2 ).getBytes() );
+
+		try 
+		{
+			StringBuffer sb = new StringBuffer();
+			String hashValues[] = new String[3];
+			
+			sb.append("<p>");			
+			
+			// building up a table row
+			Raid1DTO raid1Dto = raid.copyFile(fn, from2, to2 );
+			ArrayList<FileViewObject> fvol = raid1Dto.getFileViewObjects();
+			String[] interfaceNames = raid1Dto.getInterfaceNames();
+			
+			for (FileViewObject fvo : fvol) 
+			{
+				FileObject[] fols = fvo.getInterfaceInformationFos();
+				
+				int ii = 0;
+				
+				for( FileObject fo : fols )
+				{
+					sb.append( "<tt>" );
+					sb.append( fo.getHash() );
+					hashValues[ii] = fo.getHash();
+					sb.append( "</tt>&nbsp;&nbsp;" );
+					
+					sb.append( interfaceNames[ii] );
+					
+					sb.append( "<br />" );
+					ii++;
+				}
+			}
+			
+			compareHashValues( sb, fn, interfaceNames, hashValues );
+			
+			sb.append("</p>");
+			
+			resp.getWriter().write(sb.toString());
+		} 
+		catch (Exception e) 
+		{
+			resp.getWriter().write("error " + e.getMessage());
+		}
+	}
+	
+	private void getFileInfo(String fn, HttpServletRequest req,
+			HttpServletResponse resp) 
+					throws IOException 
+	{
+		// resp.getOutputStream().write( raid.getFileInfo(fn).getBytes() );
+
+		try 
+		{
+			StringBuffer sb = new StringBuffer();
+			String hashValues[] = new String[3];
+			
+			sb.append("<p>");			
+			
+			// building up a table row
+			Raid1DTO raid1Dto = raid.getFileInfo( fn );
+			ArrayList<FileViewObject> fvol = raid1Dto.getFileViewObjects();
+			String[] interfaceNames = raid1Dto.getInterfaceNames();
+			
+			for (FileViewObject fvo : fvol) 
+			{
+				FileObject[] fols = fvo.getInterfaceInformationFos();
+				
+				int ii = 0;
+				
+				for( FileObject fo : fols )
+				{
+					sb.append( "<tt>" );
+					sb.append( fo.getHash() );
+					hashValues[ii] = fo.getHash();
+					
+log( "Id: " + ii + " | " + hashValues[ii] );					
+					
+					sb.append( "</tt>&nbsp;&nbsp;" );	
+					
+					sb.append( interfaceNames[ii] );
+					
+					sb.append( "<br />" );
+					ii++;
+				}
+			}
+				
+			compareHashValues( sb, fn, interfaceNames, hashValues );
+			
+			sb.append("</p>");
+			
+			resp.getWriter().write( sb.toString() );
+		} 
+		catch (Exception e) 
+		{
+			resp.getWriter().write("error " + e.getMessage());
+		}
 	}
 
 	private void listFiles(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -287,8 +380,8 @@ public class Raid1Servlet extends HttpServlet {
 			// only output it!
 
 			// building up a table row
-
-			ArrayList<FileViewObject> fvol = raid.listFiles();
+			Raid1DTO raid1Dto = raid.listFiles();
+			ArrayList<FileViewObject> fvol = raid1Dto.getFileViewObjects();
 
 			for (FileViewObject fvo : fvol) {
 				FileObject f = fvo.getGlobalFo();
@@ -396,5 +489,184 @@ public class Raid1Servlet extends HttpServlet {
 
 	private Object getShowInfoLink(String id, FileObject f) {
 		return "<a href=\"javascript:void\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" title=\"Show file info\"><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
+	}
+	
+	
+	/* Methods from Raid1.java --> should be taken here to produce HTML output!
+	 * At the moment there's only String interface ...
+	 * *DTO may be necessary (depending on RAID1 / RAID5)
+	 */
+	/**
+	 * addTwoLinks - generate the file copy between two interfaces depending on the
+	 * hashValues of the files.
+	 * 
+	 * @param b			concatenation Buffer
+	 * @param file		name of the file
+	 * @param from		index of from interface
+	 * @param fromIsEmpty	defining if file does no exist
+	 * @param to		index of the to interface
+	 * @param toIsEmpty		defining if file does no exist
+	 */
+	
+	private void addTwoLinks( StringBuffer b, String file, 
+			int from, boolean fromIsEmpty,
+			int to, boolean toIsEmpty )
+	{
+		b.append("&nbsp;");	
+		
+log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty 
+		+ " TO: " + to + " | " + toIsEmpty );
+		
+		if( toIsEmpty == false )
+			addLink( b, file, to, from, true );
+		
+		b.append("&nbsp;|&nbsp;");	
+		
+		if( fromIsEmpty == false )
+			addLink( b, file, from, to, false );
+		
+		b.append("&nbsp;");	
+	}
+	
+	private void addLink( StringBuffer b, String file, int from, int to, boolean isLeft )
+	{
+		b.append("<a target='_blank' href=\"raid1?task=copy&from=" + from  
+				+ "&to=" + to 
+				+ "&fileName=" + file + "\">" );
+		
+		if( isLeft == true )
+			b.append( "<img src=\"/web/pic/copy_left.png\" alt=\"copy left\" />");
+		else
+			b.append( "<img src=\"/web/pic/copy_right.png\" alt=\"copy right\" />");
+			
+		b.append("</a>");			
+	}
+	
+	private void generateCopyButtons( StringBuffer b, String fileName, String[] interfaceNames, String[] hashValues )
+	{
+		String firstHashValue = null;
+		String actHashValue = null;
+		String previousHashValue = null;
+		String firstConnectorInterfaceName = null;
+		int actId = 0;
+		int firstId = -1;
+		int previousId = -1;
+		boolean firstIsEmpty = false;
+		boolean actIsEmpty = false;
+		boolean previousIsEmpty = false;
+
+		b.append("<p>");
+		
+		for( String interfaceName : interfaceNames ) 
+		{			
+			actHashValue = hashValues[actId];
+			
+			if( actHashValue.compareTo( NON_EXISTENT ) == 0 )
+				actIsEmpty = true;
+			else
+				actIsEmpty = false;
+		
+			
+			if( firstHashValue == null )
+			{
+				firstHashValue = actHashValue;
+				firstId = actId;
+				firstConnectorInterfaceName = interfaceName;
+				
+				if( firstHashValue.compareTo( NON_EXISTENT ) == 0 )
+				{
+					firstIsEmpty = true;
+				}
+			}
+			
+			if( previousHashValue != null )
+			{
+				log(  "PRE: " + previousHashValue + " --> ACT: " + actHashValue );
+				if( previousHashValue.compareTo( actHashValue ) != 0  )
+				{
+					// generate "<" and ">" button
+					addTwoLinks( b, fileName, previousId, previousIsEmpty, actId, actIsEmpty );
+				}
+				else
+				{
+					b.append("&nbsp;|&nbsp;");							
+				}
+			}
+			else
+			{
+				b.append("&nbsp;|&nbsp;");							
+			}
+			
+			b.append( "<bold>" + interfaceName + "</bold>" );
+			
+			previousHashValue = actHashValue;
+			previousId = actId;
+			
+			if( previousHashValue.compareTo( NON_EXISTENT ) == 0 )
+				previousIsEmpty = true;
+			else
+				previousIsEmpty = false;
+			
+			actId++;
+		}
+		
+		if( firstHashValue != null )
+		{
+			if( firstHashValue.compareTo( actHashValue ) != 0  )
+			{
+				// generate "<" and ">" button
+				addTwoLinks( b, fileName, previousId, previousIsEmpty, firstId, firstIsEmpty );
+			}
+			else
+			{
+				b.append("&nbsp;|&nbsp;");							
+			}
+		}
+		else
+		{
+			b.append("&nbsp;|&nbsp;");							
+		}
+		
+		b.append( "<bold>" + firstConnectorInterfaceName + "</bold>&nbsp;|" );
+		
+		b.append("</p>");		
+	}
+	
+	private String compareHashValues( StringBuffer b, String fileName, String[] interfaceNames, String hashValues[] )
+	{
+		try
+		{
+			boolean differentHashvalues = false;
+			String preHash = null;
+
+			for (String hashValue : hashValues) 
+			{
+				if (preHash == null) 
+				{
+					preHash = hashValue;
+				} 
+				else 
+				{
+					if (preHash.compareTo(hashValue) != 0) 
+					{
+						differentHashvalues = true;
+						break;
+					}
+				}
+			}
+
+			// now we are generating some exchange Buttons
+			if( differentHashvalues ) 
+			{
+				generateCopyButtons( b, fileName, interfaceNames, hashValues );
+			}
+
+			return b.toString();
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			return "error:" + e.getMessage();
+		}
 	}
 }

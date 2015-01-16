@@ -1,12 +1,11 @@
 
 package at.tuwien.aic.raid.sessionbean;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.ejb.Local;
 
 import at.tuwien.aic.raid.data.FileObject;
-import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid5DTO;
 
 @Local
 public interface Raid5sessionBeanInterface {
@@ -16,8 +15,8 @@ public interface Raid5sessionBeanInterface {
 	 *         file content eg data is set to null
 	 * 
 	 */
-	ArrayList<FileViewObject> listFiles() throws IOException;
-	ArrayList<FileViewObject> getFileHistory(String fn) throws IOException;
+	Raid5DTO listFiles() throws IOException;
+	Raid5DTO getFileHistory(String fn) throws IOException;
 	
 	void delete(String fn) throws IOException;
 

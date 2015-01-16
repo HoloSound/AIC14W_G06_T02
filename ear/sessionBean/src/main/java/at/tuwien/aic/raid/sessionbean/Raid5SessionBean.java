@@ -1,13 +1,12 @@
 package at.tuwien.aic.raid.sessionbean;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.ejb.Stateless;
 
 import at.tuwien.aic.raid.Raid5;
 import at.tuwien.aic.raid.data.FileObject;
-import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid5DTO;
 
 @Stateless()
 public class Raid5SessionBean implements Raid5sessionBeanInterface {
@@ -19,13 +18,13 @@ public class Raid5SessionBean implements Raid5sessionBeanInterface {
 	}
 
 	@Override
-	public ArrayList<FileViewObject> listFiles() throws IOException {
+	public Raid5DTO listFiles() throws IOException {
 		
 		return raid.listFiles();
 	}
 
 	@Override
-	public ArrayList<FileViewObject> getFileHistory( String fn )
+	public Raid5DTO getFileHistory( String fn )
 			throws IOException 
 	{	
 		return raid.getFileHistory(fn);

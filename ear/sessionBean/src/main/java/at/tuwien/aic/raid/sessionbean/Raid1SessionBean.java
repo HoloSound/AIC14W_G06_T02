@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import at.tuwien.aic.raid.Raid1;
 import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid1DTO;
 
 @Stateless()
 public class Raid1SessionBean 
@@ -23,7 +24,7 @@ public class Raid1SessionBean
 	}
 
 	@Override
-	public ArrayList<FileViewObject> listFiles() throws IOException {
+	public Raid1DTO listFiles() throws IOException {
 		
 		return raid1.listFiles();
 	}
@@ -47,20 +48,20 @@ public class Raid1SessionBean
 	}
 
 	@Override
-	public String getFileInfo(String fn) {
+	public Raid1DTO getFileInfo(String fn) {
 		
 		return raid1.getFileInfo(fn);
 	}
 
 	@Override
-	public ArrayList<FileViewObject>  getFileHistory( String fn )
+	public Raid1DTO getFileHistory( String fn )
 			 throws IOException 
 	{
 		return raid1.getFileHistory( fn );
 	}
 
 	@Override
-	public String copyFile(String fn, String fromInterface, String toInterface ) 
+	public Raid1DTO copyFile(String fn, String fromInterface, String toInterface ) 
 	{
 		return raid1.copyFile( fn, fromInterface, toInterface );
 	}

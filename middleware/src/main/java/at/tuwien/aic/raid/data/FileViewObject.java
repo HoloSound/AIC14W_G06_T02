@@ -14,9 +14,11 @@ package at.tuwien.aic.raid.data;
 
 public class FileViewObject
 {
+	// global basic name
 	private FileObject globalFo;
+	// RAID1 - gets the HASH values for each own file
+	// RAID5 - gets the generated names of the files at the locations
 	private FileObject[] interfaceInformationFos;
-	private String[] interfaceNames;
 	
 
 	public FileObject getGlobalFo()
@@ -38,18 +40,5 @@ public class FileViewObject
 	{
 		this.interfaceInformationFos = interfaceInformationFos;
 	}
-
-	public String[] getInterfaceNames()
-	{
-		return interfaceNames;
-	}
-
-	public void setInterfaceNames( String[] interfaceNames )
-	{
-		this.interfaceNames = interfaceNames;
-	}
-	
-	
-	
 	
 }

@@ -7,6 +7,7 @@ import javax.naming.NamingException;
 
 import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid1DTO;
 import at.tuwien.aic.raid.sessionbean.RaidSessionBeanInterface;
 
 public class Controller {
@@ -73,8 +74,8 @@ public class Controller {
 // The creation of viewing would be the wrong place - we should here only output it!
 			
 			// building up a table row
-
-			ArrayList<FileViewObject> fvol = raid.listFiles();
+			Raid1DTO raid1Dto = raid.listFiles();
+			ArrayList<FileViewObject> fvol = raid1Dto.getFileViewObjects();
 			
 			for( FileViewObject fvo : fvol ) 
 			{

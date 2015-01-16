@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import at.tuwien.aic.raid.connector.ConnectorConstructor;
 import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
+import at.tuwien.aic.raid.data.Raid1DTO;
 
 public class Raid1 {
 
@@ -173,10 +174,11 @@ public class Raid1 {
 	 * 
 	 */
 
-	public synchronized ArrayList<FileViewObject> listFiles() 
+	public synchronized Raid1DTO listFiles() 
 			throws IOException 
 	{
-		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
+		Raid1DTO ret = new Raid1DTO();
+		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 
 		log( "listFiles(): ");
 		
@@ -204,26 +206,31 @@ public class Raid1 {
 				FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
 	
 				toView.setInterfaceInformationFos(interfaceInformationFos);
-	
+				
+// TODO:
+//				toView.setInterfaceNames( connectorNames );
 				// TODO here we do another round if we want to duplicate files
-				ret.add(toView);
+				dataRow.add(toView);
 			}
 			// we do not take data - if not necessary for viewing
 		}
 
-		log( "listFiles(): retunring " + ret.size() + " datasets.");
+		log( "listFiles(): returning " + dataRow.size() + " datasets.");
+		
+		ret.setFileViewObjects( dataRow );
+		ret.setInterfaceNames( connectorNames );
 		
 		return ret;
 	}
 
 	
-	public ArrayList<FileViewObject> getFileHistory( String fn )
+	public Raid1DTO getFileHistory( String fn )
 				throws IOException 
 	{
-		// "<h1>the history for  " + fn + " will be here </h1>";
-		ArrayList<FileViewObject> ret = new ArrayList<FileViewObject>();
+		Raid1DTO ret = new Raid1DTO();
+		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 
-		log( "getFileHistory(): ");
+		log( "getFileHistory( " + fn + " ): ");
 		
 		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
@@ -231,6 +238,10 @@ public class Raid1 {
 		for (String key : compareViewMap.keySet()) 
 		{
 			FileViewObject toView = compareViewMap.get(key);
+			String keyFileName = toView.getGlobalFo().getName();
+			
+			log( "getFileHistory(): checking " + keyFileName );
+			
 
 			// here we have to distinguish if
 			// History - or ACTUELL
@@ -252,13 +263,18 @@ public class Raid1 {
 				
 				if( readFileName.compareTo( fn ) == 0 )
 				{
-					ret.add( toView );
+					// TODO:					
+					// toView.setInterfaceNames( connectorNames );
+					dataRow.add( toView );
 				}
 			}
 			// we do not take data - if not necessary for viewing
 		}
 
-		log( "getFileHistory(): returning " + ret.size() + " datasets.");
+		log( "getFileHistory(): returning " + dataRow.size() + " datasets.");
+		
+		ret.setFileViewObjects( dataRow );
+		ret.setInterfaceNames( connectorNames );
 		
 		return ret;
 	}
@@ -273,7 +289,7 @@ public class Raid1 {
 	 *             restored lazily
 	 * 
 	 */
-	public synchronized void delete(String fn) throws IOException {
+	public synchronized void delete( String fileName ) throws IOException {
 		// definition of connector interfaces
 		ConnectorInterface[] cis = new ConnectorInterface[3];
 
@@ -284,16 +300,25 @@ public class Raid1 {
 		// simple implementation:
 		// real implementation would run each interface in own thread
 		// to parallelize the writing action and minimize the waiting time.
-		for (ConnectorInterface ci : cis) {
-			try {
-				log("Deleting" + fn + "from " + ci.getName() + ".");
-				ci.delete(new FileObject(fn));
-			} catch (Exception e) {
-				log("Deleting from " + ci.getName() + " failed" + e.getMessage());
-				throw new IOException(e);
+		for( ConnectorInterface ci : cis )
+		{
+			try
+			{
+				log( "Deleting " + fileName + " from " + ci.getName() + "." );
+				ci.delete( new FileObject( fileName ) );
+			}
+			catch( FileNotFoundException e )
+			{
+				log( "Deleting " + fileName + " from " + ci.getName() + " failed: " + e.getMessage() );
+			}
+			catch( Exception e )
+			{
+				log( "Deleting from " + ci.getName() + " failed"
+						+ e.getMessage() );
+				throw new IOException( e );
 			}
 
-			log("File " + fn + "deleted from " + ci.getName() + ".");
+			log( "File " + fileName + "deleted from " + ci.getName() + "." );
 		}
 	}
 
@@ -527,6 +552,9 @@ public class Raid1 {
 		}
 	}
 	
+	
+	
+	
 	private void addTwoLinks( StringBuffer b, String file, 
 			int from, boolean fromIsEmpty,
 			int to, boolean toIsEmpty )
@@ -653,7 +681,92 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 		b.append("</p>");		
 	}
 	
+	
+	public Raid1DTO getFileInfo( String fileName )
+	{
+		log( "getFileInfo( " + fileName + " )" );
+		
+		Raid1DTO ret = new Raid1DTO();
+		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
+		FileViewObject actRow = new FileViewObject();
+		
+		FileObject actFileObject = new FileObject( fileName );
+		actFileObject.setHash( "--------------------------------" );
+		actRow.setGlobalFo( actFileObject );
+		
+		FileObject[] interfaceInformationFos = new FileObject[3];
+	
+		try
+		{
+			// initialization of connector interfaces
+			initConnectorInterface();
 
+			int interfaceId = 0;
+
+			for( ConnectorInterface ci : connectorInterface )
+			{
+				FileObject readFileObject = new FileObject( fileName ); 
+				
+				try
+				{		
+					try
+					{
+						readFileObject = ci.read( actFileObject );
+	
+						if( readFileObject != null )
+						{
+							if( readFileObject.getMd5() != null )
+							{
+								String hashValue = readFileObject.getMd5();
+								readFileObject.setHash( hashValue );
+							}
+							else
+							{
+								readFileObject.setHash( "--------------------------------" );
+							}
+						}
+						else
+						{
+							readFileObject = actFileObject;
+							readFileObject.setHash( "--------------------------------" );
+						}
+
+					}
+					catch( FileNotFoundException fnfe )
+					{
+						readFileObject.setHash( "--------------------------------" );
+					}
+				}
+				catch( Exception e )
+				{
+					readFileObject.setHash( "--------------------------------" );
+					log( "getFileInfo(): ERROR " + e.getMessage() );
+				}
+
+				log( "getFileInfo(): Id=" + interfaceId + " | " + readFileObject.getHash() );
+				
+				interfaceInformationFos[interfaceId] = readFileObject;
+				
+				interfaceId++;
+			}
+			
+			actRow.setInterfaceInformationFos( interfaceInformationFos );
+			dataRow.add( actRow );			
+		}
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
+
+		ret.setFileViewObjects( dataRow );
+		ret.setInterfaceNames( connectorNames );
+
+		log( "getFileInfo(): returning " + dataRow.size() + " datasets.");
+		
+		return ret;
+	}
+
+	/*
 	public String getFileInfo(String fileName ) {
 		try {
 			StringBuffer b = new StringBuffer();
@@ -740,9 +853,9 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 		}
 		
 	}
+ */
 
-
-	public String copyFile( String fn, String fromInterface, String toInterface )
+	public Raid1DTO copyFile( String fn, String fromInterface, String toInterface )
 	{
 		log( "copyFile(): file: " + fn + ", fromInterface: " + fromInterface + ", toInterface: " + toInterface );
 		
