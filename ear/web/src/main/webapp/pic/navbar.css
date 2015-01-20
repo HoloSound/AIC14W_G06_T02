@@ -1,0 +1,30 @@
+
+
+
+body {
+	background: url(../pics/bg_shield.png) repeat, url(Clouds.png) no-repeat center center  fixed;
+	padding: 0px 0px;
+	-webkit-background-size: 1px,cover;
+	-moz-background-size: 1px,cover;
+	-o-background-size: 1px,cover;
+	background-size: 1px,cover;
+	
+ 
+
+}
+
+html {
+	
+	 padding-top: 50px;
+
+
+	
+}
+
+ 
+
+.navbar {
+  margin-bottom: 20px;
+}
+
+

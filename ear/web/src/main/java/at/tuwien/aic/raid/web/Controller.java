@@ -154,25 +154,25 @@ public class Controller {
 	
 
 	private Object getShowHistoryLink(FileObject f) {
-		return "<a target='_blank' title=\"Show file history\" href=\"raid1?task="
+		return "<a target='_blank' class='btn btn-sm alert-warning-transparent ' title=\"Show file history\" href=\"raid1?task="
 				+ Raid1Servlet.SHOW_HISTORY + "&"
 				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
 	}
 
 	private Object getShowInfoLink( String id, FileObject f ) {
-		return "<a href=\"javascript:void\" onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" title=\"Show file info\"><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
+		return "<a href=\"javascript:void\" class='btn btn-sm alert-info-transparent' onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" title=\"Show file info\"><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
 	}
 	
 	private String getDownloadLink(FileObject f) {
 
-		return "<a target='_blank' title=\"Download file\" href=\"raid1?task="
+		return "<a target='_blank' class='btn btn-sm alert-success-transparent 'title=\"Download file\" href=\"raid1?task="
 				+ Raid1Servlet.DOWNLOAD_OPERATION + "&"
 				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
 	}
 
 	private String getDeleteLink(FileObject f) {
 
-		return "<a target='_blank' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid1?task="
+		return "<a target='_blank' class='btn btn-sm alert-danger-transparent ' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid1?task="
 				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME+"="+f.getName()
 				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
