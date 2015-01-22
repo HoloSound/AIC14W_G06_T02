@@ -321,6 +321,28 @@ public class Raid1 {
 			log( "File " + fileName + "deleted from " + ci.getName() + "." );
 		}
 	}
+	
+	
+	/**
+	 * Try to remove the file from all connector
+	 * 
+	 * @param fn
+	 * @throws IOException
+	 *             if any of the delete operation fails the data will be
+	 *             restored lazily
+	 * 
+	 */
+	public synchronized void deleteHistory( String fileName ) throws IOException {
+		// definition of connector interfaces
+		delete( fileName );
+	}
+
+	
+	public synchronized FileObject getHistoryFile(String fn) 
+			throws IOException 
+	{
+		return getFile( fn );
+	}
 
 	/**
 	 * 

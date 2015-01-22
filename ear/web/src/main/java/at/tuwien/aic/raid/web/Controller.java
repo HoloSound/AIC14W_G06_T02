@@ -155,7 +155,7 @@ public class Controller {
 
 	private Object getShowHistoryLink(FileObject f) {
 		return "<a target='_blank' class='btn btn-sm alert-warning-transparent ' title=\"Show file history\" href=\"raid1?task="
-				+ Raid1Servlet.SHOW_HISTORY + "&"
+				+ Raid1Servlet.GET_HISTORY_LIST + "&"
 				+ Raid1Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
 	}
 

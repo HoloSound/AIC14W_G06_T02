@@ -19,7 +19,8 @@ public interface Raid5sessionBeanInterface {
 	Raid5DTO getFileHistory(String fn) throws IOException;
 	
 	void delete(String fn) throws IOException;
-
+	void deleteHistory(String fn) throws IOException;
+	
 	/**
 	 * 
 	 * @param file name
@@ -28,6 +29,7 @@ public interface Raid5sessionBeanInterface {
 	 *             
 	 */
 	FileObject getFile(String fn) throws IOException;
+	FileObject getHistoryFile(String fn) throws IOException;
 
 	void write(FileObject f)throws IOException;
 }

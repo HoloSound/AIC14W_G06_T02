@@ -36,10 +36,23 @@ public class Raid1SessionBean
 	}
 
 	@Override
+	public void deleteHistory(String fn) throws IOException {
+		raid1.deleteHistory(fn);
+		
+	}
+	
+	@Override
 	public FileObject getFile(String fn) throws IOException {
 		
 		return raid1.getFile(fn);
 	}
+	
+	@Override
+	public FileObject getHistoryFile(String fn) throws IOException {
+		
+		return raid1.getHistoryFile(fn);
+	}
+	
 
 	@Override
 	public void write(FileObject f) throws IOException {

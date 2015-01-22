@@ -32,14 +32,26 @@ public class Raid5SessionBean implements Raid5sessionBeanInterface {
 	
 	@Override
 	public void delete(String fn) throws IOException {
-		raid.delete(fn);
 		
+		raid.delete(fn);
+	}
+	
+	@Override
+	public void deleteHistory(String fn) throws IOException {
+		
+		raid.deleteHistory(fn);
 	}
 
 	@Override
 	public FileObject getFile(String fn) throws IOException {
 		
 		return raid.getFile(fn);
+	}
+	
+	@Override
+	public FileObject getHistoryFile(String fn) throws IOException {
+		
+		return raid.getHistoryFile(fn);
 	}
 
 	@Override

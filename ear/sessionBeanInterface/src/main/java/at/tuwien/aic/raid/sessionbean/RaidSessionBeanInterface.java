@@ -29,8 +29,9 @@ public interface RaidSessionBeanInterface {
 	 *             
 	 */
 	FileObject getFile(String fn) throws IOException;
+	FileObject getHistoryFile(String fn) throws IOException;
 
 	void write(FileObject f)throws IOException;
 	void delete(String fn) throws IOException;
-
+	void deleteHistory(String fn) throws IOException;
 }

@@ -16,7 +16,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import at.tuwien.aic.raid.ConnectorInterface;
 import at.tuwien.aic.raid.data.FileObject;
 import at.tuwien.aic.raid.data.FileViewObject;
 import at.tuwien.aic.raid.data.Raid1DTO;
@@ -26,17 +25,20 @@ import at.tuwien.aic.raid.sessionbean.RaidSessionBeanInterface;
 public class Raid1Servlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	public static final String DELETE_OPERATION = "delete";
+	public static final String DELETE_HISTORY_OPERATION = "delete_history";
 	public static final String FILE_NAME = "fileName";
 	public static final String DOWNLOAD_OPERATION = "download";
+	public static final String DOWNLOAD_HISTORY_OPERATION = "download_history";
 	public static final String UPLOAD_OPERATION = "upload";
 	public static final String FILE_INFO = "fileInfo";
 	public static final String COPY = "copy";
 	public static final String FROM = "from";
 	public static final String TO = "to";
 	public static final String GET_FILE_LIST = "list";	
+	public static final String GET_HISTORY_LIST = "history";
 	private static final String NON_EXISTENT = "--------------------------------";
 	
-	public static final String SHOW_HISTORY = "history";
+
 	@EJB
 	private RaidSessionBeanInterface raid;
 
@@ -100,7 +102,7 @@ public class Raid1Servlet extends HttpServlet {
 							
 				copyFile(from,to,fn, req, resp);
 			}
-			if (SHOW_HISTORY.equals(req.getParameter("task"))) {// lets
+			if (GET_HISTORY_LIST.equals(req.getParameter("task"))) {// lets
 				String fn = req.getParameter(FILE_NAME);
 				getFileHistory(fn, req, resp);
 			}
@@ -118,6 +120,17 @@ public class Raid1Servlet extends HttpServlet {
 					deleteFile(fn, resp);
 				}
 			}
+			if (DELETE_HISTORY_OPERATION.equals(req.getParameter("task"))) {// lets
+				// delete a
+				// file
+				String fn = req.getParameter(FILE_NAME);
+				if (fn == null) {
+					error("parameter Error", resp);
+					return;
+				} else {
+					deleteHistoryFile(fn, resp);
+				}
+			}
 
 			if (DOWNLOAD_OPERATION.equals(req.getParameter("task"))) {// lets
 																		// download
@@ -129,6 +142,18 @@ public class Raid1Servlet extends HttpServlet {
 					return;
 				} else {
 					downloadFile(fn, resp);
+				}
+			}
+			if (DOWNLOAD_HISTORY_OPERATION.equals(req.getParameter("task"))) {// lets
+				// download
+				// a
+				// file
+				String fn = req.getParameter(FILE_NAME);
+				if (fn == null) {
+					error("parameter Error", resp);
+					return;
+				} else {
+					downloadHistoryFile(fn, resp);
 				}
 			}
 		} catch (Exception e) {
@@ -211,7 +236,7 @@ public class Raid1Servlet extends HttpServlet {
 				}
 				sb.append(">");
 
-				sb.append(getDownloadLink(f));
+				sb.append(getDownloadHistoryLink(f));
 				sb.append("</td>");				
 				
 				sb.append("<td");
@@ -219,7 +244,7 @@ public class Raid1Servlet extends HttpServlet {
 					sb.append(" bgcolor=\"#eeeeff\"");
 				}
 				sb.append(">");
-				sb.append(getDeleteLink(f));
+				sb.append(getDeleteHistoryLink(f));
 				sb.append("</td>");
 
 				sb.append("</tr>");
@@ -458,9 +483,23 @@ log( "Id: " + ii + " | " + hashValues[ii] );
 		resp.getOutputStream().write(f.getData());
 
 	}
+	
+	private void downloadHistoryFile(String fn, HttpServletResponse resp) throws IOException {
+		FileObject f = raid.getHistoryFile(fn);
+		resp.setContentType("application/octet-stream");
+		resp.setHeader("Content-Disposition", "attachment; filename=\"" + f.getName() + "\"");
+		resp.getOutputStream().write(f.getData());
+
+	}
 
 	private void deleteFile(String fn, HttpServletResponse resp) throws IOException {
 		raid.delete(fn);
+		resp.getOutputStream().write("delete sucessfull".getBytes());
+
+	}
+	
+	private void deleteHistoryFile(String fn, HttpServletResponse resp) throws IOException {
+		raid.deleteHistory(fn);
 		resp.getOutputStream().write("delete sucessfull".getBytes());
 
 	}
@@ -477,14 +516,28 @@ log( "Id: " + ii + " | " + hashValues[ii] );
 	}
 
 	// This changes have no effect!
+	private String getDownloadHistoryLink(FileObject f) {
+
+		return "<a target='_blank' title=\"Download file\" href=\"raid1?task=" + Raid1Servlet.DOWNLOAD_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+				+ "\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
+	}
+	
+	// This changes have no effect!
 	private String getDeleteLink(FileObject f) {
 
 		return "<a target='_blank' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
 				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
+	
+	// This changes have no effect!
+	private String getDeleteHistoryLink(FileObject f) {
+
+		return "<a target='_blank' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
+	}
 
 	private Object getShowHistoryLink(FileObject f) {
-		return "<a target='_blank' title=\"Show file history\" href=\"raid1?task=" + Raid1Servlet.SHOW_HISTORY + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName() + "\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
+		return "<a target='_blank' title=\"Show file history\" href=\"raid1?task=" + Raid1Servlet.GET_HISTORY_LIST + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName() + "\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
 	}
 
 	private Object getShowInfoLink(String id, FileObject f) {

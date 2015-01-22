@@ -25,10 +25,12 @@ import at.tuwien.aic.raid.sessionbean.Raid5sessionBeanInterface;
 public class Raid5Servlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	public static final String DELETE_OPERATION = "delete";
+	public static final String DELETE_HISTORY_OPERATION = "delete_history";
 	public static final String FILE_NAME = "fileName";
 	public static final String DOWNLOAD_OPERATION = "download";
+	public static final String DOWNLOAD_HISTORY_OPERATION = "download_history";
 	public static final String UPLOAD_OPERATION = "upload";
-	public static final String SHOW_HISTORY = "history";
+	public static final String GET_HISTORY_LIST = "history";
 	
 	@EJB
 	private Raid5sessionBeanInterface raid;
@@ -87,7 +89,7 @@ public class Raid5Servlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		try {
-			if (SHOW_HISTORY.equals(req.getParameter("task"))) {// lets
+			if (GET_HISTORY_LIST.equals(req.getParameter("task"))) {// lets
 				String fn = req.getParameter(FILE_NAME);
 				getFileHistory(fn, req, resp);
 			}
@@ -105,6 +107,17 @@ public class Raid5Servlet extends HttpServlet {
 					deleteFile(fn, resp);
 				}
 			}
+			if (DELETE_HISTORY_OPERATION.equals(req.getParameter("task"))) {// lets
+				// delete a
+				// file
+				String fn = req.getParameter(FILE_NAME);
+				if (fn == null) {
+					error("parameter Error", resp);
+					return;
+				} else {
+					deleteHistoryFile(fn, resp);
+				}
+			}
 
 			if (DOWNLOAD_OPERATION.equals(req.getParameter("task"))) {// lets
 																		// download
@@ -116,6 +129,18 @@ public class Raid5Servlet extends HttpServlet {
 					return;
 				} else {
 					downloadFile(fn, resp);
+				}
+			}
+			if (DOWNLOAD_HISTORY_OPERATION.equals(req.getParameter("task"))) {// lets
+				// download
+				// a
+				// file
+				String fn = req.getParameter(FILE_NAME);
+				if (fn == null) {
+					error("parameter Error", resp);
+					return;
+				} else {
+					downloadHistoryFile(fn, resp);
 				}
 			}
 		} catch (Exception e) {
@@ -306,7 +331,7 @@ public class Raid5Servlet extends HttpServlet {
 				}
 				sb.append(">");
 
-				sb.append(getDownloadLink(f));
+				sb.append(getDownloadHistoryLink(f));
 				sb.append("</td>");				
 				
 				sb.append("<td");
@@ -314,7 +339,7 @@ public class Raid5Servlet extends HttpServlet {
 					sb.append(" bgcolor=\"#eeeeff\"");
 				}
 				sb.append(">");
-				sb.append(getDeleteLink(f));
+				sb.append(getDeleteHistoryLink(f));
 				sb.append("</td>");
 
 				sb.append("</tr>");
@@ -333,13 +358,31 @@ public class Raid5Servlet extends HttpServlet {
 	private void downloadFile(String fn, HttpServletResponse resp)
 			throws IOException 
 	{
-		// System.out.println( "downloadFile( " + fn + " )" );
+		log( "downloadFile( " + fn + " )" );
 		
 		FileObject f = raid.getFile( fn );
 		
-		// System.out.println( "Raid5Servlet::downloadFile() result f may be not correct!" );
-		// System.out.println( "Raid5Servlet::downloadFile( " + f.getName() + " ) " );
-		// System.out.println( "Raid5Servlet::downloadFile() I'M HERE! - CORRECT" );
+		log( "downloadFile() result f may be not correct!" );
+		log( "downloadFile( " + f.getName() + " ) " );
+		log( "downloadFile() I'M HERE! - CORRECT" );
+		
+		resp.setContentType("application/octet-stream");
+		resp.setHeader("Content-Disposition",
+				"attachment; filename=\"" + f.getName() + "\"");
+		resp.getOutputStream().write( f.getData() );
+
+	}
+	
+	private void downloadHistoryFile(String fn, HttpServletResponse resp)
+			throws IOException 
+	{
+		log( "downloadHistoryFile( " + fn + " )" );
+		
+		FileObject f = raid.getHistoryFile( fn );
+		
+		log( "downloadHistoryFile() result f may be not correct!" );
+		log( "downloadHistoryFile( " + f.getName() + " ) " );
+		log( "downloadHistoryFile() I'M HERE! - CORRECT" );
 		
 		resp.setContentType("application/octet-stream");
 		resp.setHeader("Content-Disposition",
@@ -351,6 +394,13 @@ public class Raid5Servlet extends HttpServlet {
 	private void deleteFile(String fn, HttpServletResponse resp)
 			throws IOException {
 		raid.delete(fn);
+		resp.getOutputStream().write("delete sucessfull".getBytes());
+
+	}
+	
+	private void deleteHistoryFile(String fn, HttpServletResponse resp)
+			throws IOException {
+		raid.deleteHistory(fn);
 		resp.getOutputStream().write("delete sucessfull".getBytes());
 
 	}
@@ -367,6 +417,13 @@ public class Raid5Servlet extends HttpServlet {
 				+ Raid5Servlet.DOWNLOAD_OPERATION + "&"
 				+ Raid5Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
 	}
+	
+	private String getDownloadHistoryLink(FileObject f) {
+
+		return "<a target='_blank' class='btn btn-sm alert-success-transparent' title=\"Download file\" href=\"raid5?task="
+				+ Raid5Servlet.DOWNLOAD_HISTORY_OPERATION + "&"
+				+ Raid5Servlet.FILE_NAME + "="+f.getName()+"\"> <img src=\"/web/pic/download.png\" alt=\"download\"/> </a>";
+	}
 
 	private String getDeleteLink(FileObject f) {
 
@@ -374,9 +431,16 @@ public class Raid5Servlet extends HttpServlet {
 				+ Raid5Servlet.DELETE_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
 				+ "', '', callback5, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
+	
+	private String getDeleteHistoryLink(FileObject f) {
+
+		return "<a target='_blank' class='btn btn-sm alert-danger-transparent' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid5?task="
+				+ Raid5Servlet.DELETE_HISTORY_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
+				+ "', '', callback5, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
+	}
 
 	private Object getShowHistoryLink(FileObject f) {
-		return "<a target='_blank' class='btn btn-sm alert-warning-transparent' title=\"Show file history\" href=\"raid5?task=" + Raid5Servlet.SHOW_HISTORY + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName() + "\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
+		return "<a target='_blank' class='btn btn-sm alert-warning-transparent' title=\"Show file history\" href=\"raid5?task=" + Raid5Servlet.GET_HISTORY_LIST + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName() + "\"> <img src=\"/web/pic/history.png\" alt=\"history\"/> </a>";
 	}
 	
 }

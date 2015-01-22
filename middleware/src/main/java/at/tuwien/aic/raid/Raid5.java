@@ -588,12 +588,12 @@ public class Raid5
 					// in this case the file names start with char [3] !
 					String mainFileName = aFileName.substring( 3 );
 					
-					log( "1: " + mainFileName );
+					log( "Main-Name: " + mainFileName );
 					
 					if( mainFileName.length() > 0 )
 					{
 						String raidType = aFileName.substring( 0, 3 );
-						log( "2: " + raidType );
+						log( "Type-Name: " + raidType );
 
 						FileViewObject foundViewObject = compareViewMap.get( mainFileName );
 						
@@ -641,6 +641,73 @@ public class Raid5
 	}
 	
 	
+	private synchronized ArrayList<FileViewObject> listFilesinternal( boolean isHistory ) 
+					throws IOException
+	{
+		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
+
+		log( "listHistoryFiles():" );
+
+		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
+
+		// Move it to return value
+		for( String key : compareViewMap.keySet() )
+		{
+			FileViewObject toView = compareViewMap.get( key );
+
+			// in RAID5 we do NOT show HISTORY files!
+			Pattern p2 = Pattern
+					.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
+			Matcher m2 = p2.matcher( toView.getGlobalFo().getName() );
+			boolean b2 = m2.matches();
+
+			if( b2 == isHistory )
+			{
+				// maybe we will update the hash - and
+				FileObject[] interfaceInformationFos = toView
+						.getInterfaceInformationFos();
+
+				toView.setInterfaceInformationFos( interfaceInformationFos );
+				// TODO: setInterfaceNames
+				// toView.setInterfaceNames( connectorNames );
+				dataRow.add( toView );
+			}
+		}
+
+		log( "listHistoryFiles(): returning " + dataRow.size() + " datasets." );
+
+		return dataRow;
+	}
+
+	/**
+	 * Compares the content of all connectors and try to fix missing files If
+	 * three is a file missing in a connector restore from other connectors
+	 * 
+	 * @return list of files which should be consistent on every connector
+	 * @throws IOException
+	 *             If ALL connectors fail. Log all other exception
+	 * 
+	 */
+
+	public synchronized Raid5DTO listHistoryFiles() 
+				throws IOException
+	{
+		Raid5DTO ret = new Raid5DTO();
+		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
+		
+		log( "listHistoryFiles():" );
+		
+		dataRow = listFilesinternal( true );
+
+		log( "listHistoryFiles(): returning " + dataRow.size() + " datasets.");
+
+		ret.setFileViewObjects( dataRow );
+		ret.setInterfaceNames( connectorNames );
+		
+		return ret;
+	}	
+	
+	
 	/**
 	 * Compares the content of all connectors and try to fix missing files If
 	 * three is a file missing in a connector restore from other connectors
@@ -657,34 +724,12 @@ public class Raid5
 		Raid5DTO ret = new Raid5DTO();
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 		
-		log( "listFiles():" );
+		log( "listHistoryFiles():" );
 		
-		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
-		
-		// Move it to return value
-		for( String key : compareViewMap.keySet() )
-		{
-			FileViewObject toView = compareViewMap.get( key );
-			
-			// in RAID5 we do NOT show HISTORY files!
-			Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
-			Matcher m2 = p2.matcher( toView.getGlobalFo().getName() );
-			boolean b2 = m2.matches();				
-			
-			if( b2 == false )
-			{		
-				// maybe we will update the hash - and
-				FileObject[] interfaceInformationFos = toView.getInterfaceInformationFos();
-	
-				toView.setInterfaceInformationFos(interfaceInformationFos);
-// TODO:	setInterfaceNames
-//				toView.setInterfaceNames( connectorNames );
-				dataRow.add(toView);
-			}
-		}
-	
-		log( "listFiles(): returning " + dataRow.size() + " datasets.");
-		
+		dataRow = listFilesinternal( false );
+
+		log( "listHistoryFiles(): returning " + dataRow.size() + " datasets.");
+
 		ret.setFileViewObjects( dataRow );
 		ret.setInterfaceNames( connectorNames );
 		
@@ -692,59 +737,60 @@ public class Raid5
 	}
 
 	public Raid5DTO getFileHistory( String fn )
-			throws IOException 
-{
-	Raid5DTO ret = new Raid5DTO();
-	ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
-
-	HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
-
-	log( "getFileHistory( " + fn + " ):" );
-	
-	// Move it to return value
-	for (String key : compareViewMap.keySet()) 
+				throws IOException
 	{
-		FileViewObject toView = compareViewMap.get(key);
-		String keyFileName = toView.getGlobalFo().getName();
-		
-		log( "getFileHistory(): checking " + keyFileName );
-		
-		// here we have to distinguish if
-		// History - or ACTUELL
-		// and in both cases
-		// RAID1 (else RAID5)
-		
-		// in RAID1 we do NOT show HISTORY files!
-		Pattern p2 = Pattern.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
-		Matcher m2 = p2.matcher( toView.getGlobalFo().getName() );
-		boolean b2 = m2.matches();				
-		
-		if( b2 == true )
-		{		
-			// maybe we will update the hash - and
-			FileObject globalFileObject = toView.getGlobalFo();
-			String fileName = globalFileObject.getName();
-			
-			String readFileName = fileName.substring( 16 );
-			
-			if( readFileName.compareTo( fn ) == 0 )
+		Raid5DTO ret = new Raid5DTO();
+		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
+
+		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
+
+		log( "getFileHistory( " + fn + " ):" );
+
+		// Move it to return value
+		for( String key : compareViewMap.keySet() )
+		{
+			FileViewObject toView = compareViewMap.get( key );
+			String keyFileName = toView.getGlobalFo().getName();
+
+			log( "getFileHistory(): checking " + keyFileName );
+
+			// here we have to distinguish if
+			// History - or ACTUELL
+			// and in both cases
+			// RAID1 (else RAID5)
+
+			// in RAID1 we do NOT show HISTORY files!
+			Pattern p2 = Pattern
+					.compile( "[2][0-9][0-9][0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]_.*" );
+			Matcher m2 = p2.matcher( toView.getGlobalFo().getName() );
+			boolean b2 = m2.matches();
+
+			if( b2 == true )
 			{
-				// TODO setInterfaceNames
-				// toView.setInterfaceNames( connectorNames );
-				dataRow.add( toView );
+				// maybe we will update the hash - and
+				FileObject globalFileObject = toView.getGlobalFo();
+				String fileName = globalFileObject.getName();
+
+				String readFileName = fileName.substring( 16 );
+
+				if( readFileName.compareTo( fn ) == 0 )
+				{
+					// TODO setInterfaceNames
+					// toView.setInterfaceNames( connectorNames );
+					dataRow.add( toView );
+				}
 			}
+			// we do not take data - if not necessary for viewing
 		}
-		// we do not take data - if not necessary for viewing
+
+		log( "getFileHistory(): returning " + dataRow.size() + " datasets." );
+
+		ret.setFileViewObjects( dataRow );
+		ret.setInterfaceNames( connectorNames );
+
+		return ret;
 	}
 
-	log( "getFileHistory(): returning " + dataRow.size() + " datasets.");
-	
-	ret.setFileViewObjects( dataRow );
-	ret.setInterfaceNames( connectorNames );
-	
-	return ret;
-}
-	
 	
 	/**
 	 * Remove the different files from all connectors
@@ -755,13 +801,15 @@ public class Raid5
 	 *             restored lazily
 	 * 
 	 */
-	public synchronized void delete( String fn ) throws IOException
+	public synchronized void deleteHistory( String fn ) throws IOException
 	{
+		log( "deleteHistory( " + fn + " )" );
+		
 		// here we generate the 3 different files
 	    // initialization of connector interfaces
 		initConnectorInterface();
 		
-		ArrayList<FileViewObject> listViewObjects = listFiles().getFileViewObjects();
+		ArrayList<FileViewObject> listViewObjects = listHistoryFiles().getFileViewObjects();
 		FileObject actFileObject = null;
 		FileObject[] interfaceInformationFos = null;
 		
@@ -779,7 +827,7 @@ public class Raid5
 		
 		if( interfaceInformationFos == null )
 		{
-			
+			throw new IOException("Faild: got not interface inforation objects!");			
 		}		
 
 		// simple implementation:
@@ -819,6 +867,87 @@ public class Raid5
 		}
 
 		ii++;
+		
+		log( "deleteHistory() - file " + fn + " deleted." );
+	}
+	
+	/**
+	 * Remove the different files from all connectors
+	 * 
+	 * @param fn
+	 * @throws IOException
+	 *             if any of the delete operation fails the data will be
+	 *             restored lazily
+	 * 
+	 */
+	public synchronized void delete( String fn ) throws IOException
+	{
+		log( "delete( " + fn + " )" );
+		
+		// here we generate the 3 different files
+	    // initialization of connector interfaces
+		initConnectorInterface();
+		
+		ArrayList<FileViewObject> listViewObjects = listFiles().getFileViewObjects();
+		FileObject actFileObject = null;
+		FileObject[] interfaceInformationFos = null;
+		
+		for( FileViewObject listViewObject : listViewObjects )
+		{
+			actFileObject = listViewObject.getGlobalFo();
+			
+			if( actFileObject.getName().compareTo( fn ) == 0 )
+			{
+				interfaceInformationFos = listViewObject.getInterfaceInformationFos();
+				
+				break;
+			}
+		}
+		
+		if( interfaceInformationFos == null )
+		{
+			throw new IOException( "Faild: got not interface inforation objects!" );			
+		}		
+
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		int ii = 0;
+		
+		for( ConnectorInterface ci : connectorInterface )
+		{
+			FileObject aFileObject = interfaceInformationFos[ii];
+			
+			if( aFileObject != null )
+			{
+				String fileName = aFileObject.getName() + fn;
+			
+				try
+				{
+					log( "Deleting " + fileName + " from " + ci.getName() + "." );
+					ci.delete( new FileObject( fileName ) );
+				}
+				catch( FileNotFoundException e )
+				{
+					log( "Deleting " + fileName + " from " + ci.getName() + " failed: " + e.getMessage() );
+				}
+				catch( Exception e )
+				{
+					log( "Deleting " + fileName + " from " + ci.getName() + " failed: " + e.getMessage() );
+					throw new IOException( e );
+				}
+				
+				log( "File " + fileName + "deleted from " + ci.getName() + "." );
+			}
+			else
+			{
+				log( "File " + fn + " can't be found @ " + ci.getName() + "." );
+			}
+		}
+
+		ii++;
+		
+		log( "delete() - file " + fn + " deleted." );
 	}
 
 	/**
@@ -848,9 +977,13 @@ public class Raid5
 		FileObject actFileObject = null;
 		FileObject[] interfaceInformationFos = null;
 		
+		log( "getFile() got " + listViewObjects.size() + " listViewObjects !" );
+		
 		for( FileViewObject listViewObject : listViewObjects )
 		{
 			actFileObject = listViewObject.getGlobalFo();
+			
+			log( "getFile() compare actFileObject: " + actFileObject.getName() + " with " + fn );
 			
 			if( actFileObject.getName().compareTo( fn ) == 0 )
 			{
@@ -913,6 +1046,102 @@ public class Raid5
 		return readFile;
 	}
 
+	/**
+	 * 
+	 * Calculates the hash values for each available file and logs the result
+	 * 
+	 * @param fn
+	 * @return
+	 * @throws IOException
+	 *             If no connector is reachable, the file does not exist in any
+	 *             connector, the calculated hashfiles are inconsistent
+	 *
+	 */
+	public synchronized FileObject getHistoryFile( String fn ) throws IOException
+	{
+		log( "getHistoryFile( " + fn + " ) " );
+		
+		// RAID5 LOGIK
+		FileObject readFile;
+		FileObject[] fileObjects = new FileObject[3];
+		
+	    // initialization of connector interfaces
+		initConnectorInterface();
+
+		
+		ArrayList<FileViewObject> listViewObjects = listHistoryFiles().getFileViewObjects();
+		FileObject actFileObject = null;
+		FileObject[] interfaceInformationFos = null;
+		
+		log( "getHistoryFile() got " + listViewObjects.size() + " listViewObjects !" );
+		
+		for( FileViewObject listViewObject : listViewObjects )
+		{
+			actFileObject = listViewObject.getGlobalFo();
+			
+			log( "getHistoryFile() compare actFileObject: " + actFileObject.getName() + " with " + fn );
+			
+			if( actFileObject.getName().compareTo( fn ) == 0 )
+			{
+				interfaceInformationFos = listViewObject.getInterfaceInformationFos();
+				
+				break;
+			}
+		}
+		
+		
+		if( interfaceInformationFos == null )
+		{
+			throw new IOException("Faild: got not interface inforation objects!");
+		}
+		
+		// simple implementation:
+		// real implementation would run each interface in own thread
+		// to parallelize the writing action and minimize the waiting time.
+		int ii = 0;
+		
+		// Here we have the problem - that the filename fn is only a part
+		// of the downloadable files!
+		// We have to generate a listFile to determine where which file is download able!
+		
+		for( ConnectorInterface ci : connectorInterface )
+		{
+			FileObject aFileObject = interfaceInformationFos[ii];
+			
+			if( aFileObject != null )
+			{
+				String fileName = aFileObject.getName() + fn;
+				
+				try
+				{
+					log( "getHistoryFile(): Read " + fn + " from " + ci.getName() + "." );
+					fileObjects[ii] = ci.read( new FileObject( fileName ) );
+				}
+				catch( Exception e )
+				{
+					log( "getHistoryFile(): Reading from " + ci.getName() + " failed" + e.getMessage() );
+					throw new IOException( e );
+				}
+			
+				log( "getHistoryFile(): File " + fileName + " read from " + ci.getName() + "." );
+			}
+			else
+			{
+				log( "getHistoryFile(): File " + fn + " can't be found @ " + ci.getName() + "." );
+			}
+
+			ii++;
+		}
+
+		log( "getHistoryFile() - try reconstruction ... " );
+		
+		readFile = reconstructFile( fileObjects );
+		
+		log( "getHistoryFile() - file reconstructed. " );
+		
+		return readFile;
+	}
+	
 	/**
 	 * Stores the file in at least TWO connectors
 	 * 
