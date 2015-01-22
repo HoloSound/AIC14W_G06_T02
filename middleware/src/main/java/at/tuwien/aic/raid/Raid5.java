@@ -65,7 +65,7 @@ public class Raid5
 	ConnectorInterface box = ConnectorConstructor.boxInstance();
 	ConnectorInterface s3 = ConnectorConstructor.s3Instance();
 
-	private ConnectorInterface[] connectorInterface = null;
+	private ConnectorInterface[] connectorInterfaces = null;
 	private String[] connectorNames = null;
 	
 	private void log(String string) {
@@ -85,13 +85,13 @@ public class Raid5
 
 	public void initConnectorInterface()
 	{
-		if( connectorInterface == null )
+		if( connectorInterfaces == null )
 		{
-			connectorInterface = new ConnectorInterface[3];
+			connectorInterfaces = new ConnectorInterface[3];
 			
 			for( int ii = 0 ; ii < this.getMaxId() ; ii++ )
 			{
-				connectorInterface[ii] = this.getInterface( ii );
+				connectorInterfaces[ii] = this.getInterface( ii );
 			}
 		}
 		
@@ -554,7 +554,7 @@ public class Raid5
 		// simple implementation:
 		// real implementation would run each interface in own thread
 		// to parallelize the writing action and minimize the waiting time.
-		for( ConnectorInterface ci : connectorInterface )
+		for( ConnectorInterface ci : connectorInterfaces )
 		{
 			try
 			{
@@ -835,7 +835,7 @@ public class Raid5
 		// to parallelize the writing action and minimize the waiting time.
 		int ii = 0;
 		
-		for( ConnectorInterface ci : connectorInterface )
+		for( ConnectorInterface ci : connectorInterfaces )
 		{
 			FileObject aFileObject = interfaceInformationFos[ii];
 			
@@ -891,10 +891,15 @@ public class Raid5
 		ArrayList<FileViewObject> listViewObjects = listFiles().getFileViewObjects();
 		FileObject actFileObject = null;
 		FileObject[] interfaceInformationFos = null;
+
+		// log( "delete( " + fn + " )" );
 		
 		for( FileViewObject listViewObject : listViewObjects )
 		{
 			actFileObject = listViewObject.getGlobalFo();
+			
+			// log( "delete() fileName: " + actFileObject.getName() + " ?==? " + fn );	
+			
 			
 			if( actFileObject.getName().compareTo( fn ) == 0 )
 			{
@@ -914,14 +919,16 @@ public class Raid5
 		// to parallelize the writing action and minimize the waiting time.
 		int ii = 0;
 		
-		for( ConnectorInterface ci : connectorInterface )
+		for( ConnectorInterface ci : connectorInterfaces )
 		{
 			FileObject aFileObject = interfaceInformationFos[ii];
 			
 			if( aFileObject != null )
 			{
 				String fileName = aFileObject.getName() + fn;
-			
+				
+				log( "delete() fileName: " + fileName );	
+				
 				try
 				{
 					log( "Deleting " + fileName + " from " + ci.getName() + "." );
@@ -943,9 +950,9 @@ public class Raid5
 			{
 				log( "File " + fn + " can't be found @ " + ci.getName() + "." );
 			}
+			
+			ii++;
 		}
-
-		ii++;
 		
 		log( "delete() - file " + fn + " deleted." );
 	}
@@ -1008,7 +1015,7 @@ public class Raid5
 		// of the downloadable files!
 		// We have to generate a listFile to determine where which file is download able!
 		
-		for( ConnectorInterface ci : connectorInterface )
+		for( ConnectorInterface ci : connectorInterfaces )
 		{
 			FileObject aFileObject = interfaceInformationFos[ii];
 			
@@ -1104,7 +1111,7 @@ public class Raid5
 		// of the downloadable files!
 		// We have to generate a listFile to determine where which file is download able!
 		
-		for( ConnectorInterface ci : connectorInterface )
+		for( ConnectorInterface ci : connectorInterfaces )
 		{
 			FileObject aFileObject = interfaceInformationFos[ii];
 			
@@ -1187,7 +1194,7 @@ public class Raid5
 		// simple implementation:
 		// real implementation would run each interface in own thread
 		// to parallelize the writing action and minimize the waiting time.
-		for( ConnectorInterface ci : connectorInterface )
+		for( ConnectorInterface ci : connectorInterfaces )
 		{
 			FileObject writeFO = newList.get( index );
 			
