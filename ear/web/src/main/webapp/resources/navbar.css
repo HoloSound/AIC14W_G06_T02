@@ -2,7 +2,7 @@
 
 
 body {
-	background: url(../pics/bg_shield.png) repeat, url(Clouds.png) no-repeat center center  fixed;
+	background: url(../pic/bg_shield.png) repeat, url(../pic/Clouds.png) no-repeat center center  fixed;
 	padding: 0px 0px;
 	-webkit-background-size: 1px,cover;
 	-moz-background-size: 1px,cover;

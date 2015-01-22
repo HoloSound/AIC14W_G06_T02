@@ -6,12 +6,7 @@ function loadFileInfo(name,td){
 }
 
 
-function showRaid1(){
-jQuery("#raid5Div").fadeOut('fast',function(){jQuery("#raid1Div").fadeIn();});
 
-jQuery("#raid1li").css("font-weight","800");
-jQuery("#raid5li").css("font-weight","initial");
-}
 
 function showLoadingInFileList(){
 	$('#raid1Div table' ).empty();
@@ -70,16 +65,11 @@ function showLoadingInFileList5(){
 	$('#raid5Div table' ).append("<strong>LOADING</strong>")
 }
 
-function showRaid5(){
-	jQuery("#raid1Div").fadeOut('fast',function(){jQuery("#raid5Div").fadeIn();});
 
-	jQuery("#raid1li").css("font-weight","initial");
-	jQuery("#raid5li").css("font-weight","800");
-	}
 
 $( document ).ready(function() {
 	$('#raid5Div table' ).load("raid5?task=list" );//RELOAD LIST in 5
-	showRaid1()
+	
 	
 	$( '#raid5Div form' )
 	  .submit( function( e ) {
