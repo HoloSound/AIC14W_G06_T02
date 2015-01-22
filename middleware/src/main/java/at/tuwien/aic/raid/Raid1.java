@@ -318,7 +318,7 @@ public class Raid1 {
 				throw new IOException( e );
 			}
 
-			log( "File " + fileName + "deleted from " + ci.getName() + "." );
+			log( "File " + fileName + " deleted from " + ci.getName() + "." );
 		}
 	}
 	

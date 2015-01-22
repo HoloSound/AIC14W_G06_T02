@@ -300,8 +300,15 @@ public class BoxImpl implements ConnectorInterface
 			//e.printStackTrace();
 			throw new IOException(e);
 		} catch (BoxServerException e) {
-			//e.printStackTrace();
-			throw new IOException(e);
+			if( e.getMessage().compareTo( "Method Not Allowed" ) == 0 )
+			{
+				throw new FileNotFoundException( e.getMessage() );
+			}
+			else
+			{
+				//e.printStackTrace();
+				throw new IOException(e);
+			}
 		} catch (AuthFatalFailureException e) {
 			//e.printStackTrace();
 			throw new IOException(e);

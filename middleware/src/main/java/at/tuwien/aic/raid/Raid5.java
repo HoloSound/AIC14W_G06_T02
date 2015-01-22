@@ -646,7 +646,7 @@ public class Raid5
 	{
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 
-		log( "listHistoryFiles():" );
+		log( "listFilesinternal():" );
 
 		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
@@ -674,7 +674,7 @@ public class Raid5
 			}
 		}
 
-		log( "listHistoryFiles(): returning " + dataRow.size() + " datasets." );
+		log( "listFilesinternal(): returning " + dataRow.size() + " datasets." );
 
 		return dataRow;
 	}
@@ -724,11 +724,11 @@ public class Raid5
 		Raid5DTO ret = new Raid5DTO();
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 		
-		log( "listHistoryFiles():" );
+		log( "listFiles():" );
 		
 		dataRow = listFilesinternal( false );
 
-		log( "listHistoryFiles(): returning " + dataRow.size() + " datasets.");
+		log( "listFiles(): returning " + dataRow.size() + " datasets.");
 
 		ret.setFileViewObjects( dataRow );
 		ret.setInterfaceNames( connectorNames );
@@ -858,7 +858,7 @@ public class Raid5
 					throw new IOException( e );
 				}
 				
-				log( "File " + fileName + "deleted from " + ci.getName() + "." );
+				log( "File " + fileName + " deleted from " + ci.getName() + "." );
 			}
 			else
 			{
@@ -937,7 +937,7 @@ public class Raid5
 					throw new IOException( e );
 				}
 				
-				log( "File " + fileName + "deleted from " + ci.getName() + "." );
+				log( "File " + fileName + " deleted from " + ci.getName() + "." );
 			}
 			else
 			{
