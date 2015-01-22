@@ -513,17 +513,20 @@ log( "Id: " + ii + " | " + hashValues[ii] );
 			int to, boolean toIsEmpty )
 	{
 		b.append("&nbsp;");	
-		
+
 log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty 
 		+ " TO: " + to + " | " + toIsEmpty );
 		
-		if( toIsEmpty == false )
-			addLink( b, file, to, from, true );
-		
-		b.append("&nbsp;|&nbsp;");	
-		
-		if( fromIsEmpty == false )
-			addLink( b, file, from, to, false );
+	if( toIsEmpty == false )
+		addLink( b, file, to, from, true );
+	
+	if( toIsEmpty == false || fromIsEmpty == false )
+		b.append( "&nbsp;" );
+	else
+		b.append("&nbsp;|&nbsp;");
+	
+	if( fromIsEmpty == false )
+		addLink( b, file, from, to, false );
 		
 		b.append("&nbsp;");	
 	}
