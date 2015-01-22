@@ -240,6 +240,8 @@ public class Raid5
 	{
 		FileObject ret = new FileObject();
 		
+		log( "reconstructFile()" );
+		
 		// check how many files are available
 		switch( fileObjects.length )
 		{
@@ -262,6 +264,8 @@ public class Raid5
 			throw( new IOException( "To many arguments exception." ) );	
 			// break;
 		}
+
+		// log( "reconstructFile() POINT 1" );
 		
 		// select the files we have
 		int ii = 0;
@@ -275,7 +279,21 @@ public class Raid5
 		for( ii = 0 ; ii < fileObjects.length ; ii++ )
 		{
 			FileObject actFo = fileObjects[ii];
+			
+			if( actFo == null )
+			{
+				log( "reconstructFile() - fileobject missing!" );
+				continue;
+			}
+			
 			String fn = actFo.getName();
+			
+			if( fn == null )
+			{
+				log( "reconstructFile() - filename missing!" );
+				continue;
+			}
+			
 			int actSize = actFo.getData().length;
 			
 			String typeStr = fn.substring( 0, 1 );
@@ -375,6 +393,8 @@ public class Raid5
 				}
 			}
 		}
+	
+		// log( "reconstructFile() POINT 2" );
 		
 		ret.setName( targetName );
 		
@@ -425,6 +445,8 @@ public class Raid5
 				dataSize = parData.length;
 			}
 		}
+		
+		// log( "reconstructFile() POINT 3" );		
 		
 		// now we have to make a case distinction between accessable data!
 		byte[] resultData = new byte[dataSize*2];
@@ -496,6 +518,7 @@ public class Raid5
 			}
 		}
 
+		// log( "reconstructFile() POINT 4" );		
 		
 		// we have to shorten the file if odd byte size!
 		if( targetEven.compareTo( "0" ) == 0 )
@@ -508,6 +531,8 @@ public class Raid5
 			resultData = Arrays.copyOf( resultData, resultData.length -1 );
 			ret.setData( resultData );
 		}
+		
+		log( "reconstructFile() return" );
 		
 		return ret;
 	}
@@ -809,6 +834,8 @@ public class Raid5
 	 */
 	public synchronized FileObject getFile( String fn ) throws IOException
 	{
+		log( "getFile( " + fn + " ) " );
+		
 		// RAID5 LOGIK
 		FileObject readFile;
 		FileObject[] fileObjects = new FileObject[3];
@@ -858,27 +885,31 @@ public class Raid5
 				
 				try
 				{
-					log( "Read" + fn + "from " + ci.getName() + "." );
+					log( "getFile(): Read " + fn + " from " + ci.getName() + "." );
 					fileObjects[ii] = ci.read( new FileObject( fileName ) );
 				}
 				catch( Exception e )
 				{
-					log( "Reading from " + ci.getName() + " failed" + e.getMessage() );
+					log( "getFile(): Reading from " + ci.getName() + " failed" + e.getMessage() );
 					throw new IOException( e );
 				}
 			
-				log( "File " + fileName + " read from " + ci.getName() + "." );
+				log( "getFile(): File " + fileName + " read from " + ci.getName() + "." );
 			}
 			else
 			{
-				log( "File " + fn + " can't be found @ " + ci.getName() + "." );
+				log( "getFile(): File " + fn + " can't be found @ " + ci.getName() + "." );
 			}
 
 			ii++;
 		}
+
+		log( "getFile() - try reconstruction ... " );
 		
 		readFile = reconstructFile( fileObjects );
-
+		
+		log( "getFile() - file reconstructed. " );
+		
 		return readFile;
 	}
 

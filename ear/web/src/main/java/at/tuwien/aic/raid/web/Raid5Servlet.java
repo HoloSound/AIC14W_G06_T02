@@ -331,12 +331,20 @@ public class Raid5Servlet extends HttpServlet {
 	}
 	
 	private void downloadFile(String fn, HttpServletResponse resp)
-			throws IOException {
-		FileObject f = raid.getFile(fn);
+			throws IOException 
+	{
+		// System.out.println( "downloadFile( " + fn + " )" );
+		
+		FileObject f = raid.getFile( fn );
+		
+		// System.out.println( "Raid5Servlet::downloadFile() result f may be not correct!" );
+		// System.out.println( "Raid5Servlet::downloadFile( " + f.getName() + " ) " );
+		// System.out.println( "Raid5Servlet::downloadFile() I'M HERE! - CORRECT" );
+		
 		resp.setContentType("application/octet-stream");
 		resp.setHeader("Content-Disposition",
 				"attachment; filename=\"" + f.getName() + "\"");
-		resp.getOutputStream().write(f.getData());
+		resp.getOutputStream().write( f.getData() );
 
 	}
 
