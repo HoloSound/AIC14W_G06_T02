@@ -179,8 +179,10 @@ public class Raid1 {
 	{
 		Raid1DTO ret = new Raid1DTO();
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
-
+		
+		log("################### LIST FILES... ###################");
 		log( "listFiles(): ");
+		log("#####################################################");
 		
 		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
@@ -230,7 +232,9 @@ public class Raid1 {
 		Raid1DTO ret = new Raid1DTO();
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 
+		log("################### GET FILE HISTORY... ###################");
 		log( "getFileHistory( " + fn + " ): ");
+		log("###########################################################");
 		
 		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
@@ -290,6 +294,11 @@ public class Raid1 {
 	 * 
 	 */
 	public synchronized void delete( String fileName ) throws IOException {
+		
+		log("################### DELETE... ###################");
+		log("Delete File: "+fileName+"...");
+		log("#################################################");
+		
 		// definition of connector interfaces
 		ConnectorInterface[] cis = new ConnectorInterface[3];
 
@@ -333,6 +342,7 @@ public class Raid1 {
 	 * 
 	 */
 	public synchronized void deleteHistory( String fileName ) throws IOException {
+		log("deleteHistory("+fileName+")");
 		// definition of connector interfaces
 		delete( fileName );
 	}
@@ -341,6 +351,7 @@ public class Raid1 {
 	public synchronized FileObject getHistoryFile(String fn) 
 			throws IOException 
 	{
+		log("getHistoryFile("+fn+")");
 		return getFile( fn );
 	}
 
@@ -354,7 +365,10 @@ public class Raid1 {
 	 *
 	 */
 	public synchronized FileObject getFile(String fn) throws IOException {// TODO
-																			// IMPLEMENT
+		log("################### GET FILE... ###################");
+		log("Get File: "+fn+"...");
+		log("###################################################");
+		// IMPLEMENT
 		// RAID1 LOGIK
 		FileObject readFile = new FileObject(fn);
 
@@ -514,6 +528,11 @@ public class Raid1 {
 	 */
 
 	public synchronized void write(FileObject f) throws IOException {
+		String writeFileName = "";
+		if(f != null) {
+			writeFileName = f.getName();
+		}
+		log("################### write("+writeFileName+") ###################");
 		// TODO IMPLEMENT RAID1
 		// LOGIK
 		int baseErrors = 0;
@@ -578,7 +597,7 @@ public class Raid1 {
 
 	public Raid1DTO getFileInfo( String fileName )
 	{
-		log( "getFileInfo( " + fileName + " )" );
+		log( "########## getFileInfo( " + fileName + " ) ##########" );
 		
 		Raid1DTO ret = new Raid1DTO();
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
@@ -695,6 +714,7 @@ public class Raid1 {
 
 	public Raid1DTO copyFile( String fn, String fromInterface, String toInterface )
 	{
+		log("###########################################");
 		log( "copyFile(): file: " + fn + ", fromInterface: " + fromInterface + ", toInterface: " + toInterface );
 		
 		initConnectorInterface();
