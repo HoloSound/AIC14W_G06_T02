@@ -75,7 +75,9 @@ public class Raid5
 
 	public Raid5()
 	{
-		log( "NEW Raid5" );
+		log( "#############################################" );
+		log( "#                 NEW Raid5                 #" );
+		log( "#############################################" );
 	}
 
 	public int getMaxId()
@@ -240,7 +242,9 @@ public class Raid5
 	{
 		FileObject ret = new FileObject();
 		
-		log( "reconstructFile()" );
+		log( "#############################################" );
+		log( "#            reconstructFile()              #" );
+		log( "#############################################" );
 		
 		// check how many files are available
 		switch( fileObjects.length )
@@ -646,7 +650,9 @@ public class Raid5
 	{
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 
-		log( "listFilesinternal():" );
+		log( "#############################################" );
+		log( "#             listFilesinternal():          #" );
+		log( "#############################################" );
 
 		HashMap<String, FileViewObject> compareViewMap = buildListFileMap();
 
@@ -695,7 +701,9 @@ public class Raid5
 		Raid5DTO ret = new Raid5DTO();
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
 		
-		log( "listHistoryFiles():" );
+		log( "#############################################" );
+		log( "#              listHistoryFiles():          #" );
+		log( "#############################################" );
 		
 		dataRow = listFilesinternal( true );
 
@@ -723,8 +731,10 @@ public class Raid5
 	{
 		Raid5DTO ret = new Raid5DTO();
 		ArrayList<FileViewObject> dataRow = new ArrayList<FileViewObject>();
-		
-		log( "listFiles():" );
+
+		log( "#############################################" );
+		log( "#                listFiles():               #" );
+		log( "#############################################" );
 		
 		dataRow = listFilesinternal( false );
 
@@ -803,7 +813,9 @@ public class Raid5
 	 */
 	public synchronized void deleteHistory( String fn ) throws IOException
 	{
+		log( "#############################################" );
 		log( "deleteHistory( " + fn + " )" );
+		log( "#############################################" );
 		
 		// here we generate the 3 different files
 	    // initialization of connector interfaces
@@ -882,7 +894,9 @@ public class Raid5
 	 */
 	public synchronized void delete( String fn ) throws IOException
 	{
+		log( "#############################################" );
 		log( "delete( " + fn + " )" );
+		log( "#############################################" );
 		
 		// here we generate the 3 different files
 	    // initialization of connector interfaces
@@ -970,7 +984,9 @@ public class Raid5
 	 */
 	public synchronized FileObject getFile( String fn ) throws IOException
 	{
+		log( "#############################################" );
 		log( "getFile( " + fn + " ) " );
+		log( "#############################################" );
 		
 		// RAID5 LOGIK
 		FileObject readFile;
@@ -1066,7 +1082,9 @@ public class Raid5
 	 */
 	public synchronized FileObject getHistoryFile( String fn ) throws IOException
 	{
+		log( "#############################################" );
 		log( "getHistoryFile( " + fn + " ) " );
+		log( "#############################################" );
 		
 		// RAID5 LOGIK
 		FileObject readFile;
@@ -1160,6 +1178,9 @@ public class Raid5
 	
 	public synchronized void write( FileObject f ) throws IOException
 	{
+		log( "#############################################" );
+		log( "#           write(FileObject f)             #" );
+		log( "#############################################" );
 		int errorFiles = 0;
 		int errorHistoryFiles = 0;
 		
