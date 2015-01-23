@@ -5,7 +5,13 @@ function loadFileInfo(name,td){
 	a.load("raid1?task=fileInfo&fileName="+encodeURIComponent(name));
 }
 
-
+function raid1ConnectorCopy(from,to,name,td){
+	var a= jQuery("#"+td);
+	a.empty();
+	a.append("working");
+	a.load("raid1?task=copy&from="+from+"&to="+to+"&fileName="+encodeURIComponent(name));
+	
+}
 
 
 function showLoadingInFileList(){

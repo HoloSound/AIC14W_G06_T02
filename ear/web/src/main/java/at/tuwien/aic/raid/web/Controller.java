@@ -135,7 +135,7 @@ public class Controller {
 				sb.append("</td>");	
 				
 				sb.append("<td id='"+id+"'>");
-				sb.append("<a href=\"javascript:void\" onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" title=\"Show file info\"> load</a>");
+				sb.append("<a href=\"javascript:;\" onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" title=\"Show file info\"> load</a>");
 				sb.append("</td>");
 
 				sb.append("</tr>");				
@@ -160,7 +160,7 @@ public class Controller {
 	}
 
 	private Object getShowInfoLink( String id, FileObject f ) {
-		return "<a href=\"javascript:void\" class='btn btn-sm alert-info-transparent' onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" title=\"Show file info\"><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
+		return "<a href=\"javascript:;\" class='btn btn-sm alert-info-transparent' onclick=\"loadFileInfo('"+f.getName()+"','"+id+"');\" title=\"Show file info\"><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
 	}
 	
 	private String getDownloadLink(FileObject f) {
@@ -172,7 +172,7 @@ public class Controller {
 
 	private String getDeleteLink(FileObject f) {
 
-		return "<a target='_blank' class='btn btn-sm alert-danger-transparent ' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid1?task="
+		return "<a target='_blank' class='btn btn-sm alert-danger-transparent ' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid1?task="
 				+ Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME+"="+f.getName()
 				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}

@@ -460,7 +460,7 @@ log( "Id: " + ii + " | " + hashValues[ii] );
 				sb.append("</td>");
 				
 				sb.append("<td id='" + id + "'>");
-				sb.append("<a href=\"javascript:void\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" title=\"Show file info\"> load</a>");
+				sb.append("<a href=\"javascript:;\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" title=\"Show file info\"> load</a>");
 				sb.append("</td>");
 
 				sb.append("</tr>");
@@ -525,14 +525,14 @@ log( "Id: " + ii + " | " + hashValues[ii] );
 	// This changes have no effect!
 	private String getDeleteLink(FileObject f) {
 
-		return "<a target='_blank' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+		return "<a target='_blank' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
 				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
 	
 	// This changes have no effect!
 	private String getDeleteHistoryLink(FileObject f) {
 
-		return "<a target='_blank' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+		return "<a target='_blank' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
 				+ "', '', callback1, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
 
@@ -541,7 +541,7 @@ log( "Id: " + ii + " | " + hashValues[ii] );
 	}
 
 	private Object getShowInfoLink(String id, FileObject f) {
-		return "<a href=\"javascript:void\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" title=\"Show file info\"><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
+		return "<a href=\"javascript:;\" onclick=\"loadFileInfo('" + f.getName() + "','" + id + "');\" title=\"Show file info\"><img src=\"/web/pic/info.png\" alt=\"info\"/></a>";
 	}
 	
 	
@@ -586,9 +586,9 @@ log( "File: " + file + " FROM: " + from + " | " + fromIsEmpty
 	
 	private void addLink( StringBuffer b, String file, int from, int to, boolean isLeft )
 	{
-		b.append("<a target='_blank' href=\"raid1?task=copy&from=" + from  
-				+ "&to=" + to 
-				+ "&fileName=" + file + "\">" );
+
+		String id =file.replace(".", "").replaceAll("#", "").replaceAll(" ", "") + "TD";
+		b.append("<a  href='javascript:;' onclick=\"raid1ConnectorCopy('"+from+"','"+to+"','"+file+"','"+id+"');\">" );
 		
 		if( isLeft == true )
 			b.append( "<img src=\"/web/pic/copy_left.png\" alt=\"copy left\" />");
