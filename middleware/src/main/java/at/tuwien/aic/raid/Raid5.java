@@ -876,9 +876,9 @@ public class Raid5
 			{
 				log( "File " + fn + " can't be found @ " + ci.getName() + "." );
 			}
+			
+			ii++;
 		}
-
-		ii++;
 		
 		log( "deleteHistory() - file " + fn + " deleted." );
 	}

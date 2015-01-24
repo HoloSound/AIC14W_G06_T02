@@ -399,14 +399,14 @@ public class Raid5Servlet extends HttpServlet {
 	private void deleteFile(String fn, HttpServletResponse resp)
 			throws IOException {
 		raid.delete(fn);
-		resp.getOutputStream().write("delete sucessfull".getBytes());
+		resp.getOutputStream().write("Delete sucessfull".getBytes());
 
 	}
 	
 	private void deleteHistoryFile(String fn, HttpServletResponse resp)
 			throws IOException {
 		raid.deleteHistory(fn);
-		resp.getOutputStream().write("delete sucessfull".getBytes());
+		resp.getOutputStream().write("Delete sucessfull".getBytes());
 
 	}
 
