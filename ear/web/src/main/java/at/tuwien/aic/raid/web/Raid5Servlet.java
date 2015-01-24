@@ -348,7 +348,7 @@ public class Raid5Servlet extends HttpServlet {
 						sb.append(" bgcolor=\"#eeeeff\"");
 					}
 					sb.append(">");
-					String l = "<a target='_blank' class='btn btn-sm alert-danger-transparent' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid5?task="
+					String l = "<a  class='btn btn-sm alert-danger-transparent' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid5?task="
 					+ Raid5Servlet.DELETE_HISTORY_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
 					+ "', '', alertAndReload, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 					

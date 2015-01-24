@@ -253,7 +253,7 @@ public class Raid1Servlet extends HttpServlet {
 						sb.append(" bgcolor=\"#eeeeff\"");
 					}
 					sb.append(">");
-					String l = "<a target='_blank' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+					String l = "<a  title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
 							+ "', '', alertAndReload, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 					sb.append(l);
 					sb.append("</td>");
