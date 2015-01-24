@@ -213,48 +213,57 @@ public class Raid1Servlet extends HttpServlet {
 			Raid1DTO raid1Dto = raid.getFileHistory( fn );
 			ArrayList<FileViewObject> fvol = raid1Dto.getFileViewObjects();
 
-			for (FileViewObject fvo : fvol) {
-				FileObject f = fvo.getGlobalFo();
-				String id = f.getName().replace(".", "").replaceAll("#", "").replaceAll(" ", "") + "TD";
-
+			if( fvol.size() == 0 )
+			{
 				sb.append("<tr>");
-
-				// may be done via class - and css definition
-				sb.append("<td");
-				if (ii % 2 == 0) {
-					sb.append(" bgcolor=\"#eeeeff\"");
-				}
-				sb.append(">");
-
-				// in principle the name itself may be the downloadlink
-				sb.append("<tt>");
-				sb.append(f.getName());
-				sb.append("</tt></td>");
-
-				sb.append("<td");
-				if (ii % 2 == 0) {
-					sb.append(" bgcolor=\"#eeeeff\"");
-				}
-				sb.append(">");
-
-				sb.append(getDownloadHistoryLink(f));
-				sb.append("</td>");				
-				
-				sb.append("<td");
-				if (ii % 2 == 0) {
-					sb.append(" bgcolor=\"#eeeeff\"");
-				}
-				sb.append(">");
-				String l = "<a target='_blank' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
-						+ "', '', alertAndReload, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
-				sb.append(l);
-				sb.append("</td>");
-
+				sb.append("<td colspan=\"3\"><strong>No History available.</strong></td>");
 				sb.append("</tr>");
-
-				ii++;
 			}
-
+			else
+			{
+				for (FileViewObject fvo : fvol) {
+					FileObject f = fvo.getGlobalFo();
+					String id = f.getName().replace(".", "").replaceAll("#", "").replaceAll(" ", "") + "TD";
+	
+					sb.append("<tr>");
+	
+					// may be done via class - and css definition
+					sb.append("<td");
+					if (ii % 2 == 0) {
+						sb.append(" bgcolor=\"#eeeeff\"");
+					}
+					sb.append(">");
+	
+					// in principle the name itself may be the downloadlink
+					sb.append("<tt>");
+					sb.append(f.getName());
+					sb.append("</tt></td>");
+	
+					sb.append("<td");
+					if (ii % 2 == 0) {
+						sb.append(" bgcolor=\"#eeeeff\"");
+					}
+					sb.append(">");
+	
+					sb.append(getDownloadHistoryLink(f));
+					sb.append("</td>");				
+					
+					sb.append("<td");
+					if (ii % 2 == 0) {
+						sb.append(" bgcolor=\"#eeeeff\"");
+					}
+					sb.append(">");
+					String l = "<a target='_blank' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+							+ "', '', alertAndReload, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
+					sb.append(l);
+					sb.append("</td>");
+	
+					sb.append("</tr>");
+	
+					ii++;
+				}
+			}
+			
 			sb.append("</table>");
 			
 			resp.getWriter().write(sb.toString());
