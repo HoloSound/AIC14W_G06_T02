@@ -5,6 +5,11 @@ function loadFileInfo(name,td){
 	a.load("raid1?task=fileInfo&fileName="+encodeURIComponent(name));
 }
 
+function  alertAndReload(dataReceived){
+	alert(dataReceived);
+	setTimeout(window.location.reload.bind(window.location), 50);
+	
+}
 function raid1ConnectorCopy(from,to,name,td){
 	var a= jQuery("#"+td);
 	a.empty();

@@ -170,10 +170,11 @@ public class Raid1Servlet extends HttpServlet {
 	
 		try {
 			StringBuilder sb = new StringBuilder();
-
+			sb.append("<head>   <script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script> <SCRIPT type=\"text/javascript\" src=\"script.js\"></script></head>");
 			sb.append( "<h1>RAID1 history of file: " + fn + "</h1>" );
-			
+		
 			// building up a table
+			
 			sb.append("<table border=\"1\">");
 			sb.append("<colgroup>");
 			sb.append("<col width=\"300\" />");
@@ -244,7 +245,9 @@ public class Raid1Servlet extends HttpServlet {
 					sb.append(" bgcolor=\"#eeeeff\"");
 				}
 				sb.append(">");
-				sb.append(getDeleteHistoryLink(f));
+				String l = "<a target='_blank' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid1?task=" + Raid1Servlet.DELETE_HISTORY_OPERATION + "&" + Raid1Servlet.FILE_NAME + "=" + f.getName()
+						+ "', '', alertAndReload, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
+				sb.append(l);
 				sb.append("</td>");
 
 				sb.append("</tr>");
@@ -253,6 +256,7 @@ public class Raid1Servlet extends HttpServlet {
 			}
 
 			sb.append("</table>");
+			
 			resp.getWriter().write(sb.toString());
 		} catch (Exception e) {
 			resp.getWriter().write("error " + e.getMessage());

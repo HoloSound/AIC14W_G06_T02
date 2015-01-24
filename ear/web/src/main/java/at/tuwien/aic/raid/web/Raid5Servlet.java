@@ -264,6 +264,7 @@ public class Raid5Servlet extends HttpServlet {
 	
 		try {
 			StringBuilder sb = new StringBuilder();
+			sb.append("<head>   <script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script> <SCRIPT type=\"text/javascript\" src=\"script.js\"></script></head>");
 			
 			sb.append( "<h1>RAID5 history of file: " + fn + "</h1>" );
 
@@ -339,7 +340,11 @@ public class Raid5Servlet extends HttpServlet {
 					sb.append(" bgcolor=\"#eeeeff\"");
 				}
 				sb.append(">");
-				sb.append(getDeleteHistoryLink(f));
+				String l = "<a target='_blank' class='btn btn-sm alert-danger-transparent' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid5?task="
+				+ Raid5Servlet.DELETE_HISTORY_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
+				+ "', '', alertAndReload, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
+				
+				sb.append(l);
 				sb.append("</td>");
 
 				sb.append("</tr>");
@@ -427,14 +432,14 @@ public class Raid5Servlet extends HttpServlet {
 
 	private String getDeleteLink(FileObject f) {
 
-		return "<a target='_blank' class='btn btn-sm alert-danger-transparent' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid5?task="
+		return "<a target='_blank' class='btn btn-sm alert-danger-transparent' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid5?task="
 				+ Raid5Servlet.DELETE_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
 				+ "', '', callback5, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
 	
 	private String getDeleteHistoryLink(FileObject f) {
 
-		return "<a target='_blank' class='btn btn-sm alert-danger-transparent' title=\"Delete file\" href='javascript:void' onclick=\"jQuery.get('raid5?task="
+		return "<a target='_blank' class='btn btn-sm alert-danger-transparent' title=\"Delete file\" href='javascript:;' onclick=\"jQuery.get('raid5?task="
 				+ Raid5Servlet.DELETE_HISTORY_OPERATION + "&" + Raid5Servlet.FILE_NAME+"="+f.getName()
 				+ "', '', callback5, 'text' )\" > <img src=\"/web/pic/delete.png\" alt=\"delete\"/> </a>";
 	}
