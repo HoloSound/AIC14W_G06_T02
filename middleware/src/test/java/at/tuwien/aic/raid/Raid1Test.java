@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -105,7 +106,16 @@ public class Raid1Test
 		fo.setName(  "hex.bin" );
 		
 		fileIF.delete( fo );
-		dropBoxIF.delete( fo );
+		
+		try
+		{
+			dropBoxIF.delete( fo );
+		}
+		catch( IOException ioe )
+		{
+			fail();
+			ioe.printStackTrace();
+		}
 	}	
 	
 	@Test
@@ -180,7 +190,16 @@ public class Raid1Test
 		
 		// and now a second time
 		fileIF.update( fo );
-		dropBoxIF.update( fo );
+		
+		try
+		{
+			dropBoxIF.update( fo );
+		}
+		catch( IOException ioe )
+		{
+			fail();
+			ioe.printStackTrace();
+		}
 	}
 	
 	
@@ -210,7 +229,16 @@ public class Raid1Test
 		
 		// and now a second time
 		fileIF.update( fo );
-		dropBoxIF.update( fo );
+		
+		try
+		{
+			dropBoxIF.update( fo );
+		}
+		catch( IOException ioe )
+		{
+			fail();
+			ioe.printStackTrace();
+		}
 	}
 	
 }

@@ -342,7 +342,7 @@ public class Raid1 {
 	 * 
 	 */
 	public synchronized void deleteHistory( String fileName ) throws IOException {
-		log("deleteHistory("+fileName+")");
+		log( "deleteHistory("+fileName+")" );
 		// definition of connector interfaces
 		delete( fileName );
 	}
@@ -412,7 +412,7 @@ public class Raid1 {
 		if (boxFile != null) {
 			boxFileMd5 = boxFile.getMd5();
 			log("################### HASH VALUE FOR BOX ###################");
-			log("File \"" + fn + "\": BoxMD5: " + boxFileMd5);
+			log("File \"" + fn + "\": Box-MD5: " + boxFileMd5);
 			log("##########################################################");
 			returnFile = boxFile;
 		}
@@ -420,7 +420,7 @@ public class Raid1 {
 		if (dboxFile != null) {
 			dboxFileMd5 = dboxFile.getMd5();
 			log("################### HASH VALUE FOR DBOX ###################");
-			log("File \"" + fn + "\": DropBoxMD5: " + dboxFileMd5);
+			log("File \"" + fn + "\": DropBox-MD5: " + dboxFileMd5);
 			log("###########################################################");
 			returnFile = dboxFile;
 		}
@@ -428,7 +428,7 @@ public class Raid1 {
 		if (s3File != null) {
 			s3FileMd5 = s3File.getMd5();
 			log("################### HASH VALUE FOR S3 ###################");
-			log("File \"" + fn + "\": S3MD5: " + s3FileMd5);
+			log("File \"" + fn + "\": S3-MD5: " + s3FileMd5);
 			log("#########################################################");
 			returnFile = s3File;
 		}

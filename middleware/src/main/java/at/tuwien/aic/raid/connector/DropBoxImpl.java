@@ -188,7 +188,19 @@ public class DropBoxImpl
 			{
 				log( "DELETE: " + aFO.getName() );
 		
-				this.delete( file );
+				try
+				{
+					this.delete( file );
+				}
+				catch( FileNotFoundException fnfe )
+				{
+					log( "DELETE of file " + file + ": - file was not found!" );
+				}
+				catch( IOException ioe )
+				{
+					log( "INTERFACE Problem @ deleting file " + file );
+				}
+				
 				// there can only be ONE file with the same name!
 				break;
 			}	
@@ -318,6 +330,7 @@ public class DropBoxImpl
 
 	@Override
 	public void update( FileObject file )
+				throws IOException
 	{
 		delete( file );		// return - dont care
 		create( file );
@@ -325,6 +338,7 @@ public class DropBoxImpl
 
 	@Override
 	public void delete( FileObject file )
+				throws IOException
 	{
 		// TODO !!!
 		// log( "Function delete - at the moment not implemented!" );
@@ -340,6 +354,10 @@ public class DropBoxImpl
 		}
 		catch( DbxException e )
 		{
+			if( e.getMessage().compareTo( "unexpected HTTP status code: 404:" ) == 0 )
+			{
+				throw new FileNotFoundException();
+			}
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

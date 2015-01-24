@@ -119,7 +119,15 @@ public class Raid1DropBoxTest
 			System.out.println( " " + aFO.getName() );
 			fo.setName( aFO.getName() );
 
-			dropBoxIF.delete( fo );
+			try
+			{
+				dropBoxIF.delete( fo );
+			}
+			catch( IOException ioe )
+			{
+				fail();
+				ioe.printStackTrace();
+			}
 		}
 	}
 
@@ -129,7 +137,15 @@ public class Raid1DropBoxTest
 		FileObject fo = new FileObject();
 		fo.setName( "hex.bin" );
 
-		dropBoxIF.delete( fo );
+		try
+		{
+			dropBoxIF.delete( fo );
+		}
+		catch( IOException ioe )
+		{
+			fail();
+			ioe.printStackTrace();
+		}
 	}
 
 	@Test
@@ -203,7 +219,15 @@ public class Raid1DropBoxTest
 		fo.setData( data );
 
 		// and now a second time
-		dropBoxIF.update( fo );
+		try
+		{
+			dropBoxIF.update( fo );
+		}
+		catch( IOException ioe )
+		{
+			fail();
+			ioe.printStackTrace();
+		}
 	}
 
 	@Test
@@ -230,8 +254,17 @@ public class Raid1DropBoxTest
 		fo.setData( data );
 
 		// and now a second time
-		dropBoxIF.update( fo );
-	}
+		try
+		{
+			dropBoxIF.update( fo );
+		}
+		catch( IOException ioe )
+		{
+			fail();
+			ioe.printStackTrace();
+		}
+}
+
 
 	
 	@Test

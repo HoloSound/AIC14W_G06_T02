@@ -494,13 +494,15 @@ log( "Id: " + ii + " | " + hashValues[ii] );
 
 	private void deleteFile(String fn, HttpServletResponse resp) throws IOException {
 		raid.delete(fn);
-		resp.getOutputStream().write("delete sucessfull".getBytes());
+		resp.getOutputStream().write("Delete sucessfull".getBytes());
 
 	}
 	
 	private void deleteHistoryFile(String fn, HttpServletResponse resp) throws IOException {
+		System.out.println("Raid1Servlet::deleteHistoryFile( " + fn + " )");
 		raid.deleteHistory(fn);
-		resp.getOutputStream().write("delete sucessfull".getBytes());
+		System.out.println("Raid1Servlet::deleteHistoryFile() - after raid.deleteHistory()");
+		resp.getOutputStream().write("Delete sucessfull".getBytes());
 
 	}
 
